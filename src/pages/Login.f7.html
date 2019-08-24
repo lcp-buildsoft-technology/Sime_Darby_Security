@@ -1,0 +1,156 @@
+<template>
+    
+    <!-- Login Screen -->
+   
+          <div class="page login" id="login" data-name="login">
+            <div class="page-content login-screen-content login_bg"  >
+              <div class="login-screen-title"> <img src="./static/logo.png" class="img_css"></div>
+              <form class="list" id="login-form">
+                <ul>
+                  <li class="item-content item-input">
+                    <div class="item-inner">
+                      <div class="item-title item-label white_label">Username</div>
+                      <div class="item-input-wrap">
+                        <input type="email" name="username" placeholder="Your User ID" required validate>
+                      </div>
+                    </div>
+                  </li>
+                  <li class="item-content item-input">
+                    <div class="item-inner">
+                      <div class="item-title item-label white_label">Password</div>
+                      <div class="item-input-wrap">
+                        <input type="password" name="password" placeholder="Your password" required validate>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+             
+            </form>
+
+              <div class="list">
+                <ul>
+                  <li> 
+                        <center>
+                      <a href="#" class="button button-outline button-round  login-button">Sign In</a>
+                    </center>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+
+         
+
+
+
+
+
+
+
+          </div>
+
+
+
+
+      
+</template>
+<script>
+import request from '../js/request.js';
+export default {
+
+on:{
+pageInit:function(){
+  var $$=this.$$;
+     var app=this.$app;
+     var router=this.$router;
+
+
+
+// *Login function /////////////////////////////////////////////////////////////////////////////////////////////////
+$$(".login-button").on('click', function () {
+
+  var formData = app.form.convertToData('#login-form');
+  
+   //*show loading animation
+   app.preloader.show("#FC6F5B");
+
+ 
+
+
+
+ request.post("security_login",null,formData, function(data){
+  app.preloader.hide();
+console.log(data);
+var toastCenter = app.toast.create({
+    text: "Login Successfull",
+    position: 'center',
+    closeTimeout: 2000,
+  });
+
+  toastCenter.open();
+
+  app.form.storeFormData("auth", data);
+  
+
+router.navigate({name:"main"});
+ }
+
+
+ ,function(xhr,status){
+  app.preloader.hide();
+console.log(status);
+//    //*toast alert
+
+if(status==400){
+var toastCenter = app.toast.create({
+    text: "Invalid UserID or Password!",
+    position: 'center',
+    closeTimeout: 2000,
+  });
+
+  toastCenter.open();
+
+
+ }else{
+  var toastCenter = app.toast.create({
+    text: "Something error when login!",
+    position: 'center',
+    closeTimeout: 2000,
+  });
+
+  toastCenter.open();
+ }
+});
+
+});
+
+// end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+}
+ 
+
+        
+    }
+    </script>
