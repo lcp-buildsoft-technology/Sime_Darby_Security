@@ -23,6 +23,23 @@ function post(url,header,data, success, error) {
         }
     })
 }
+function postFormData(url,header,data, success, error) {
+    Framework7.request({
+        url: config.BASE_URL + url + '/',
+        method: "POST",
+        headers :header,
+        contentType: 'multipart/form-data',
+        data: data,
+        crossDomain: true,
+        dataType: 'json',
+        success: function(data){
+            success(data);
+        },
+        error: function(xhr,status){
+            error(xhr,status);
+        }
+    })
+}
 
 function get(url,header,data, success, error,complete) {
     Framework7.request({
@@ -47,13 +64,38 @@ function get(url,header,data, success, error,complete) {
     })
 }
 
+
+function put(url,header,data,success,error,complete){
+    Framework7.request({
+        url: config.BASE_URL + url + '/',
+        method: "PUT",
+        headers :header,
+        contentType: 'application/x-www-form-urlencoded',
+        crossDomain: true,
+        data: data,
+        dataType: 'json',
+        success: function(data){
+            success(data);
+        },
+        error: function(xhr,status){
+            error(xhr,status);
+        },
+        complete: function(xhr,status){
+            if(complete){
+                complete(xhr,status);
+            }
+        },
+    })
+}
+
+
 function getimg(url,header, success, error,complete) {
     Framework7.request({
         url: url,
         method: "GET",
         headers :header,
         async:true,
-        timeout:10000,
+        timeout:20000,
         crossDomain: true,
         xhrFields:{
             responseType: 'blob'
@@ -120,4 +162,4 @@ function getNext(url,header,success,error,complete){
         },
     })
 }
-export default {post,get,getNext,getimg};
+export default {post,get,getNext,getimg,postFormData,put}

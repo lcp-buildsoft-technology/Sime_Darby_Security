@@ -1,0 +1,447 @@
+<template>
+       
+    <div class="page" id="history" data-name="history">
+        <div class="page-content" >
+          <!-- Static Navbar -->
+          <div class="navbar">
+            <div class="navbar-inner">
+              <div class="left">
+                <a class="link back">
+                    <i class="material-icons"> arrow_back</i>
+                  <span class="if-not-md">Back</span>
+                </a>
+              </div>
+              <div class="title">VISIT HISTORY</div>
+            </div>
+          </div>
+
+          <div class="toolbar tabbar toolbar-top" style="top:0;">
+              <div class="toolbar-inner">
+                <a href="#tab-3" class="tab-link tab-link-active">WALK IN</a>
+                <a href="#tab-4" class="tab-link">SCAN IN</a>
+       
+              </div>
+            </div>
+          <div class="tabs-swipeable-wrap" style="height:auto;">
+            <div class="tabs">
+              <div id="tab-3" class="page-content tab tab-active" style="padding-top:0;">
+                <div >
+                  <div class="visitor_content">
+                  
+                       <div class="visitor_scroll_view1" id="visitor_walkin_scroll_view">
+                         
+                         
+                        </div>                     
+                  
+                  </div>
+                </div>
+              </div>
+              <div id="tab-4" class="page-content tab" style="padding-top:0;">
+                <div >
+                    <div class="visitor_content">
+                    
+                        <div class="visitor_scroll_view1" id="visitor_scanin_scroll_view">
+                        </div>
+                   </div>
+                 
+                </div>
+              </div>
+          
+            </div>
+          </div>
+        
+
+
+
+
+
+         
+              
+              
+              
+         
+              
+              
+    
+         
+
+
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      
+      </template>
+ 
+      <script>
+         import request from '../js/request.js';
+        import socket from 'socket.io-client/dist/socket.io.js';
+        import CONFIG from "../js/config.js";
+      export default {
+        
+        data:function(){
+              var dynamicPopup;
+              var app=this.$app;
+              var auth = app.form.getFormData("auth");
+              
+              return{
+                user:auth.user,
+              }
+            },
+          on:{
+              pageInit:function(){
+                var $$=this.$$;
+             var app=this.$app;
+             var router=this.$router;
+             var resons;
+             var auth = app.form.getFormData("auth");
+            
+
+
+                 //get list when page load
+                 request.get("visitor_entry",{"Authorization":"JWT "+auth.token},{status:"AIS",type:"WI"},function(data){
+            console.log(data);
+            
+            var list_item=[];
+              for(var i=0;i<data.length;i++){
+                
+       
+                var new_entry_item="";
+              
+            
+
+            var status_id="status_"+data[i].tracker_id;
+            var card_id="card_"+data[i].tracker_id;
+            var address="";
+            if(data[i].entry_type!="I"){
+              address= data[i].lot.name+","+data[i].lot.street.name;
+            }else{
+              address ="Impromtu";
+            }
+            new_entry_item ="<div class='card  card_in card_width "+card_id+" '  >"+
+                    "<div class='card-content card-click  content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+                      '<div class="row no-gap">'+
+                        '<div class="col-20 card-left-content">'+
+                          '<div class="card-left-content_inner">'+
+                            '<i class="material-icons">chevron_right</i>'+
+                             '<p>WALK IN</p>'+
+                         ' </div>'+
+                        '</div>'+
+                        '<div class="col-70 card-center-content">'+
+                          '<div class="card-center-content_inner">'+
+                            '<div>'+address+'</div>'+
+                            '<div style="width: 100%;">'+
+                                    '<div style="display: inline-block;">'+data[i].visitor_car_plate+'</div>'+
+                                    '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;"> '+data[i].created_at+'</div>'+
+
+                           ' </div>'+
+                          '</div>'+
+                        '</div>' +   
+                        '<div class="col-10 card-right-content">'+
+                          '<div class="card-right-content_inner">'+
+                           ' <i class="material-icons">more_vert</i>'+
+                         ' </div>'+
+                       ' </div>'+
+
+                      '</div>'+
+                    '</div>'+
+                 ' </div>';
+
+         
+
+            var content_item = {status:data[i].status, content:new_entry_item};
+            list_item.push(content_item);
+                          }
+              
+
+   
+    
+
+         
+                function show_list(total,now){
+               
+                  var all=total;
+                  var z=now
+                
+          
+                  if(z<all){
+                    var data_status =list_item[z].status;
+                  var content = list_item[z].content;
+                
+ 
+             setTimeout(function(){ $$('#visitor_walkin_scroll_view').append(content);
+             z++;
+            show_list(all,z);
+            },100) 
+           
+            
+          }
+                }
+               
+         
+                show_list(list_item.length,0);
+          
+
+            });
+
+
+
+
+
+
+
+
+
+
+
+
+                    //get list when page load
+                    request.get("visitor_entry",{"Authorization":"JWT "+auth.token},{status:"AIS",type:"EMS"},function(data){
+            console.log(data);
+            
+            var list_item=[];
+              for(var i=0;i<data.length;i++){
+                
+       
+                var new_entry_item="";
+              
+            
+
+            var status_id="status_"+data[i].tracker_id;
+            var card_id="card_"+data[i].tracker_id;
+
+            var address="";
+            if(data[i].entry_type!="I"){
+              address= data[i].lot.name+","+data[i].lot.street.name;
+            }else{
+              address ="Impromtu";
+            }
+
+            new_entry_item ="<div class='card  card_in card_width "+card_id+" '  >"+
+                    "<div class='card-content card-click  content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+                      '<div class="row no-gap">'+
+                        '<div class="col-20 card-left-content">'+
+                          '<div class="card-left-content_inner">'+
+                            '<i class="material-icons">chevron_right</i>'+
+                             '<p>SCAN IN</p>'+
+                         ' </div>'+
+                        '</div>'+
+                        '<div class="col-70 card-center-content">'+
+                          '<div class="card-center-content_inner">'+
+                            '<div>'+address+'</div>'+
+                            '<div style="width: 100%;">'+
+                                    '<div style="display: inline-block;">'+data[i].visitor_car_plate+'</div>'+
+                                    '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;"> <b > '+data[i].created_at+'</b></div>'+
+
+                           ' </div>'+
+                          '</div>'+
+                        '</div>' +   
+                        '<div class="col-10 card-right-content">'+
+                          '<div class="card-right-content_inner">'+
+                           ' <i class="material-icons">more_vert</i>'+
+                         ' </div>'+
+                       ' </div>'+
+
+                      '</div>'+
+                    '</div>'+
+                 ' </div>';
+
+         
+
+            var content_item = {status:data[i].status, content:new_entry_item};
+            list_item.push(content_item);
+                          }
+              
+
+   
+    
+
+         
+                function show_list(total,now){
+               
+                  var all=total;
+                  var z=now
+                
+          
+                  if(z<all){
+                    var data_status =list_item[z].status;
+                  var content = list_item[z].content;
+                
+ 
+             setTimeout(function(){ $$('#visitor_scanin_scroll_view').append(content);
+             z++;
+            show_list(all,z);
+            },100) 
+           
+            
+          }
+                }
+               
+         
+                show_list(list_item.length,0);
+          
+
+            });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+ $$(".visitor_scroll_view1").on('click',".card-click",function () {
+  console.log($$(this));
+  var id = $$(this).attr("visitor_id");
+  console.log(id);
+  var dynamicPopup ;
+  app.dialog.preloader();
+request.get("visitor_entry/"+id,{"Authorization":"JWT "+auth.token},null,function(data){
+
+var status_txt='';
+var txt_color='';
+var button_part='';
+var tittle='';
+
+var check_in = data.created_at;
+  
+  tittle="Entry Details";
+
+
+
+  status_txt="CHECKED IN";
+  txt_color ="green";
+  
+  button_part=    '<button class="col button button-fill button-round update-btn" style="color:white;background-color:#FB6C5E;margin-right:10px" action="back" id="'+data.tracker_id+'">BACK</button>';
+                   
+     
+        
+  var address="";
+  var address_tittle="";
+            if(data.entry_type!="I"){
+              address=  data.lot.name+","+data.lot.street.name+","+data.lot.street.area.name;
+              address_tittle = "Address";
+            }else{
+              address=  data.reason;
+              address_tittle = "Purpose";
+            }
+
+   
+    dynamicPopup = app.popup.create({
+  content: '<div class="popup">'+
+    '<div class="page">'+
+
+
+      ' <div class="navbar">'+
+               ' <div class="navbar-inner">'+
+                  '<div class="left">'+
+                    '<a class="link popup-close">'+
+                        '<i class="material-icons"> arrow_back</i>'+
+                   '   <span class="if-not-md">Back</span>'+
+                   ' </a>'+
+                 ' </div>'+
+                 ' <div class="title">'+tittle+'</div>'+
+               ' </div>'+
+          '    </div>'+
+
+          '<div class="toolbar toolbar-bottom">'+
+                  
+            '<div class="toolbar-inner" style="padding:5px 10px;">'+
+           
+              button_part+
+                '</div>'+
+            '</div>'+
+
+
+              '<div class="page-content" >'+
+
+              
+          '<div class="block">'+
+
+                '<div class="preview">'+
+                '<div data-pagination="{\'el\': \'.swiper-pagination\'}" data-space-between="50" class="swiper-container demo-swiper">'+
+                '<div class="swiper-pagination"></div>'+
+                  '<div class="swiper-wrapper">'+
+                   
+                    '<div class="swiper-slide img-front camera_btn" x="EF" id="EF"><img src="'+data.entry_car_plate_image+'" class="custom-img" ></div>'+
+                    '<div class="swiper-slide img-face camera_btn" x="FC" id="FC"><img src="'+data.driver_image+'" class="custom-img" ></div>'+
+                    '<div class="swiper-slide img-face camera_btn" x="IC" id="IC"><img src="'+data.identity_image+'" class="custom-img" ></div>'+
+                  '</div> '+
+                '</div>'+
+              '</div>'+
+             
+
+              '<div class="main_font" style="color:#FB6C5E;padding:0 5% ;font-size:2vh">'+
+
+                  "<div class='row' >"+
+                    "<div class='col-25'><label>Status</label></div>"+
+                    "<div class='col-75'><label style='color:"+txt_color+";float:right;'>"+status_txt+"</label></div>"+
+                  '</div>'+
+                  "<div class='row' >"+
+                    "<div class='col-40'><label>Vehicle Plate</label></div>"+
+                    "<div class='col-60'><label style='float:right;'>"+data.visitor_car_plate+"</label></div>"+
+                 
+                  '</div>'+
+                  "<div class='row' >"+
+                    "<div class='col-30'><label>"+address_tittle+"</label></div>"+
+                    "<div class='col-70'><label style='float:right;text-align: right;'>"+address+"</label></div>"+
+                  '</div>'+
+                  "<div class='row' >"+
+                    "<div class='col-40'><label>Check In</label></div>"+
+                    "<div class='col-60'><label style='float:right;text-align: right;'>"+check_in+"</label></div>"+
+                  '</div>'+
+                
+
+              '</div>'+
+
+
+                '</div>'+
+
+               
+
+            '</div>'+'</div>'+
+
+            '</div>',
+   
+});
+
+dynamicPopup.open();
+app.dialog.close();
+app.swiper.create(".demo-swiper",{ pagination: {
+    el: '.swiper-pagination',
+    type: 'bullets',
+  },
+});
+
+},function(error){
+  app.dialog.close();
+  console.log(error);
+});
+});
+
+
+
+
+              }
+          }
+      }
+      </script>

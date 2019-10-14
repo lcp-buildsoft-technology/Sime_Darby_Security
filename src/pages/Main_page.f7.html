@@ -15,8 +15,8 @@
                                 </div>
             
             
-                                <div class="custom-label">
-                                    <h2>{{ user.area_name }}</h2>
+                                <div class="custom-label" >
+                                    <h2 style="color:white">{{ user.area_name }}</h2>
                                 </div>
             
                                 <div class="custom-label">
@@ -28,9 +28,9 @@
                 </div>
             </div>
           
-
-              <div style="margin-top: 6.5vh;" id="button-part">
-              <div class="row">
+<center>
+              <div class="main_bot" id="button-part">
+              <div class="row" >
                     <!-- Each "cell" has col-[width in percents] class -->
                     <div class="col-33" style='text-align: center;'>
                         
@@ -44,7 +44,7 @@
                     </div>
 
 
-                    <div class="col-33" style='text-align: center;'> 
+                    <div class="col-33"  style='text-align: center;'> 
                         
                             <div class="custom-button entry_btn">
                                 <i class="material-icons custom-icon"> transfer_within_a_station</i>
@@ -56,7 +56,7 @@
                     </div>     
                         
                         
-                    <div class="col-33" style='text-align: center;'>
+                    <div class="col-33" id="scan_module" style='text-align: center;'>
                            
                                 <div class="custom-button scan_btn">
                                     <i class="material-icons custom-icon"> center_focus_strong</i>
@@ -69,14 +69,15 @@
                
                 </div>
 
-              <a href="#" class="logout_btn">  <div class="row">
-                    <div class="col-100" style='padding:10px;max-height: 6vh; text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;'>
-                                <b>LOGOUT</b>
-                        </div>
-            
+           
                 </div>
-
-                </div>
+                </center>
+                <a href="#" class="logout_btn">  <div class="row">
+                  <div class="col-100" style='padding:10px;max-height: 6vh; text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;'>
+                              <b>LOGOUT</b>
+                      </div>
+      
+              </div>
             </a>
 
             </div>
@@ -105,10 +106,11 @@ pageInit:function(){
      var app=this.$app;
      var router=this.$router;
 
-     if (app.device.android) {
-    console.log('It is android device');
-    document.getElementById("button-part").style.marginTop = "25%";
-
+  
+     if (app.device.desktop) {
+    console.log('It is desktop device');
+ 
+    document.getElementById("scan_module").remove();
   }
 
 

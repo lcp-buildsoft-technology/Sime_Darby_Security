@@ -1,0 +1,570 @@
+<template >
+
+
+    <div class="page" id="walk_in" data-name="walk_in">
+        <div class="page-content" >
+          <!-- Static Navbar -->
+          <div class="navbar">
+            <div class="navbar-inner">
+              <div class="left">
+                <a class="link back">
+                    <i class="material-icons"> arrow_back</i>
+                  <span class="if-not-md">Back</span>
+                </a>
+              </div>
+              <div class="title">WALK IN</div>
+              <div class="rightS"></div>
+            </div>
+          </div>
+
+
+             <div class="visitor_content">
+          <div class="card_width">
+          <form class="list" id="my-form" enctype="multipart/form-data">
+            <ul>
+              <li>
+                <div class="item-content item-input item-input-outline">
+                  <div class="item-inner">
+                        <div class="item-title item-label item-floating-label " style="color:#FB6C5E;text-align: left"><b>Pass No.</b></div>
+                        <div class="item-input-wrap">
+                          <input type="text"  class="walkin_check" placeholder="Select Pass No." readonly="readonly" id="demo-picker-device" style="color:black;">
+                          <span class="input-clear-button"></span>
+                        </div>                
+                    </div>
+                </div>
+              </li>    
+              <li>
+                <div class="item-content item-input item-input-outline">
+                  <div class="item-inner">
+                    <div class="item-title item-label  item-floating-label" style="color:#FB6C5E;text-align: left"><b>Vehicle Plate No.</b></div>
+                    <div class="item-input-wrap">
+                      <input type="text" class="walkin_check" name="visitor_car_plate" placeholder="" id="vehicle_plate" style="color:black;">
+                      <span class="input-clear-button"></span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            
+                  <li>
+                      <div class="item-content item-input item-input-outline">
+                        <div class="item-inner">
+                          <div class="item-title item-label item-floating-label" style="color:#FB6C5E;text-align: left"><b>Address</b></div>
+                          <div class="item-input-wrap">
+                            <input type="text" name="address"  class="walkin_check" placeholder=" " style="color:black;" readonly="readonly" id="demo-picker-dependent">
+                            <span class="input-clear-button"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                 
+                    <li>
+                <div class="item-content item-input  item-input-outline">
+                  <div class="item-inner">
+                    <div class="item-title item-label  item-floating-label" style="color:#FB6C5E;"><b>Resident</b></div>
+                    <div class="item-input-wrap">
+                      <input type="text"  class="walkin_check" placeholder="Select Resident" readonly="readonly" id="demo-picker-device1" style="color:black;">
+                      <span class="input-clear-button"></span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+            <input type="hidden" name="resident"/>
+            <input type="hidden" name="passNumber" />
+            <input type="hidden" name="status" value="PEN" />
+            <input type="hidden" name="entry_type" value="W" />
+            <input type="hidden" name="lot"/>
+            <input type="hidden" name="street"/>
+          </form>
+
+         <!-- <a href="/camera_test/" class="button">test ip camera</a> -->
+          
+         
+              <div style="margin-left:15px;margin-bottom: 5px;"><b style="display: inline-block;color:#333;">Preview </b> </div>
+             
+              <div class="preview">
+                <div data-pagination='{"el": ".swiper-pagination"}' data-space-between="50" class="swiper-container swiper-init demo-swiper">
+                  <div class="swiper-pagination"></div>
+                  <div class="swiper-wrapper">
+                    <div class="swiper-slide img-front camera_btn" x="EF" id='EF'>No Image (Car plate)</div>
+                    <div class="swiper-slide img-face camera_btn" x="FC" id='FC'>No Image (Face)</div>
+                    <div class="swiper-slide img-face camera_btn" x="IC" id='IC'>No Image (IC)</div>
+                  </div> 
+                </div>
+              </div>
+            
+
+          <div class=" row " >
+            <div class="col button button-outline button-round"><a class="button back"  style="border-color:darkgrey;color:darkgrey" href="#"><b>Cancel</b></a></div>
+            <div class="col button button-outline button-round"><a class="button submit_btn" style="border-color:#00BE47;color:#00BE47;" href="#"><b>Register</b></a></div>
+          
+          </div>
+        </div>
+        </div>
+          
+        </div>
+      </div>
+
+</template>
+
+<script>
+    import request from '../js/request.js';
+    export default {
+    
+        data:function(){
+          var app=this.$app;
+          var auth = app.form.getFormData("auth");
+          return{
+            user:auth.user,
+          }
+        },
+    on:{
+    pageInit:function(){
+      var $$=this.$$;
+         var app=this.$app;
+         var router=this.$router;
+         var PassID;
+         var auth = app.form.getFormData("auth");
+         var ip_cam=[];
+        var hasAddress = false;
+         request.get("security_ipcam",{"Authorization":"JWT "+auth.token},null, function(data){
+          for(var i=0;i<data.results.length;i++){
+              ip_cam[data.results[i].type]=data.results[i].url;
+          }
+          console.log(ip_cam);
+         });
+         //get pass no. 
+         request.get("security_passnumber",{"Authorization":"JWT "+auth.token},null, function(data){
+ 
+
+          PassID=data.results;
+ console.log(PassID);
+
+ var pass_no = [];
+ var pass_val = [];
+ for(var z=0;z<PassID.length;z++){
+  pass_no.push(PassID[z].pass_no)
+  pass_val.push(PassID[z].id)
+ }
+
+var pickerDevice = app.picker.create({
+  inputEl: '#demo-picker-device',
+  formatValue: function (values,displayValues) {
+ 
+ return displayValues;
+},
+  cols: [
+    {
+      textAlign: 'center',
+      displayValues:pass_no,
+      values: pass_val,
+      onChange: function (picker, val) {
+          $$('input[name="passNumber"]').val(val);
+      }
+    }
+  ]
+});
+});
+
+
+
+          //get address
+          var address;
+          var streetVendor = {};
+         request.get("security_street",{"Authorization":"JWT "+auth.token},null, function(data){
+ 
+          address=data.results;
+        console.log(data);
+  
+ var street = [];
+ var streetValue = [];
+ var streetLot = {};
+ for(var z=0;z<address.length;z++){
+  if(address[z].lot_set.length!=0){
+  street.push(address[z].name)
+  streetValue.push(address[z].id)
+  var temp = [];
+  var temp2 = [];
+   for(var y = 0; y <address[z].lot_set.length; y++){
+   
+   temp.push(address[z].lot_set[y].name);
+   temp2.push(address[z].lot_set[y].id);
+   }
+   streetVendor[address[z].name] =temp;
+   streetLot[address[z].id] =temp2;
+}
+  //streetVendor= street;
+ }
+
+
+    
+
+var pickerDevice1;
+
+var pickerDependent = app.picker.create({
+  inputEl: '#demo-picker-dependent',
+  rotateEffect: true,
+  formatValue: function (values,displayValues) {
+ 
+    return displayValues;
+  },
+  cols: [
+    {
+      textAlign: 'left',
+      values: streetValue,
+      displayValues:street,
+      onChange: function (picker, lot,disval) {
+        if(picker.cols[1].replaceValues){
+          picker.cols[1].replaceValues(streetLot[lot],streetVendor[disval]);
+          $$("input[name='lot']").val(streetLot[lot][0]);
+        }
+        $$("input[name='street']").val(lot);
+      }
+    },
+    {
+      displayValues:streetVendor[street[0]],
+      values: streetLot[streetValue[0]],
+      width: 160,
+      onChange: function (picker, lot) {
+        $$("input[name='lot']").val(lot);
+      }
+    },
+  ],
+  on:{
+    opened:function(){
+
+      pickerDevice1.destroy();
+
+      $$('#demo-picker-device1').val("");
+    },
+    close:function(){
+
+      app.dialog.preloader('Refreshing Resident...');
+      console.log();
+      var t =$$('#demo-picker-dependent').val().split(",");
+    
+      
+      var formdata = {
+        'street':   $$("input[name='street']").val(),
+        'lot':$$("input[name='lot']").val(),
+      }
+      console.log(formdata);
+
+      request.get("security_resident",{"Authorization":"JWT "+auth.token},formdata, function(data){
+      
+
+      var  resident_list=data.results;
+ console.log(resident_list);
+
+ var resident_list1 = [];
+ var resident_Value =[];
+ for(var z=0;z<resident_list.length;z++){
+  resident_list1.push(resident_list[z].user.first_name+" "+resident_list[z].user.last_name);
+  resident_Value.push(resident_list[z].id);
+ }
+ pickerDevice1 = app.picker.create({
+  inputEl: '#demo-picker-device1',
+  formatValue: function (values,displayValues) {
+ 
+ return displayValues;
+},
+  cols:[{
+      textAlign: 'center',
+      displayValues:resident_list1,
+      values: resident_Value,
+      onChange: function (picker, val) {
+          $$('input[name="resident"]').val(val);
+      }
+    }
+    ],
+});
+});
+
+
+app.dialog.close();
+
+
+
+
+    }
+  }
+});
+
+
+});
+
+
+
+
+
+
+    
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     var imgs = [];
+  //*camera_btn function////////////////////////////////////////////////////////////////////////////////////////////////
+  $$('.camera_btn').on('click', function () {
+    
+    var facecam= ip_cam.FC;
+    var frontcam=ip_cam.EF;
+    var iccam = ip_cam.IC;
+    var x= $$(this).attr("x");
+    if (app.device.android || app.device.ios) {
+
+      app.dialog.create({
+    title: 'Camera Option',
+    
+    buttons: [
+      {
+        text: 'IVMS',
+      },
+      {
+        text: 'Phone camera',
+      },
+      
+    ],
+    onClick: function (dialog, index) {
+            if(index === 0){
+                //Button 1 clicked
+                ivms_capture(x,frontcam,facecam,iccam);
+            }
+            else if(index === 1){
+                //Button 2 clicked
+             // cameara pugin deprecated!   
+        console.log("camera");
+        document.addEventListener("deviceready", onDeviceReady, false);
+function onDeviceReady() {
+    console.log(navigator.camera);
+}
+
+
+
+
+
+console.log(x);
+                         
+
+
+navigator.camera.getPicture(onSuccess, onFail, { quality: 50,
+    destinationType: Camera.DestinationType.DATA_URL });
+
+function onSuccess(imageURI) {
+  const byteCharacters = atob(imageURI);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+    const slice = byteCharacters.slice(offset, offset + 512);
+
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+
+  const blob = new Blob(byteArrays, {type: "image/jpg"});
+
+
+  console.log(blob);
+  var im = new Image();
+    var url = window.URL || window.webkitURL;
+    im.className = 'custom-img';
+    im.src = url.createObjectURL(blob);
+ 
+
+ 
+    
+    $$('#'+x).html("");
+    $$('#'+x).append(im);
+
+    //imgs.push({"name":x,"value":imageURI.substr(imageURI.lastIndexOf('/')+1)});
+    imgs[x]=blob;
+  
+ }
+
+function onFail(message) {
+  app.dialog.alert('Failed because: ' + message,"");
+  
+}
+            }
+           
+        },
+    verticalButtons: true,
+  }).open();
+
+
+   }else{
+
+    ivms_capture(x,frontcam,facecam,iccam);
+
+   }
+
+
+  
+  });
+    
+
+
+
+function ivms_capture(x,frontcam,facecam,iccam){
+  
+    
+
+  app.dialog.preloader('Caputre Image...');
+
+
+  
+if(x=="EF"){
+   console.log("Front:"+frontcam);
+  var $this=$$('#'+x);
+  request.getimg(frontcam,null, function(data){
+    var im = new Image();
+    var url = window.URL || window.webkitURL;
+    im.className = 'custom-img';
+    im.src = url.createObjectURL(data);
+    $this.html('');
+    $this.append(im);
+    imgs[x]=data ;
+    
+    app.dialog.close();
+     },function(error){
+          console.log(error);
+          app.dialog.close();
+          app.dialog.alert('Unable to connect to Camera!',"");
+     });
+ 
+}else if(x=="FC"){
+  console.log("Face:"+facecam);
+  var $this=$$('#'+x);
+  request.getimg(facecam,null, function(data){
+    var im = new Image();
+    var url = window.URL || window.webkitURL;
+    im.className = 'custom-img';
+    im.src = url.createObjectURL(data);
+    $this.html('');
+    $this.append(im);
+    imgs[x]=data ;
+    
+    app.dialog.close();
+     },function(error){
+          console.log(error);
+          app.dialog.close();
+          app.dialog.alert('Unable to connect to Camera!',"");
+     });   
+}else if(x=="IC"){
+  console.log("IC:"+iccam);
+  var $this=$$('#'+x);
+  request.getimg(iccam,null, function(data){
+    var im = new Image();
+    var url = window.URL || window.webkitURL;
+    im.className = 'custom-img';
+    im.src = url.createObjectURL(data);
+    $this.html('');
+    $this.append(im);
+    imgs[x]=data ;
+    
+     app.dialog.close();
+    console.log(data);
+     },function(error){
+          console.log(error);
+          app.dialog.close();
+          app.dialog.alert('Unable to connect to Camera!',"");
+     });   
+
+ 
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+$$('.submit_btn').on('click',function(){
+ 
+  var f = document.getElementById('my-form');
+  var Fdata = new FormData(f);
+for(const [key, value] of Object.entries(imgs)){
+  switch(key){
+    case "IC":Fdata.append("identity_image",value,key+".jpg");break;
+    case "EF":Fdata.append("entry_car_plate_image",value,key+".jpg");break;
+    case "FC":Fdata.append("driver_image",value,key+".jpg");break;
+  }
+
+  
+}
+
+var isValid=true;
+$$('.walkin_check').each(function(){
+  console.log($$(this).attr('id'));
+  if($$(this).val()=="" ){
+    isValid=false;
+  }
+});
+
+if(isValid){
+if(imgs.EF!=null && imgs.FC!=null && imgs.IC!=null){
+  request.postFormData("visitor_entry",{"Authorization":"JWT "+auth.token},Fdata, function(data){
+        
+     console.log(data);
+
+      if(data.status ==  "success"){
+        app.dialog.alert("Walk In Entry Created!","");
+        router.back('/main/', {force:true});
+     
+      }
+      },
+      function(xhr,status){
+//error 
+
+
+      });
+
+}else{
+  app.dialog.alert("Please capture all image!","");
+}
+}else{
+  app.dialog.alert("All field must be insert!","");
+}
+});
+
+
+
+     // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+
+
+
+
+
+    
+    }
+    
+    }
+     
+    
+            
+        }
+        </script>
+    

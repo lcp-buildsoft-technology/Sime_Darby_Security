@@ -12,6 +12,8 @@ import cordovaApp from './cordova-app.js';
 // Import Routes
 import routes from './routes.js';
 import request from './request.js';
+import socket from 'socket.io-client/dist/socket.io.js';
+import CONFIG from "../js/config.js";
 var app = new Framework7({
   root: '#app', // App root element
   id: 'io.framework7.simedarbysecurity', // App bundle ID
@@ -19,15 +21,7 @@ var app = new Framework7({
   theme: 'auto', // Automatic theme detection
 
   // App root data
-  data: function () {
-    return {
-      user: {
-        firstName: 'simedarby',
-        lastName: 'property',
-      },
-
-    };
-  },
+ 
   touch: {
     // Enable fast clicks
     fastClicks: true,
@@ -54,6 +48,9 @@ var app = new Framework7({
     iosOverlaysWebView: true,
     androidOverlaysWebView: false,
   },
+  view:{
+    stackPages:true,
+  },
   on: {
     init: function () {
       var f7 = this;
@@ -63,14 +60,15 @@ var app = new Framework7({
       }
 
       var auth = f7.form.getFormData("auth");
-
+      
+      var mainView = f7.views.create('.view-main');
 
 
       if(auth){
         
         request.post("security_verify_token",null,{"token":auth.token}, function(data){
         
-        var mainView = f7.views.create('.view-main');
+   
         console.log(auth);
         mainView.router.navigate({name:"main"});
         mainView.router.clearPreviousHistory();
@@ -82,12 +80,9 @@ var app = new Framework7({
       
         toastCenter.open();
 
-
-
-
       },
       function(xhr,status){
-      if(status==400){
+
         app.form.removeFormData('auth');
         var toastCenter = app.toast.create({
           text: "Your session has expired!<br>Please Login Again!",
@@ -97,28 +92,32 @@ var app = new Framework7({
       
         toastCenter.open();
       
-      }else{
-        var toastCenter = app.toast.create({
-          text: "Something error when login!",
-          position: 'center',
-          closeTimeout: 2000,
-        });
-      
-        toastCenter.open();
-      }
+        mainView.router.navigate('/login/',{force:true});
       });
         
+      }else{
+        mainView.router.navigate('/login/');
       }
       
-    },
+
+      var app=this;
+      var auth = app.form.getFormData("auth");
+  
+
+
+
+
+  
+    }
   },
+
 });
 
 
 //directly open boom gate submit btn
 $$('#open').on('click', function (e) {
 
-
+ 
   e.preventDefault();
 var value = $$("[name='reason-radio']:checked").val();
 var auth = app.form.getFormData("auth");
@@ -126,26 +125,44 @@ var formData = new FormData();
 formData.append("type",$$('#gate-type').val());
 formData.append("reason",value);
 
-app.dialog.preloader('Opening Boom gate...');
+request.get("security_boomgate",{"Authorization":"JWT "+auth.token},null,function(data){
+ var url = data[0].url;
+ console.log(url);
+ 
 
-request.post("security_boomgatelog",{"Authorization":"JWT "+auth.token},formData, function(data){
-  app.dialog.close();
-console.log(data);
-var toastCenter = app.toast.create({
-    text: "Boomgate Open",
-    position: 'center',
-    closeTimeout: 2000,
-  });
+  app.dialog.preloader('Opening Boom gate...');
 
-  toastCenter.open();
-
-  
-  app.popup.close();
-request.getimg("http://192.168.0.107/boomgate.php",null, function(data){
+  request.post("security_boomgatelog",{"Authorization":"JWT "+auth.token},formData, function(data){
+    app.dialog.close();
   console.log(data);
-  });
+  var toastCenter = app.toast.create({
+      text: "Boomgate Open",
+      position: 'center',
+      closeTimeout: 2000,
+    });
+  
+    toastCenter.open();
+  
+    
+    app.popup.close();
+  request.getimg(url,null, function(data){
+    console.log(data);
+    });
+  
+   });
 
- });
+    },function(){
+      var toastCenter = app.toast.create({
+        text: "Cannot connect boomgate!",
+        position: 'center',
+        closeTimeout: 2000,
+      });
+    
+      toastCenter.open();
+    });
+  
+
+
 });
 
 
@@ -196,7 +213,8 @@ function onBackKeyDown() {
             });
     
        
-  }  else {
+  }
+  else{
 
     app.views.main.router.back();
  }
@@ -227,4 +245,71 @@ $$(document).on('click',".cancel", function () {
   return false;
 });
 
+
+$$("#app").on('click',".update-btn",function () {
+  var auth = app.form.getFormData("auth");
+  console.log($$(this));
+  var action = $$(this).attr("action");
+  var entry_id = $$(this).attr("id");
+console.log(action);
+console.log(entry_id);
+var up_status='';
+var post_request=false;
+if(action=="approved"){
+  up_status="AIS";
+  post_request=true;
+}else if(action=="reject"){
+  up_status="RIS";
+  post_request=true;
+}else if(action=="reject_exit"){
+  up_status="ROS";
+  post_request=true;
+}else if(action=="approved_exit"){
+  up_status="AOS";
+  post_request=true;
+}
+
+
+
+
+if(post_request==true){
+  request.put('visitor_entry/'+entry_id, {"Authorization":"JWT "+auth.token}, {
+                  "status": up_status
+              },
+              function (data) {
+  
+                var toastCenter = app.toast.create({
+            text: "<center>Entry Update Success!</center>",
+            position: 'center',
+            closeTimeout: 2000,
+          });
+        
+          toastCenter.open();
+  
+          request.getimg("http://192.168.0.107/boomgate.php",null, function(data){
+            console.log(data);
+            });
+                  app.popup.close();
+              },
+              function (xhr, status) {
+                var toastCenter = app.toast.create({
+            text: "<center>Entry Update Failed!</center>",
+            position: 'center',
+            closeTimeout: 2000,
+          });
+        
+          toastCenter.open();
+  
+   
+              });
+  }else{
+   if(action=='back'){
+      app.popup.close();
+   }else if(action=='register'){
+     console.log("re-register");
+   } 
+  }
+
+
+});
 

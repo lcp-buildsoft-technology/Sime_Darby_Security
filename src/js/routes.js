@@ -9,9 +9,9 @@ import IMPROMTU from '../pages/Impromtu.f7.html';
 import VISITOR from '../pages/Visitor.f7.html';
 import CONTACT from '../pages/Contact.f7.html';
 import HISTORY from '../pages/History.f7.html';
-import CAMERA_TEST from '../pages/camera_test.f7.html';
 
-
+import SCAN_ENTRY from '../pages/scanned_entry.f7.html';
+import REENTRY from '../pages/reentry.f7.html';
 
 var routes = [
   
@@ -19,13 +19,17 @@ var routes = [
     path: '/login/',
     component: LoginPage,
   },
-  { name: "camera_test",
-  path: '/camera_test/',
-  component: CAMERA_TEST,
+  { name: "reentry",
+    path: '/reentry/',
+    component: REENTRY,
   },
   { name: "impromtu",
   path: '/impromtu/',
   component: IMPROMTU,
+  },
+  { name: "scan_entry",
+  path: '/scan_entry/',
+  component: SCAN_ENTRY,
   },
   { name: "main",
     path: '/main/',

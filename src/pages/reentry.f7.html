@@ -1,0 +1,444 @@
+
+
+<template >
+
+
+    <div class="page" id="reentry" data-name="reentry">
+        <div class="page-content" >
+          <!-- Static Navbar -->
+          <div class="navbar">
+            <div class="navbar-inner">
+              <div class="left">
+                <a  href="/main/" data-force="true" data-ignore-cache="true"  class="link back">
+                    <i class="material-icons"> arrow_back</i>
+                  <span class="if-not-md">Back</span>
+                </a>
+              </div>
+              <div class="title">Re-register Visitor Entry</div>
+              <div class="rightS"></div>
+            </div>
+          </div>
+
+
+             <div class="visitor_content">
+          <div class="card_width">
+          <form class="list" id="my-form" enctype="multipart/form-data">
+            <ul>
+              
+              <li>
+                <div class="item-content item-input item-input-outline">
+                  <div class="item-inner">
+                    <div class="item-title item-label  item-floating-label" style="color:#FB6C5E;text-align: left"><b>Vehicle Plate No.</b></div>
+                    <div class="item-input-wrap">
+                  
+                      <input type="text"   name="visitor_car_plate" placeholder=""  id="vehicle_plate" style="color:black;" readonly="readonly" >
+                     
+                       
+                    </div>
+                  </div>
+                </div>
+              </li>
+            
+                  <li>
+                      <div class="item-content item-input item-input-outline">
+                        <div class="item-inner">
+                          <div class="item-title item-label item-floating-label" style="color:#FB6C5E;text-align: left"><b>Address</b></div>
+                          <div class="item-input-wrap">
+                            <input type="text" name="address"    placeholder=" " style="color:black;" readonly="readonly" id="address">
+                             
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                 
+                    <li>
+                <div class="item-content item-input  item-input-outline">
+                  <div class="item-inner">
+                    <div class="item-title item-label  item-floating-label" style="color:#FB6C5E;"><b>Entry Type</b></div>
+                    <div class="item-input-wrap">
+                      <input type="text"    placeholder="Select Resident" readonly="readonly" id="entry_type" style="color:black;">
+                       
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+            <input type="hidden" name="resident"/>
+            <input type="hidden" name="passNumber" />
+            <input type="hidden" name="status" value="PEN" />
+            <input type="hidden" name="entry_type" value="W" />
+            <input type="hidden" name="lot"/>
+            <input type="hidden" name="street"/>
+          </form>
+
+         <!-- <a href="/camera_test/" class="button">test ip camera</a> -->
+          
+         
+         <div style="margin-left:15px;margin-bottom: 5px;"><b style="display: inline-block;color:#333;">Preview </b> </div>
+             
+         <div class="preview">
+           <div data-pagination='{"el": ".swiper-pagination"}' data-space-between="50" class="swiper-container swiper-init demo-swiper">
+             <div class="swiper-pagination"></div>
+             <div class="swiper-wrapper">
+                 <div class="swiper-slide img-front camera_btn" x="EF" id='EF'>No Image (Car plate)</div>
+                 <div class="swiper-slide img-face camera_btn" x="FC" id='FC'>No Image (Face)</div>
+                 <div class="swiper-slide img-face camera_btn" x="IC" id='IC'>No Image (IC)</div>
+     
+             </div> 
+           </div>
+         </div>
+            
+
+          <div class=" row " >
+            <div class="col button button-outline button-round"><a href="/main/" data-force="true" data-ignore-cache="true" class="button back"  style="border-color:darkgrey;color:darkgrey" ><b>Cancel</b></a></div>
+            <div class="col button button-outline button-round"><a class="button submit_btn" style="border-color:#00BE47;color:#00BE47;" href="#"><b>Send Approval</b></a></div>
+          
+          </div>
+        </div>
+        </div>
+          
+        </div>
+      </div>
+
+</template>
+
+<script>
+    import request from '../js/request.js';
+    export default {
+    
+        data:function(){
+          var app=this.$app;
+          var auth = app.form.getFormData("auth");
+          var entry_data = app.form.getFormData("scan_entry_data");
+       
+          return{
+            user:auth.user,
+        
+          }
+        },
+    on:{
+    pageInit:function(){
+      var $$=this.$$;
+         var app=this.$app;
+         var router=this.$router;
+        
+         var auth = app.form.getFormData("auth");
+         var entry_data = app.form.getFormData("scan_entry_data");
+         var type='';
+        
+         switch (entry_data.entry_type){
+           case "E": type="Single Entry";
+           break;
+
+           case "M": type="Multiple Entry";
+           break;
+
+           case "S": type="Shedule Entry";
+           break;
+
+         }
+        
+         $$('#vehicle_plate').val(entry_data.visitor_car_plate);
+         $$('#address').val(entry_data.lot+","+entry_data.street_name);
+         $$('#entry_type').val(type);
+         
+
+      
+         var ip_cam=[];
+        var hasAddress = false;
+
+         request.get("security_ipcam",{"Authorization":"JWT "+auth.token},null, function(data){
+          for(var i=0;i<data.results.length;i++){
+              ip_cam[data.results[i].type]=data.results[i].url;
+          }
+          console.log(ip_cam);
+         });
+     
+
+
+
+
+
+    
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     var imgs = [];
+  //*camera_btn function////////////////////////////////////////////////////////////////////////////////////////////////
+  $$('.camera_btn').on('click', function () {
+    
+    var facecam= ip_cam.FC;
+    var frontcam=ip_cam.EF;
+    var iccam = ip_cam.IC;
+    var x= $$(this).attr("x");
+    if (app.device.android || app.device.ios) {
+
+      app.dialog.create({
+    title: 'Camera Option',
+    
+    buttons: [
+      {
+        text: 'IVMS',
+      },
+      {
+        text: 'Phone camera',
+      },
+      
+    ],
+    onClick: function (dialog, index) {
+            if(index === 0){
+                //Button 1 clicked
+                ivms_capture(x,frontcam,facecam,iccam);
+            }
+            else if(index === 1){
+                //Button 2 clicked
+             // cameara pugin deprecated!   
+        console.log("camera");
+        document.addEventListener("deviceready", onDeviceReady, false);
+function onDeviceReady() {
+    console.log(navigator.camera);
+}
+
+
+
+
+
+console.log(x);
+                         
+
+
+navigator.camera.getPicture(onSuccess, onFail, { quality: 50,
+    destinationType: Camera.DestinationType.DATA_URL });
+
+function onSuccess(imageURI) {
+  const byteCharacters = atob(imageURI);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+    const slice = byteCharacters.slice(offset, offset + 512);
+
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+
+  const blob = new Blob(byteArrays, {type: "image/jpg"});
+
+
+  console.log(blob);
+  var im = new Image();
+    var url = window.URL || window.webkitURL;
+    im.className = 'custom-img';
+    im.src = url.createObjectURL(blob);
+ 
+
+ 
+    
+    $$('#'+x).html("");
+    $$('#'+x).append(im);
+
+    //imgs.push({"name":x,"value":imageURI.substr(imageURI.lastIndexOf('/')+1)});
+    imgs[x]=blob;
+  
+ }
+
+
+function onFail(message) {
+  app.dialog.alert('Failed because: ' + message,"");
+  
+}
+            }
+           
+        },
+    verticalButtons: true,
+  }).open();
+
+
+   }else{
+
+    ivms_capture(x,frontcam,facecam,iccam);
+
+   }
+
+
+  
+  });
+    
+
+
+
+function ivms_capture(x,frontcam,facecam,iccam){
+  
+    
+
+  app.dialog.preloader('Caputre Image...');
+
+
+  
+if(x=="EF"){
+   console.log("Front:"+frontcam);
+  var $this=$$('#'+x);
+  request.getimg(frontcam,null, function(data){
+    var im = new Image();
+    var url = window.URL || window.webkitURL;
+    im.className = 'custom-img';
+    im.src = url.createObjectURL(data);
+    $this.html('');
+    $this.append(im);
+    imgs[x]=data ;
+    
+    app.dialog.close();
+     },function(error){
+          console.log(error);
+          app.dialog.close();
+          app.dialog.alert('Unable to connect to Camera!',"");
+     });
+ 
+}else if(x=="FC"){
+  console.log("Face:"+facecam);
+  var $this=$$('#'+x);
+  request.getimg(facecam,null, function(data){
+    var im = new Image();
+    var url = window.URL || window.webkitURL;
+    im.className = 'custom-img';
+    im.src = url.createObjectURL(data);
+    $this.html('');
+    $this.append(im);
+    imgs[x]=data ;
+    
+    app.dialog.close();
+     },function(error){
+          console.log(error);
+          app.dialog.close();
+          app.dialog.alert('Unable to connect to Camera!',"");
+     });   
+}else if(x=="IC"){
+  console.log("IC:"+iccam);
+  var $this=$$('#'+x);
+  request.getimg(iccam,null, function(data){
+    var im = new Image();
+    var url = window.URL || window.webkitURL;
+    im.className = 'custom-img';
+    im.src = url.createObjectURL(data);
+    $this.html('');
+    $this.append(im);
+    imgs[x]=data ;
+    
+     app.dialog.close();
+    console.log(data);
+     },function(error){
+          console.log(error);
+          app.dialog.close();
+          app.dialog.alert('Unable to connect to Camera!',"");
+     });   
+
+ 
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+$$('.submit_btn').on('click',function(){
+ 
+
+
+  var Fdata = new FormData();
+    Fdata.append('status', 'PEN');
+    Fdata.append('visitor_name', entry_data.visitor_name);
+    Fdata.append('visitor_car_plate', entry_data.visitor_car_plate);
+    Fdata.append('visitor_phone_number', entry_data.visitor_phone_number);
+                    if (entry_data.visitor != null) {
+                        Fdata.append('visitor', entry_data.visitor);
+                    }
+
+    Fdata.append('entry_type', entry_data.entry_type);
+    Fdata.append('entry', entry_data.id);
+    Fdata.append('lot', entry_data.lot);
+    Fdata.append('resident', entry_data.resident);
+    Fdata.append('community', entry_data.community);
+    Fdata.append('area', entry_data.area);
+    Fdata.append('street', entry_data.street);
+
+
+
+for(const [key, value] of Object.entries(imgs)){
+  switch(key){
+    case "IC":Fdata.append("identity_image",value,key+".jpg");break;
+    case "EF":Fdata.append("entry_car_plate_image",value,key+".jpg");break;
+    case "FC":Fdata.append("driver_image",value,key+".jpg");break;
+  }
+
+  
+}
+
+
+
+if(imgs.EF!=null && imgs.FC!=null && imgs.IC!=null){
+  request.postFormData("visitor_entry",{"Authorization":"JWT "+auth.token},Fdata, function(data){
+        
+     console.log(data);
+
+      if(data.status ==  "success"){
+        app.dialog.alert("Approval Sent!","");
+        router.back('/main/', {force:true});
+     
+      }
+      },
+      function(xhr,status){
+//error
+
+
+      });
+
+}else{
+  app.dialog.alert("Please capture all image!","");
+}
+
+});
+
+
+
+     // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+
+
+
+
+
+    
+    },pageBeforeOut:function(){
+     
+    }
+    
+    }
+     
+    
+            
+        }
+        </script>
+    

@@ -1,0 +1,146 @@
+<template>
+    
+    <!-- Main Screen -->
+   
+          <div class="page entry" id="entry" data-name="entry">
+            <div class="page-content  login_bg"  >
+
+            
+          
+   
+            <div style=" margin: auto;width: 50%; padding: 10px;" id="entry_page">
+      
+              <div class="row">
+                    <!-- Each "cell" has col-[width in percents] class -->
+                    <div class="col-100" style='text-align: center;'>
+                        
+                            <div class="custom-button-large walkin_btn">
+                                <i class="material-icons custom-icon-large"> directions_run</i>
+                                <div class="custom-label">
+                                    <h2>WALK IN</h2>
+                                </div>
+                            </div>
+                            
+                        
+                    </div>
+
+                </div>
+
+
+
+                <div class="row" >
+
+                <div class="col-100" style='text-align: center;'> 
+                        
+                        <div class="custom-button-large impromtu_btn" >
+                            <i class="material-icons custom-icon-large"> local_shipping</i>
+                            <div class="custom-label">
+                                <h2>IMPROMPTU</h2>
+                            </div>
+                        </div>
+                       
+                    
+                </div>     
+                    
+            </div>
+           
+        </div>
+
+
+        
+
+ 
+                   <div class="row entry_bot" >
+
+                    <div class="col-45 home_btn" style='max-height: 6vh; text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;  line-height: 14px;margin:0 2%;cursor: pointer;'>
+                                <b><p>HOME</p></b>
+                        </div>
+            
+                        <div class="col-45 " style='max-height: 6vh;  text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;  line-height: 14px;margin:0 2%;cursor: pointer;'>
+                            <b><p>GPS</p></b>
+                    </div>
+                </div>
+                
+            
+
+
+            
+            </div>
+
+          </div>
+
+
+
+
+      
+</template>
+<script>
+import request from '../js/request.js';
+export default {
+
+    data:function(){
+      var app=this.$app;
+      var auth = app.form.getFormData("auth");
+      return{
+        user:auth.user,
+      }
+    },
+on:{
+pageInit:function(){
+  var $$=this.$$;
+     var app=this.$app;
+     var router=this.$router;
+
+
+     if (app.device.android) {
+    console.log('It is android device');
+    document.getElementById("entry_page").style.marginTop = "15%";
+  
+  }else{
+    document.getElementById("entry_page").style.marginTop = "2%";
+  }
+
+//*home function////////////////////////////////////////////////////////////////////////////////////////////////
+$$('.home_btn').on('click', function () {
+    console.log("home");
+    router.back('/main/', {force:true});
+
+});
+
+ // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+//*walkin function////////////////////////////////////////////////////////////////////////////////////////////////
+$$('.walkin_btn').on('click', function () {
+    console.log("walkin");
+  router.navigate({name:"walkin"});
+
+
+});
+
+ // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ 
+
+
+
+
+//*walkin function////////////////////////////////////////////////////////////////////////////////////////////////
+$$('.impromtu_btn').on('click', function () {
+    console.log("impromtu");
+  router.navigate({name:"impromtu"});
+
+
+});
+
+ // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+}
+
+}
+ 
+
+        
+    }
+    </script>
