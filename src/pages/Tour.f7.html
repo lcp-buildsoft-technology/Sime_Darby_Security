@@ -1,0 +1,228 @@
+<template>
+  <div class="page">
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="left">
+          <a href="#" class="cancel cancel_margin" data-panel="left">
+            <i class="icon icon-back"></i>
+            <i class="if-not-md">Back</i>
+          </a>
+        </div>
+        <div class="title sliding" style="color: white;">Tour Scanner</div>
+      </div>
+    </div>
+    <div class="page-content">
+      <img
+        src="./static/focus.png"
+        style="height: 300px;width: 300px;"
+        class=" center_position"
+        id="focus"
+      />
+      <h1 class="center_position" id="text_content">
+        Scan qrcode through Scanner device
+      </h1>
+
+      <form id="form" autocomplete="off">
+        <input
+          id="scanner"
+          type="text"
+          name="uuid"
+          onblur="this.focus()"
+          autofocus
+          autocomplete="off"
+        />
+      </form>
+    </div>
+  </div>
+</template>
+<style>
+  html,
+  body {
+    background-color: transparent;
+  }
+  .page-previous {
+    display: none;
+  }
+  .page-current {
+    background-color: transparent;
+  }
+  #form {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+  }
+</style>
+<script>
+  import request from "../js/request.js";
+  export default {
+    on: {
+      pageInit: function() {
+        var app = this.$app;
+        var router = this.$router;
+        var $$ = this.$$;
+        var auth = app.form.getFormData("auth");
+        var QRScanner = window.QRScanner;
+
+        if (app.device.android) {
+          document.getElementById("scanner").style.display = "none";
+
+          document.getElementById("text_content").style.display = "none";
+
+          QRScanner.prepare(onDone); // show the prompt
+        } else {
+          document.getElementById("focus").style.display = "none";
+        }
+
+        function onDone(err, status) {
+          if (err) {
+            var toastCenter = app.toast.create({
+              text: "Something error!",
+              position: "center",
+              closeTimeout: 2000
+            });
+
+            toastCenter.open();
+            console.error(err);
+          }
+          if (status.authorized) {
+            QRScanner.show();
+
+            // window.setInterval(function(){
+            console.log("scanning");
+            QRScanner.scan(scan);
+            // },500);
+          } else if (status.denied) {
+            var toastCenter = app.toast.create({
+              text: "Camera permission: Denied",
+              position: "center",
+              closeTimeout: 2000
+            });
+
+            toastCenter.open();
+          } else {
+            var toastCenter = app.toast.create({
+              text: "Camera permission: Off",
+              position: "center",
+              closeTimeout: 2000
+            });
+
+            toastCenter.open();
+          }
+        }
+
+        function scan(err, text) {
+          if (err) {
+          } else {
+            app.dialog.preloader("GPS Detecting");
+            navigator.geolocation.getCurrentPosition(
+              function(position) {
+                app.dialog.close();
+                var latitude = position.coords.latitude;
+                var longitude = position.coords.longitude;
+                console.log(latitude);
+                console.log(longitude);
+                app.dialog.preloader();
+                request.post(
+                  "security_postlog",
+                  { Authorization: "JWT " + auth.token },
+                  { qr_uuid: text, longitude: longitude, latitude: latitude },
+                  function(data) {
+                    app.dialog.close();
+                    var now = formatAMPM(new Date());
+                    var guard_name =
+                      auth.user.first_name + " " + auth.user.last_name;
+
+                    var fd = {
+                      longitude: longitude,
+                      latitude: latitude,
+                      qr_uuid: text,
+                      timestamp: now,
+                      security_guard_name: guard_name
+                    };
+
+                    app.form.storeFormData("tour_log", fd);
+
+                    QRScanner.destroy(function(status) {
+                      console.log(status);
+                    });
+
+                    app.views.main.router.back("/tour_log/", { force: true });
+                  },
+                  function(xhr,status) {
+                    app.dialog.close();
+                    // alert(JSON.stringify(xhr.responseText));
+                    console.log(xhr)
+                    console.log(status)
+                    if(status==400 || status=="400" ){
+                      app.dialog.alert("Next tour scan only allow after 30 min of last tour scan");
+
+                    }else{
+                      app.dialog.alert("Server connection error");
+
+                    }
+                    setTimeout(QRScanner.scan(scan), 1500);
+                  }
+                );
+              },
+              function(error) {
+                app.dialog.close();
+                app.dialog.alert(
+                  "To continue, please turn on device location, which uses phone GPS service."
+                );
+                setTimeout(QRScanner.scan(scan), 1500);
+              },
+              { enableHighAccuracy: true, timeout: 5000 }
+            );
+          }
+        }
+
+        $$(".page-content #scanner").attr("autocomplete", "off");
+        var typingTimer; //timer identifier
+        $$(".page-content").on("keyup", "#scanner", function() {
+          clearTimeout(typingTimer);
+          typingTimer = setTimeout(doneTyping, doneTypingInterval);
+        });
+
+        //on keydown, clear the countdown
+        $$(".page-content").on("keydown", "#scanner", function() {
+          clearTimeout(typingTimer);
+        });
+
+        function doneTyping() {
+          var text = $$(".page-content #scanner").val();
+          console.log(text);
+          //submit form;
+
+          app.dialog.alert(text, "");
+
+          $$(".page-content #scanner").val("");
+        }
+      }
+    }
+  };
+
+  function formatAMPM(date_data) {
+    var year = date_data.getFullYear();
+    var month = date_data.getMonth() + 1;
+    var date = date_data.getDate();
+    var hours = date_data.getHours();
+    var minutes = date_data.getMinutes();
+    var ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var strTime =
+      date +
+      "-" +
+      month +
+      "-" +
+      year +
+      " " +
+      hours +
+      ":" +
+      minutes +
+      " " +
+      ampm;
+    return strTime;
+  }
+</script>

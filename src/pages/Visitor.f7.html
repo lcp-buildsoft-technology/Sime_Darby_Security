@@ -153,18 +153,13 @@
              var resons;
              var auth = app.form.getFormData("auth");
   
-            //socket
-            var sck = socket.connect(CONFIG.SOCKET);
-          
-            console.log(auth);
-            sck.emit("user",{id:auth.user.id,area:auth.user.area,role:"security"});
-          
+         
             var gate_type;
 
-            if (app.device.desktop) {
+            // if (app.device.desktop) {
              
-              $$('.contact_btn').remove();
-            }
+            //   $$('.contact_btn').remove();
+            // }
 
 
 
@@ -179,7 +174,7 @@
                   var new_entry_item="";
             var color="";
             var status="";
-          
+        
             
                   if(data[i].status=="AIR"){
               color="forestgreen";
@@ -187,12 +182,12 @@
             }else if(data[i].status=="RIR"){
               color="red";
               status="Rejected";
-              
+           
             }
             else if(data[i].status=="PEN"){
               color="#FB6C5E";
               status="Pending";
-              
+            
             }
 
             var status_id="status_"+data[i].tracker_id;
@@ -208,7 +203,7 @@
                         '<div class="col-20 card-left-content">'+
                           '<div class="card-left-content_inner">'+
                             '<i class="material-icons">chevron_right</i>'+
-                             '<p>CEHCK IN</p>'+
+                             '<p>CHECK IN</p>'+
                          ' </div>'+
                         '</div>'+
                         '<div class="col-70 card-center-content">'+
@@ -252,7 +247,7 @@
                             '<div class="col-20 card-left-content">'+
                               '<div class="card-left-content_inner">'+
                                ' <i class="material-icons">chevron_left</i>'+
-                                '<p>CEHCK OUT</p>'+
+                                '<p>CHECK OUT</p>'+
                               '</div>'+
                             '</div>'+
                             '<div class="col-70 card-center-content">'+
@@ -363,157 +358,11 @@ list_item.sort( compare );
 
 
 
-          //socket and prepend to list
-    
-    sck.on("visitor_arrive",function(data){
-   
-    
-          request.get("visitor_entry/"+data.track_id,{"Authorization":"JWT "+auth.token},null,function(data){
-      console.log(data);
-       
-               if(data.status!="PEX"){
-                var new_entry_item="";
-          var color="";
-          var status="";
-        
-          
-                if(data.status=="AIR"){
-            color="forestgreen";
-            status="Approved";
-          }else if(data.status=="RIR"){
-            color="red";
-            status="Rejected";
-            
-          }
-          else if(data.status=="PEN"){
-            color="#FB6C5E";
-            status="Pending";
-            
-          }
-    
-          var status_id="status_"+data.tracker_id;
-          var card_id="card_"+data.tracker_id;
-
-          var address="";
-            if(data.entry_type!="I"){
-              address=  data.lot.name+","+data.lot.street.name;
-            }
 
 
-          new_entry_item ="<div class='card card_in  card_width "+card_id+" ' >"+
-            "<div class='card-content card-click  content_heigt' visitor_id='"+data.tracker_id+"'>"+
-                    '<div class="row no-gap">'+
-                      '<div class="col-20 card-left-content">'+
-                        '<div class="card-left-content_inner">'+
-                          '<i class="material-icons">chevron_right</i>'+
-                           '<p>CEHCK IN</p>'+
-                       ' </div>'+
-                      '</div>'+
-                      '<div class="col-70 card-center-content">'+
-                        '<div class="card-center-content_inner">'+
-                          '<div>'+address+'</div>'+
-                          '<div style="width: 100%;">'+
-                                  '<div style="display: inline-block;">'+data.visitor_car_plate+'</div>'+
-                                  '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;">Status: <b class="'+status_id+'" style="color: '+color+'"> '+status+'</b></div>'+
-                         ' </div>'+
-                        '</div>'+
-                      '</div>' +   
-                      '<div class="col-10 card-right-content">'+
-                        '<div class="card-right-content_inner">'+
-                         ' <i class="material-icons">more_vert</i>'+
-                       ' </div>'+
-                     ' </div>'+
-    
-                    '</div>'+
-                  '</div>'+
-               ' </div>';
-    
-    
-
-    
-        if(data.status=="AIR"){
-          setTimeout(function(){  $$('.approved_entry_list').prepend(new_entry_item);},2000);
-               
-          }else if(data.status=="RIR"){
-            
-            setTimeout(function(){  $$('.rejected_entry_list').prepend(new_entry_item);},2000);
-               
-          }
-          else if(data.status=="PEN"){
-           
-            setTimeout(function(){   $$('.pending_entry_list').prepend(new_entry_item);},2000);
-          }
-            
-    
-      
-                        }else{
-    
-                          var card_id="card_"+data.tracker_id;
-
-                          var address="";
-            if(data.entry_type!="I"){
-              address=  data.lot.name+","+data.lot.street.name;
-            }else{
-              address="Impromtu";
-            }
-
-
-
-               var new_exit_item=  '<div class="card  card_in card_width '+card_id+'"  >'+
-                "<div class='card-content card-click  content_heigt' visitor_id='"+data.tracker_id+"'>"+
-                       ' <div class="row no-gap">'+
-                          '<div class="col-20 card-left-content">'+
-                            '<div class="card-left-content_inner">'+
-                             ' <i class="material-icons">chevron_left</i>'+
-                              '<p>CEHCK OUT</p>'+
-                            '</div>'+
-                          '</div>'+
-                          '<div class="col-70 card-center-content">'+
-                            '<div class="card-center-content_inner">'+
-                                 ' <div>'+address+'</div>'+
-                                 ' <div>'+data.visitor_car_plate+'</div>'+
-                            '</div>'+
-                          '</div>'+
-                          '<div class="col-10 card-right-content">'+
-                            '<div class="card-right-content_inner">'+
-                              '<i class="material-icons">more_vert</i>'+
-                            '</div>'+
-                         ' </div>'+
-    
-                          '</div>'+
-                        '</div>'+
-                      '</div>';
-    
-                      
-                      setTimeout(function(){ $$('#visitor_scroll_view_out').prepend(new_exit_item);},2000);  
-                    }
-          });
-        
-      });
-    
-      
-    //remove card item
-      sck.on("visitor_remove",function(data){
-       
-        if($$(app.view.current.router.currentPageEl).data("name") == 'visitor'){
-     
-      
-        $$('.card_'+data.track_id).removeClass("card_in");
-        setTimeout(function(){ $$('.card_'+data.track_id).addClass("card_out");},500);
-        setTimeout(function(){ $$('.card_'+data.track_id).remove();},1500);
-      }
-      });
-    
-    
-    
-
-
-
-
-
-
-
-      request.get("reasons",{"Authorization":"JWT "+auth.token},null, function(data){
+  app.dialog.preloader();
+ 
+request.get("reasons",{"Authorization":"JWT "+auth.token},null, function(data){
  
 
                 resons=data.results;
@@ -537,7 +386,8 @@ self.dynamicPopup = app.popup.create({
    
   });
   $$('#reason-list').html(all_resons);
-        
+      app.dialog.close();
+    
  });
 
 
@@ -577,12 +427,18 @@ $$('.history_btn').on('click', function () {
   var dynamicPopup ;
   app.dialog.preloader();
 request.get("visitor_entry/"+id,{"Authorization":"JWT "+auth.token},null,function(data){
-
+console.log(data);
 var status_txt='';
 var txt_color='';
 var button_part='';
 var tittle='';
 var check_out_img='';
+var call_btn='';
+var contact='0';
+if(data.phone_number!=null && data.phone_number!='' ){
+  contact=data.phone_number;
+}
+
 if(data.status=="PEX"){
   tittle="Check-out";
   var check_out_img='<div class="swiper-slide img-front camera_btn" x="XF" id="EF"><img src="'+data.exit_car_plate_image+'" class="custom-img" ></div>';
@@ -596,7 +452,7 @@ if(data.status=="PEN"){
   
   button_part=    '<button class="col button button-fill button-round update-btn" style="color:white;background-color:#FB6C5E;margin-right:10px" action="back" id="'+data.tracker_id+'">BACK</button>';
                    
-     
+  call_btn = "<br><button class=' button button-fill button-round call_resident' style='color:white;background-color:#89DAFF;width:75px !important' value='"+contact+"'>Call</button>";
         
 }else if(data.status=="AIR"){
   status_txt="Approved";
@@ -605,7 +461,7 @@ if(data.status=="PEN"){
   button_part=    '<button class="col button button-outline button-round update-btn" style="color:red;border-color:red;margin-right:10px" action="reject" id="'+data.tracker_id+'">REJECT</button>'+
                     '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="approved" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
       
-
+   
 }else if(data.status=="RIR"){
   status_txt="Rejected";
   txt_color ="red";
@@ -613,7 +469,7 @@ if(data.status=="PEN"){
   
 button_part=    '<button class="col button button-outline button-round update-btn" style="color:	#FB6C5E;border-color:#FB6C5E;margin-right:10px" action="register" id="'+data.tracker_id+'">RE-REGISTER</button>'+
                 '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="reject" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
-      
+ call_btn = "<br><button class=' button button-fill button-round call_resident' style='color:white;background-color:#89DAFF;width:75px !important' value='"+contact+"'>Call</button>";
 }else if(data.status=="PEX"){
   status_txt="Pending Exit";
   txt_color ="yellow";
@@ -715,7 +571,7 @@ if(data.status=="PEX"){
                     "<div class='col-60'><label style='float:right;text-align: right;'>"+check_in+"</label></div>"+
                   '</div>'+
                   show_check_out+
-
+                  call_btn+
               '</div>'+
 
 
@@ -757,6 +613,40 @@ $$(".boom-gate-btn").on('click', function () {
 
 // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+
+
+$$(document).on('click',".call_resident", function () {
+  var contact = $$(this).attr('value');
+  if(contact!="0" && contact!=""){
+    if (app.device.android) {
+      console.log('android calling');
+      document.location.href = 'tel:'+contact;
+  
+    
+    }else{
+   
+      var toastCenter = app.toast.create({
+      text: "Cannot make phone call on Web",
+      position: 'center',
+      closeTimeout: 2000,
+    });
+  
+    toastCenter.open();
+  
+     
+    }
+  
+  }else{
+    var toastCenter = app.toast.create({
+      text: "Resident's phone number not found",
+      position: 'center',
+      closeTimeout: 2000,
+    });
+  
+    toastCenter.open();
+  }
+});
 
         },pageBeforeOut:function(){
           var sck = socket.connect(CONFIG.SOCKET);

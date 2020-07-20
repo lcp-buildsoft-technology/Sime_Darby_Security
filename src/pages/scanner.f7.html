@@ -3,7 +3,7 @@
             <div class="navbar">
                     <div class="navbar-inner">
                       <div class="left">
-                        <a href="#" class="link back" data-panel="left">
+                        <a href="#" class="cancel cancel_margin" data-panel="left">
                           <i class="icon icon-back"></i>
                           <i class="if-not-md">Back</i>
                         </a>
@@ -54,6 +54,8 @@
                 
                 document.getElementById("text_content").style.display = "none";
 
+
+
                 QRScanner.prepare(onDone); // show the prompt
 
             }else{
@@ -75,28 +77,10 @@
                 if (status.authorized) {
                     QRScanner.show();
 
-                    window.setInterval(function(){
+                   // window.setInterval(function(){
                         console.log("scanning");
-                    QRScanner.scan(function(err,text){
-                        if(err){
-                            
-                        }else{
-                            console.log("scann");
-                            console.log(text);
-                          
-                          request.post("visitors/check_qr",{"Authorization":"JWT "+auth.token},{ qr_uuid:text},function (data){
-                           
-                            app.form.storeFormData("scan_entry_data", data);
-                       
-                            router.back('/scan_entry/', {force:true});
-                            
-                          },function (){
-                            app.dialog.alert("Not Found!","");
-                          });  
-            
-                        }
-                    });
-                },500);
+                    QRScanner.scan(scan);
+               // },500);
 
                 } else if (status.denied) {
         
@@ -120,10 +104,35 @@
             }
 
 
+            function scan(err, text){
+       
+              if(err){
+                            
+                          }else{
+                              console.log("scan");
+                              console.log(text);
+                            
+                            request.post("visitors/check_qr",{"Authorization":"JWT "+auth.token},{ qr_uuid:text, area_id:auth.user.area},function (data){
+                             
+                              app.form.storeFormData("scan_entry_data", data);
+                         
+                        
+                              QRScanner.destroy(function(status) {
+                                console.log(status);
+                              });
+                              app.views.main.router.back("/scan_entry/", { force: true });
+                              
+                            },function (){
+                              app.dialog.alert("Invalid QR Code!","");
+                              setTimeout(  QRScanner.scan(scan), 1500);
+                              });  
+              
+                          }
+                  }
+
        
             $$(".page-content #scanner").attr("autocomplete", "off");
                 var typingTimer;                //timer identifier
-		        var doneTypingInterval = 500;  //time in ms, 5 second for example
                 $$('.page-content').on('keyup',"#scanner", function () {
                 clearTimeout(typingTimer);
                 typingTimer = setTimeout(doneTyping, doneTypingInterval);

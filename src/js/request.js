@@ -13,7 +13,7 @@ function post(url,header,data, success, error) {
         headers :header,
         contentType: 'application/x-www-form-urlencoded',
         data: data,
-        crossDomain: true,
+        
         dataType: 'json',
         success: function(data){
             success(data);

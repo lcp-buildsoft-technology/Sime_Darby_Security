@@ -9,20 +9,41 @@ import IMPROMTU from '../pages/Impromtu.f7.html';
 import VISITOR from '../pages/Visitor.f7.html';
 import CONTACT from '../pages/Contact.f7.html';
 import HISTORY from '../pages/History.f7.html';
+import GPS from '../pages/gps.f7.html';
+import TOUR from '../pages/Tour.f7.html';
+import TOUR_MAP from '../pages/Tour_map.f7.html';
+import TOUR_OPTION from '../pages/Tour_option.f7.html';
+import TOUR_LOG from '../pages/Tour_log_details.f7.html';
 
 import SCAN_ENTRY from '../pages/scanned_entry.f7.html';
-import REENTRY from '../pages/reentry.f7.html';
 
-var routes = [
+var routes = [  
   
   { name: "login",
     path: '/login/',
     component: LoginPage,
   },
-  { name: "reentry",
-    path: '/reentry/',
-    component: REENTRY,
+  { name: "gps",
+    path: '/gps/',
+    component: GPS,
   },
+  { name: "tour",
+  path: '/tour/',
+  component: TOUR,
+  }, 
+  { name: "tour_log",
+  path: '/tour_log/',
+  component: TOUR_LOG,
+  }, 
+  { name: "tour_option",
+  path: '/tour_option/',
+  component: TOUR_OPTION,
+  }, 
+  { name: "tour_map",
+  path: '/tour_map/',
+  component: TOUR_MAP,
+  },
+
   { name: "impromtu",
   path: '/impromtu/',
   component: IMPROMTU,

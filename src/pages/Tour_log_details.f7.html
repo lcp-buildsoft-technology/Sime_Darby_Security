@@ -1,0 +1,272 @@
+<template>
+  <div class="page" id="tour_log_details" data-name="tour_log_details">
+  
+    <div class="toolbar toolbar-bottom">
+      <div class="toolbar-inner" style="padding:5px 10px;">
+        <button
+          class="col button button-outline button-round"
+          style="color:grey;border-color:grey;margin-right:10px"
+          id="home_btn"
+        >
+          Home
+        </button>
+        <button
+          class="col button button-outline button-round"
+          style="color:#FB6C5E;border-color:#FB6C5E;margin-left:10px"
+          id="tour_btn"
+        >
+          Tour
+        </button>
+      </div>
+    </div>
+
+    <div class="page-content">
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="left">
+          <a class="link back">
+            <i class="material-icons"> arrow_back</i>
+            <span class="if-not-md">Back</span>
+          </a>
+        </div>
+        <div class="title">Log Details</div>
+      </div>
+    </div>
+
+ 
+    
+      <div class="block">
+        <div id="map" style="width:100%;height:300px"></div>
+        <div
+          class="main_font"
+          style="color:#FB6C5E;padding:0 5% ;font-size:2vh;margin-top:20px;"
+        >
+          <div class="row">
+            <div class="col-25"><label>Security</label></div>
+            <div class="col-75">
+              <label style="float:right;" id="security_name"> - </label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-40"><label>Scan Time</label></div>
+            <div class="col-60">
+              <label style="float:right;" id="scan_time"> - </label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-30"><label>Scanned QR</label></div>
+            <div class="col-70">
+              <label style="float:right;text-align: right;" id="qr"> - </label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-30"><label>Longitude</label></div>
+            <div class="col-70">
+              <label style="float:right;text-align: right;" id="longitude">
+                -
+              </label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-30"><label>Latitude</label></div>
+            <div class="col-70">
+              <label style="float:right;text-align: right;" id="latitude">
+                -
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+    </div>
+  </div>
+ 
+</template>
+
+<script>
+  import request from "../js/request.js";
+  export default {
+    on: {
+      pageAfterIn: function() {
+        var app = this.$app;
+        var router = this.$router;
+        var $$ = this.$$;
+        var auth = app.form.getFormData("auth");
+        var tour_log = app.form.getFormData("tour_log");
+        console.log(auth);
+        console.log(tour_log);
+        var latitude = tour_log.latitude;
+        var longitude = tour_log.longitude;
+        document.getElementById("security_name").innerHTML =
+          tour_log.security_guard_name;
+        document.getElementById("scan_time").innerHTML = tour_log.timestamp;
+        document.getElementById("qr").innerHTML = tour_log.qr_uuid;
+        document.getElementById("longitude").innerHTML = longitude;
+        document.getElementById("latitude").innerHTML = latitude;
+
+
+
+        plugin.google.maps.environment.setEnv({
+      'API_KEY_FOR_BROWSER_RELEASE': 'AIzaSyC7XCS4gWqpqaJjVcT6F-Eal8DZMfrJggc',
+      'API_KEY_FOR_BROWSER_DEBUG': 'AIzaSyC7XCS4gWqpqaJjVcT6F-Eal8DZMfrJggc'
+    });
+
+
+        var div = document.getElementById("map");
+        var map = plugin.google.maps.Map.getMap(div);
+        var marker = map.addMarker({
+          position: {
+            lat: latitude,
+            lng: longitude
+          },
+          animation: plugin.google.maps.Animation.BOUNCE
+        });
+
+        map.moveCamera({
+          target: {
+            lat: latitude,
+            lng: longitude
+          },
+          zoom: 17,
+          tilt: 30,
+          bearing: 45
+        });
+      },
+      pageInit: function() {
+        var app = this.$app;
+        var router = this.$router;
+        var $$ = this.$$;
+        var auth = app.form.getFormData("auth");
+        var tour_log = app.form.getFormData("tour_log");
+
+        if (!app.device.android) {
+          document.getElementById("tour_btn").remove();
+        }
+
+        $$("#home_btn").on("click", function() {
+          router.back("/main/", { force: true });
+        });
+
+        var statuses = [];
+
+        $$("#tour_btn").on("click", function() {
+          var camera_granted = false;
+          var location_granted = false;
+          cordova.plugins.diagnostic.isCameraAuthorized({
+            successCallback: function(authorized) {
+              if (authorized) {
+                // camera_granted=true;
+
+                cordova.plugins.diagnostic.isLocationAuthorized(
+                  function(authorized) {
+                    if (authorized) {
+                      // location_granted=true;
+
+                      router.back("/tour/", { force: true });
+                    } else {
+                      cordova.plugins.diagnostic.requestLocationAuthorization(
+                        function(status) {
+                          switch (status) {
+                            case cordova.plugins.diagnostic.permissionStatus
+                              .NOT_REQUESTED:
+                              alert("Location Permission not requested");
+                              break;
+                            case cordova.plugins.diagnostic.permissionStatus
+                              .GRANTED:
+                              router.navigate({ name: "tour" });
+                              break;
+                            case cordova.plugins.diagnostic.permissionStatus
+                              .DENIED_ONCE:
+                              alert("Location Permission denied");
+                              break;
+                            case cordova.plugins.diagnostic.permissionStatus
+                              .DENIED_ALWAYS:
+                              alert(
+                                "Location Permission permanently denied, please manually enable location permission in app setting!"
+                              );
+                              break;
+                          }
+                        },
+                        function(error) {
+                          alert(error);
+                        }
+                      );
+                    }
+                  },
+                  function(error) {
+                    alert("The following error occurred: " + error);
+                  }
+                );
+              } else {
+                cordova.plugins.diagnostic.requestCameraAuthorization({
+                  successCallback: function(status) {
+                    switch (status) {
+                      case cordova.plugins.diagnostic.permissionStatus
+                        .NOT_REQUESTED:
+                        alert("Camera Permission not requested");
+                        break;
+                      case cordova.plugins.diagnostic.permissionStatus.GRANTED:
+                        cordova.plugins.diagnostic.requestLocationAuthorization(
+                          function(status) {
+                            switch (status) {
+                              case cordova.plugins.diagnostic.permissionStatus
+                                .NOT_REQUESTED:
+                                alert("Location Permission not requested");
+                                break;
+                              case cordova.plugins.diagnostic.permissionStatus
+                                .GRANTED:
+                                router.navigate({ name: "tour" });
+                                break;
+                              case cordova.plugins.diagnostic.permissionStatus
+                                .DENIED_ONCE:
+                                alert("Location Permission denied");
+                                break;
+                              case cordova.plugins.diagnostic.permissionStatus
+                                .DENIED_ALWAYS:
+                                alert(
+                                  "Location Permission permanently denied, please manually enable location permission in app setting!"
+                                );
+                                break;
+                            }
+                          },
+                          function(error) {
+                            alert(error);
+                          }
+                        );
+                        break;
+                      case cordova.plugins.diagnostic.permissionStatus
+                        .DENIED_ONCE:
+                        alert("Camera Permission denied");
+                        break;
+                      case cordova.plugins.diagnostic.permissionStatus
+                        .DENIED_ALWAYS:
+                        alert(
+                          "Camera Permission permanently denied, please manually enable location permission in app setting!"
+                        );
+                        break;
+                    }
+                  },
+                  errorCallback: function(error) {
+                    alret(error);
+                  },
+                  externalStorage: true
+                });
+              }
+            },
+            errorCallback: function(error) {
+              alert("The following error occurred: " + error);
+            },
+            externalStorage: true
+          });
+        });
+      },
+      pageBeforeOut: function() {
+        var app = this.$app;
+        app.form.removeFormData("tour_log");
+        console.log("data cleared!");
+      }
+    }
+  };
+</script>

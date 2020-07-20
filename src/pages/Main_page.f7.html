@@ -32,7 +32,7 @@
               <div class="main_bot" id="button-part">
               <div class="row" >
                     <!-- Each "cell" has col-[width in percents] class -->
-                    <div class="col-33" style='text-align: center;'>
+                    <div class="col-25" style='text-align: center;'>
                         
                             <div class="custom-button visitor_btn">
                                 <i class="material-icons custom-icon"> directions_car</i>
@@ -44,7 +44,7 @@
                     </div>
 
 
-                    <div class="col-33"  style='text-align: center;'> 
+                    <div class="col-25"  style='text-align: center;'> 
                         
                             <div class="custom-button entry_btn">
                                 <i class="material-icons custom-icon"> transfer_within_a_station</i>
@@ -56,7 +56,7 @@
                     </div>     
                         
                         
-                    <div class="col-33" id="scan_module" style='text-align: center;'>
+                    <div class="col-25" id="scan_module" style='text-align: center;'>
                            
                                 <div class="custom-button scan_btn">
                                     <i class="material-icons custom-icon"> center_focus_strong</i>
@@ -65,6 +65,19 @@
                                     <h3>SCANNER</h3>
                                 </div>
                            
+                    </div>
+
+
+
+                    <div class="col-25" id="tour_module" style='text-align: center;'>
+             
+                      <div class="custom-button tour_btn">
+                          <i class="material-icons custom-icon"> security</i>
+                      </div>
+                      <div class="custom-label">
+                          <h3>TOUR</h3>
+                      </div>
+                   
                     </div>
                
                 </div>
@@ -105,8 +118,7 @@ pageInit:function(){
   var $$=this.$$;
      var app=this.$app;
      var router=this.$router;
-
-  
+     var auth = app.form.getFormData("auth");
      if (app.device.desktop) {
     console.log('It is desktop device');
  
@@ -159,46 +171,29 @@ console.log("entry");
 
  // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+ 
+
+ $$('.tour_btn').on('click', function () {
+  if (app.device.desktop) {
+    router.navigate({name:"tour_map"});
+  }else{
+    router.navigate({name:"tour_option"});
+  }
+  
+      });
 
 
+ 
 
 
 //*entry function////////////////////////////////////////////////////////////////////////////////////////////////
 $$('.scan_btn').on('click', function () {
 
-  // var QRScanner = window.QRScanner;
-
+ 
   
   router.navigate({name:"scanner"});
 
   
-// function onDone(err, status){
-//   if (err) {
-//    // here we can handle errors and clean up any loose ends.
-//    console.error(err);
-//   }
-//   if (status.authorized) {
-//     // W00t, you have camera access and the scanner is initialized.
-//     // QRscanner.show() should feel very fast.
-//     console.log("scanner");
-
-//   router.navigate({name:"scanner"});
-//   } else if (status.denied) {
-//    // The video preview will remain black, and scanning is disabled. We can
-//    // try to ask the user to change their mind, but we'll have to send them
-//    // to their device settings with `QRScanner.openSettings()`.
-//    app.dialog.alert('Permission Denied, Please give permission to use scanner function');
-
-//   } else {
-//     // we didn't get permission, but we didn't get permanently denied. (On
-//     // Android, a denial isn't permanent unless the user checks the "Don't
-//     // ask again" box.) We can ask again at the next relevant opportunity.
-//     app.dialog.alert('Please give permission to use scanner function');
-//   }
-// }
-
-
-// QRScanner.prepare(onDone); // show the prompt
       });
 
  // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////

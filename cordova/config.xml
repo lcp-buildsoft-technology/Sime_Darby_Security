@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="io.framework7.simedarbysecurity" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.simedarby.security" version="1.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Sime Darby Security</name>
     <description>
         A sample Apache Cordova application that responds to the deviceready event.
@@ -7,8 +7,10 @@
     <author email="dev@cordova.apache.org" href="http://cordova.io">
         Apache Cordova Team
     </author>
+    
     <content src="index.html" />
     <plugin name="cordova-plugin-whitelist" spec="1" />
+    <access origin="content:///*" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -29,6 +31,7 @@
     <platform name="android">
       <preference name="StatusBarOverlaysWebView" value="false" />
       <preference name="android-minSdkVersion" value="21" />
+      <preference name="android-targetSdkVersion" value="28" />      
       <preference name="SplashMaintainAspectRatio" value="true" />
       <splash density="land-hdpi" src="res/screen/android/drawable-hdpi/screen.png" />
       <splash density="land-mdpi" src="res/screen/android/drawable-mdpi/screen.png" />
@@ -46,6 +49,10 @@
       <icon density="xhdpi" src="res/icon/android/mipmap-xhdpi/ic_launcher.png" />
       <icon density="xxhdpi" src="res/icon/android/mipmap-xxhdpi/ic_launcher.png" />
       <icon density="xxxhdpi" src="res/icon/android/mipmap-xxxhdpi/ic_launcher.png" />
+      <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
+            <application android:usesCleartextTraffic="true" />
+        </edit-config>
+
     </platform>
 
 
@@ -78,6 +85,13 @@
     </platform>
 
 
+    <platform name="electron">
+        <preference name="AutoHideSplashScreen" value="true" />
+        <preference name="SplashScreenDelay" value="0" />
+        <preference name="ShowSplashScreenSpinner" value="false" />
+
+    </platform>
+
     <preference name="UIWebViewBounce" value="false" />
     <preference name="DisallowOverscroll" value="true" />
     <preference name="BackupWebStorage" value="local" />
@@ -88,4 +102,6 @@
     <preference name="Allow3DTouchLinkPreview" value="false" />
     <preference name="CordovaWebViewEngine" value="CDVWKWebViewEngine" />
     <preference name="AllowInlineMediaPlayback" value="true" />
+    <preference name="GOOGLE_MAPS_ANDROID_API_KEY" value="AIzaSyC7XCS4gWqpqaJjVcT6F-Eal8DZMfrJggc" />
+    <preference name="GOOGLE_MAPS_IOS_API_KEY" value="AIzaSyC7XCS4gWqpqaJjVcT6F-Eal8DZMfrJggc" />
 </widget>

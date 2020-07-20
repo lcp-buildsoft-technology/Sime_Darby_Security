@@ -128,12 +128,12 @@ next_page=data.next;
 
 }
 
-for(var i=0;i<data.results.length;i++){
-console.log(data.results[i]);
+for(var i=0;i<data.length;i++){
+console.log(data[i]);
 
 
-var address_data=data.results[i].street;
-var user_data=data.results[i].resident;
+var address_data=data[i].street;
+var user_data=data[i].resident;
 
 
 if(user_data.length!=0){
@@ -148,15 +148,17 @@ console.log(phone_no);
 
 
 items.push({
-     title:"No. "+data.results[i].name+", "+address_data.name+", "+ address_data.area.name,
+     title:"No. "+data[i].name+", "+address_data.name+", "+ address_data.area.name,
      subtitle: user_data[0].resident.user.first_name+" "+user_data[0].resident.user.last_name,
-    value:phone_no
+    value:phone_no,
+    house_id:data[i].id
   });
 
 }else{
   items.push({
-    title: "No. "+data.results[i].name+", "+address_data.name+", "+ address_data.area.name,
-     subtitle: "No Ownner"
+    title: "No. "+data[i].name+", "+address_data.name+", "+ address_data.area.name,
+     subtitle: "No Ownner",
+     house_id:data[i].id
   });
 }
 }
@@ -198,7 +200,7 @@ var itemsPerLoad = 5;
   },
   // *List item Template7 template
   itemTemplate:
-    '<li value="{{value}}" class="phone_call">' +
+    '<li value="{{value}}" class="phone_call" house_id="{{house_id}}">' +
       '<a href="#" class="item-link item-content">' +
         '<div class="location_icon"></div>'+
         '<div class="item-inner">' +
@@ -278,12 +280,12 @@ next_page=data.next;
 
 
 
-for(var i=0;i<data.results.length;i++){
-console.log(data.results[i]);
+for(var i=0;i<data.length;i++){
+console.log(data[i]);
 
 
-var address_data=data.results[i].street;
-var user_data=data.results[i].resident;
+var address_data=data[i].street;
+var user_data=data[i].resident;
 
 
 if(user_data.length!=0){
@@ -298,14 +300,14 @@ console.log(phone_no);
 
 
 new_items.push({
-  title: "Lot "+data.results[i].name+", "+address_data.name+", "+ address_data.area.name,
+  title: "Lot "+data[i].name+", "+address_data.name+", "+ address_data.area.name,
      subtitle: user_data[0].resident.user.first_name+" "+user_data[0].resident.user.last_name,
     value:phone_no
   });
 
 }else{
   new_items.push({
-    title: "Lot "+data.results[i].name+", "+address_data.name+", "+ address_data.area.name,
+    title: "Lot "+data[i].name+", "+address_data.name+", "+ address_data.area.name,
      subtitle: "No Ownner"
   });
 }
@@ -399,8 +401,6 @@ if(value==""||value=="No Insert Phone Num"){
 });
 
 // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
         }

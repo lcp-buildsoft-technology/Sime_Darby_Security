@@ -1,156 +1,300 @@
 <template>
-    
-    <!-- Login Screen -->
-   
-          <div class="page login" id="login" data-name="login">
-            <div class="page-content login-screen-content login_bg"  >
-              <div class="login-screen-title"> <img src="./static/logo.png" class="img_css"></div>
-              <form class="list" id="login-form">
-                <ul>
-                  <li class="item-content item-input">
-                    <div class="item-inner">
-                      <div class="item-title item-label white_label">Username</div>
-                      <div class="item-input-wrap">
-                        <input type="text" name="username" placeholder="Your User ID" required validate>
-                      </div>
-                    </div>
-                  </li>
-                  <li class="item-content item-input">
-                    <div class="item-inner">
-                      <div class="item-title item-label white_label">Password</div>
-                      <div class="item-input-wrap">
-                        <input type="password" name="password" placeholder="Your password" required validate>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-             
-            </form>
+  <!-- Login Screen -->
 
-              <div class="list">
-                <ul>
-                  <li> 
-                        <center>
-                      <a href="#" class="button button-outline button-round  login-button">Login</a>
-                    </center>
-                  </li>
-                </ul>
+  <div class="page login" id="login" data-name="login">
+    <div class="page-content login-screen-content login_bg">
+      <div class="login-screen-title">
+        <img src="./static/logo.png" class="img_css" />
+      </div>
+      <form class="list" id="login-form">
+        <ul>
+          <li class="item-content item-input">
+            <div class="item-inner">
+              <div class="item-title item-label white_label">Username</div>
+              <div class="item-input-wrap">
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Your User ID"
+                  required
+                  validate
+                />
               </div>
             </div>
+          </li>
+          <li class="item-content item-input">
+            <div class="item-inner">
+              <div class="item-title item-label white_label">Password</div>
+              <div class="item-input-wrap">
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Your password"
+                  required
+                  validate
+                />
+              </div>
+            </div>
+          </li>
+        </ul>
+      </form>
 
-
-         
-
-
-
-
-
-
-
-          </div>
-
-
-
-
-      
+      <div class="list">
+        <ul>
+          <li>
+            <center>
+              <button class="button button-outline button-round  login-button">
+                Login
+              </button>
+            </center>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </template>
 <script>
-import request from '../js/request.js';
-export default {
+  import request from "../js/request.js";
+  import socket from "socket.io-client/dist/socket.io.js";
+  import CONFIG from "../js/config.js";
+  export default {
+    on: {
+      pageInit: function() {
+        var $$ = this.$$;
+        var app = this.$app;
+        var router = this.$router;
 
-on:{
-pageInit:function(){
-  var $$=this.$$;
-     var app=this.$app;
-     var router=this.$router;
+        // *Login function /////////////////////////////////////////////////////////////////////////////////////////////////
+        $$(".login-button").on("click", function() {
+          var formData = app.form.convertToData("#login-form");
 
+          //*show loading animation
+          app.preloader.show("#FC6F5B");
 
+          request.post(
+            "security_login",
+            null,
+            formData,
+            function(data) {
+              app.preloader.hide();
+              console.log(data);
+              var toastCenter = app.toast.create({
+                text: "Login Successfull",
+                position: "center",
+                closeTimeout: 2000
+              });
 
-// *Login function /////////////////////////////////////////////////////////////////////////////////////////////////
-$$(".login-button").on('click', function () {
+              toastCenter.open();
 
-  var formData = app.form.convertToData('#login-form');
-  
-   //*show loading animation
-   app.preloader.show("#FC6F5B");
+              app.form.storeFormData("auth", data);
 
- 
+              var auth = app.form.getFormData("auth");
+              //socket
+              var sck = socket.connect(CONFIG.SOCKET);
 
+              console.log(auth);
+              sck.emit("user", {
+                id: auth.user.id,
+                area: auth.user.area,
+                role: "security"
+              });
 
+              //socket and prepend to list
 
- request.post("security_login",null,formData, function(data){
-  app.preloader.hide();
-console.log(data);
-var toastCenter = app.toast.create({
-    text: "Login Successfull",
-    position: 'center',
-    closeTimeout: 2000,
-  });
+              sck.on("visitor_arrive", function(data) {
+                // console.log(data.status);
+                // alert(data.status);
+                if (
+                  $$(app.view.current.router.currentPageEl).data("name") ==
+                  "visitor"
+                ) {
+                  request.get(
+                    "visitor_entry/" + data.track_id,
+                    { Authorization: "JWT " + auth.token },
+                    null,
+                    function(data) {
+                      console.log(data);
 
-  toastCenter.open();
+                      if (data.status != "PEX") {
+                        var new_entry_item = "";
+                        var color = "";
+                        var status = "";
 
-  app.form.storeFormData("auth", data);
-  
+                        if (data.status == "AIR") {
+                          color = "forestgreen";
+                          status = "Approved";
+                        } else if (data.status == "RIR") {
+                          color = "red";
+                          status = "Rejected";
+                        } else if (data.status == "PEN") {
+                          color = "#FB6C5E";
+                          status = "Pending";
+                        }
 
-router.navigate({name:"main"});
- }
+                        var status_id = "status_" + data.tracker_id;
+                        var card_id = "card_" + data.tracker_id;
 
+                        var address = "";
+                        if (data.entry_type != "I") {
+                          address = data.lot.name + "," + data.lot.street.name;
+                        }
 
- ,function(xhr,status){
-  app.preloader.hide();
-console.log(status);
-//    //*toast alert
+                        new_entry_item =
+                          "<div class='card card_in  card_width " +
+                          card_id +
+                          " ' >" +
+                          "<div class='card-content card-click  content_heigt' visitor_id='" +
+                          data.tracker_id +
+                          "'>" +
+                          '<div class="row no-gap">' +
+                          '<div class="col-20 card-left-content">' +
+                          '<div class="card-left-content_inner">' +
+                          '<i class="material-icons">chevron_right</i>' +
+                          "<p>CEHCK IN</p>" +
+                          " </div>" +
+                          "</div>" +
+                          '<div class="col-70 card-center-content">' +
+                          '<div class="card-center-content_inner">' +
+                          "<div>" +
+                          address +
+                          "</div>" +
+                          '<div style="width: 100%;">' +
+                          '<div style="display: inline-block;">' +
+                          data.visitor_car_plate +
+                          "</div>" +
+                          '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;">Status: <b class="' +
+                          status_id +
+                          '" style="color: ' +
+                          color +
+                          '"> ' +
+                          status +
+                          "</b></div>" +
+                          " </div>" +
+                          "</div>" +
+                          "</div>" +
+                          '<div class="col-10 card-right-content">' +
+                          '<div class="card-right-content_inner">' +
+                          ' <i class="material-icons">more_vert</i>' +
+                          " </div>" +
+                          " </div>" +
+                          "</div>" +
+                          "</div>" +
+                          " </div>";
 
-if(status==400){
-var toastCenter = app.toast.create({
-    text: "Invalid UserID or Password!",
-    position: 'center',
-    closeTimeout: 2000,
-  });
+                        if (data.status == "AIR") {
+                          setTimeout(function() {
+                            $$(".approved_entry_list").prepend(new_entry_item);
+                          }, 2000);
+                        } else if (data.status == "RIR") {
+                          setTimeout(function() {
+                            $$(".rejected_entry_list").prepend(new_entry_item);
+                          }, 2000);
+                        } else if (data.status == "PEN") {
+                          setTimeout(function() {
+                            $$(".pending_entry_list").prepend(new_entry_item);
+                          }, 2000);
+                        }
+                      } else {
+                        var card_id = "card_" + data.tracker_id;
 
-  toastCenter.open();
+                        var address = "";
+                        if (data.entry_type != "I") {
+                          address = data.lot.name + "," + data.lot.street.name;
+                        } else {
+                          address = "Impromtu";
+                        }
 
+                        var new_exit_item =
+                          '<div class="card  card_in card_width ' +
+                          card_id +
+                          '"  >' +
+                          "<div class='card-content card-click  content_heigt' visitor_id='" +
+                          data.tracker_id +
+                          "'>" +
+                          ' <div class="row no-gap">' +
+                          '<div class="col-20 card-left-content">' +
+                          '<div class="card-left-content_inner">' +
+                          ' <i class="material-icons">chevron_left</i>' +
+                          "<p>CEHCK OUT</p>" +
+                          "</div>" +
+                          "</div>" +
+                          '<div class="col-70 card-center-content">' +
+                          '<div class="card-center-content_inner">' +
+                          " <div>" +
+                          address +
+                          "</div>" +
+                          " <div>" +
+                          data.visitor_car_plate +
+                          "</div>" +
+                          "</div>" +
+                          "</div>" +
+                          '<div class="col-10 card-right-content">' +
+                          '<div class="card-right-content_inner">' +
+                          '<i class="material-icons">more_vert</i>' +
+                          "</div>" +
+                          " </div>" +
+                          "</div>" +
+                          "</div>" +
+                          "</div>";
 
- }else{
-  var toastCenter = app.toast.create({
-    text: "Something error when login!",
-    position: 'center',
-    closeTimeout: 2000,
-  });
+                        setTimeout(function() {
+                          $$("#visitor_scroll_view_out").prepend(new_exit_item);
+                        }, 2000);
+                      }
+                    }
+                  );
+                }
+              });
 
-  toastCenter.open();
- }
-});
+              //remove card item
+              sck.on("visitor_remove", function(data) {
+                if (
+                  $$(app.view.current.router.currentPageEl).data("name") ==
+                  "visitor"
+                ) {
+                  $$(".card_" + data.track_id).removeClass("card_in");
+                  setTimeout(function() {
+                    $$(".card_" + data.track_id).addClass("card_out");
+                  }, 500);
+                  setTimeout(function() {
+                    $$(".card_" + data.track_id).remove();
+                  }, 1500);
+                }
+              });
 
-});
+              router.navigate({ name: "main" });
+            },
 
-// end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            function(xhr, status) {
+              app.preloader.hide();
+              console.log(xhr);
+              console.log(status);
+              //    //*toast alert
 
+              if (status == 400) {
+                var toastCenter = app.toast.create({
+                  text: "Invalid UserID or Password!",
+                  position: "center",
+                  closeTimeout: 2000
+                });
 
+                toastCenter.open();
+              } else {
+                alert(xhr.status);
+                var toastCenter = app.toast.create({
+                  text: "Something error when login!",
+                  position: "center",
+                  closeTimeout: 2000
+                });
 
+                toastCenter.open();
+              }
+            }
+          );
+        });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-}
- 
-
-        
+        // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      }
     }
-    </script>
+  };
+</script>
