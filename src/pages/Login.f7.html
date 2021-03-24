@@ -63,7 +63,7 @@
         var $$ = this.$$;
         var app = this.$app;
         var router = this.$router;
-
+    
         // *Login function /////////////////////////////////////////////////////////////////////////////////////////////////
         $$(".login-button").on("click", function() {
           var formData = app.form.convertToData("#login-form");
@@ -238,7 +238,7 @@
                           "</div>";
 
                         setTimeout(function() {
-                          $$("#visitor_scroll_view_out").prepend(new_exit_item);
+                          $$(".visitor_scroll_view_out").prepend(new_exit_item);
                         }, 2000);
                       }
                     }

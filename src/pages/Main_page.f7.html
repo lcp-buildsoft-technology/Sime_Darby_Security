@@ -32,7 +32,7 @@
               <div class="main_bot" id="button-part">
               <div class="row" >
                     <!-- Each "cell" has col-[width in percents] class -->
-                    <div class="col-25" style='text-align: center;'>
+                    <div class="col-20" style='text-align: center;'>
                         
                             <div class="custom-button visitor_btn">
                                 <i class="material-icons custom-icon"> directions_car</i>
@@ -44,7 +44,7 @@
                     </div>
 
 
-                    <div class="col-25"  style='text-align: center;'> 
+                    <div class="col-20"  style='text-align: center;'> 
                         
                             <div class="custom-button entry_btn">
                                 <i class="material-icons custom-icon"> transfer_within_a_station</i>
@@ -56,7 +56,7 @@
                     </div>     
                         
                         
-                    <div class="col-25" id="scan_module" style='text-align: center;'>
+                    <div class="col-20" id="scan_module" style='text-align: center;'>
                            
                                 <div class="custom-button scan_btn">
                                     <i class="material-icons custom-icon"> center_focus_strong</i>
@@ -69,7 +69,7 @@
 
 
 
-                    <div class="col-25" id="tour_module" style='text-align: center;'>
+                    <div class="col-20" id="tour_module" style='text-align: center;'>
              
                       <div class="custom-button tour_btn">
                           <i class="material-icons custom-icon"> security</i>
@@ -79,7 +79,21 @@
                       </div>
                    
                     </div>
-               
+
+
+                    <!--  <a href="https://lcpproject.com/IVMS_meet/security.php"  class="col-20 link external"  target="_blank">
+                        
+
+                        <div style='text-align: center;'>
+                          <div class="custom-button ">
+                              <i class="material-icons custom-icon"> camera</i>
+                          </div>
+                          <div class="custom-label">
+                              <h3>intercom</h3>
+                          </div>
+                        </div>
+                      </a>
+                        -->
                 </div>
 
            
@@ -104,6 +118,8 @@
 </template>
 <script>
 import request from '../js/request.js';
+import Framework7 from 'framework7/framework7.esm.bundle.js';
+
 export default {
 
     data:function(){

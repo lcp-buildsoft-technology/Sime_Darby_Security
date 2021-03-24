@@ -303,7 +303,7 @@ if (auth) {
               "<div class='card card_in  card_width " +
               card_id +
               " ' >" +
-              "<div class='card-content card-click  content_heigt' visitor_id='" +
+              "<div class='card-content card-click entry_force  content_heigt' visitor_id='" +
               data.tracker_id +
               "'>" +
               '<div class="row no-gap">' +
@@ -398,7 +398,7 @@ if (auth) {
               "</div>";
 
             setTimeout(function() {
-              $$("#visitor_scroll_view_out").prepend(new_exit_item);
+              $$(".visitor_scroll_view_out").prepend(new_exit_item);
             }, 2000);
           }
         }
@@ -477,11 +477,15 @@ $$(document).on("click", ".cancel", function() {
   return false;
 });
 
+
+
+
 $$("#app").on("click", ".update-btn", function() {
   var auth = app.form.getFormData("auth");
   console.log($$(this));
   var action = $$(this).attr("action");
   var entry_id = $$(this).attr("id");
+  var force_open =  $$(this).attr("force_open");
   console.log(action);
   console.log(entry_id);
   var up_status = "";
@@ -512,7 +516,9 @@ $$("#app").on("click", ".update-btn", function() {
       "visitor_entry/" + entry_id,
       { Authorization: "JWT " + auth.token },
       {
-        status: up_status
+        entry_id :entry_id,
+        status: up_status,
+        force_open: force_open,
       },
       function(data) {
         app.dialog.close();

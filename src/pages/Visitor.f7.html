@@ -16,21 +16,52 @@
                   <div class="right" style="margin-right: 15px;margin-top: 6px;"><a href="#" class="contact_btn"><i class="material-icons">contact_phone</i></a></div>
                 </div>
               </div>
-    
-              <div class="toolbar tabbar toolbar-top" style="top:0;">
+
+
+
+              <div class="toolbar tabbar toolbar-top " style="top:0;">
                   <div class="toolbar-inner">
                     <a href="#tab-1" class="tab-link tab-link-active">Check-in</a>
                     <a href="#tab-2" class="tab-link">Check-out</a>
            
                   </div>
+              </div>
+    
+              <div class="desktop_view">
+                <div class="row">
+                    <!-- Each "cell" has col-[width in percents] class -->
+                    <div class="col-50" >
+                      <center>
+                        <div class="visitor_content_desktop" style="text-align: left;">
+                          
+                            <div class="visitor_scroll_view visitor_scroll_view_in" >
+                              <div class="approved_entry_list"></div>
+                              <div class="rejected_entry_list"></div>
+                              <div class="pending_entry_list"></div>
+                            </div>
+                                            
+                        </div>
+                      </center>    
+                    </div>
+                    <div class="col-50"  >
+                      <center>
+                        <div class="visitor_content_desktop" style="text-align: left;">
+                              <div class="visitor_scroll_view visitor_scroll_view_out" >
+                              </div>
+                        </div>
+                      </center>
+                    </div>
                 </div>
-              <div class="tabs-swipeable-wrap" style="height:auto;">
+              </div>
+
+              
+              <div class="tabs-swipeable-wrap mobile_view" style="height:auto;">
                 <div class="tabs">
                   <div id="tab-1" class="page-content tab tab-active" style="padding-top:0;">
                     <div >
                       <div class="visitor_content">
                       
-                           <div class="visitor_scroll_view" id="visitor_scroll_view_in">
+                           <div class="visitor_scroll_view visitor_scroll_view_in" >
                               <div class="approved_entry_list"></div>
                               <div class="rejected_entry_list"></div>
                               <div class="pending_entry_list"></div>
@@ -43,7 +74,7 @@
                     <div >
                         <div class="visitor_content">
                         
-                            <div class="visitor_scroll_view" id="visitor_scroll_view_out">
+                            <div class="visitor_scroll_view visitor_scroll_view_out" >
                             </div>
                        </div>
                      
@@ -156,10 +187,12 @@
          
             var gate_type;
 
-            // if (app.device.desktop) {
-             
-            //   $$('.contact_btn').remove();
-            // }
+            if (app.device.desktop) {
+        
+              $$('.mobile_view').css("display", "none");
+            }else{
+              $$('.desktop_view').css("display", "none");
+            }
 
 
 
@@ -198,7 +231,7 @@
               address=  data[i].lot.name+","+data[i].lot.street.name;
             }
             new_entry_item ="<div class='card  card_in card_width "+card_id+" '  >"+
-                    "<div class='card-content card-click  content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+                    "<div class='card-content card-click entry_force content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
                       '<div class="row no-gap">'+
                         '<div class="col-20 card-left-content">'+
                           '<div class="card-left-content_inner">'+
@@ -266,7 +299,7 @@
                           '</div>'+
                         '</div>';
 
-                        $$('#visitor_scroll_view_out').append(new_exit_item);
+                        $$('.visitor_scroll_view_out').append(new_exit_item);
                           }
               }
 
@@ -420,6 +453,146 @@ $$('.history_btn').on('click', function () {
 
  // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+function force_update(entry_id,up_status){
+  var auth = app.form.getFormData("auth");
+
+  app.dialog.preloader();
+  request.put(
+      "visitor_entry/" + entry_id,
+      { Authorization: "JWT " + auth.token },
+      {
+        entry_id :entry_id,
+        status: up_status,
+        force_open: true,
+      },
+      function(data) {
+        app.dialog.close();
+        var toastCenter = app.toast.create({
+          text: "<center>Entry Update Success!</center>",
+          position: "center",
+          closeTimeout: 2000
+        });
+
+        toastCenter.open();
+
+        app.popup.close();
+
+       
+          app.dialog.preloader();
+          request.get(
+            "security_boomgate",
+            { Authorization: "JWT " + auth.token },
+            null,
+            function(data) {
+              app.dialog.close();
+              var url = data;
+              console.log(url);
+              var gate_url = "";
+              var gate_type = "";
+              if (up_status == "AOS") {
+                gate_type = "X";
+              }
+
+              if (up_status == "AIS" || up_status == "RIS") {
+                gate_type = "E";
+              }
+
+              for (var i = 0; i < url.length; i++) {
+                if (url[i].type == gate_type) {
+                  gate_url = url[i].url;
+                }
+              }
+
+              app.dialog.preloader("Opening Boom gate...");
+
+              request.getimg(
+                gate_url,
+                null,
+                function(data) {
+                  console.log(data);
+                  app.dialog.close();
+                  console.log("boom gate open")
+                  var toastCenter = app.toast.create({
+                    text: "Boomgate Open",
+                    position: "center",
+                    closeTimeout: 2000
+                  });
+
+                  toastCenter.open();
+                },
+                function() {
+                  app.dialog.close();
+                  var toastCenter = app.toast.create({
+                    text: "Cannot connect boomgate!",
+                    position: "center",
+                    closeTimeout: 2000
+                  });
+
+                  toastCenter.open();
+                }
+              );
+            },
+            function() {
+              app.dialog.close();
+              var toastCenter = app.toast.create({
+                text: "Cannot connect boomgate!",
+                position: "center",
+                closeTimeout: 2000
+              });
+
+              toastCenter.open();
+            }
+          );
+        
+      },
+      function(xhr, status) {
+        var toastCenter = app.toast.create({
+          text: "<center>Entry Update Failed!</center>",
+          position: "center",
+          closeTimeout: 2000
+        });
+
+        toastCenter.open();
+        app.dialog.close();
+      }
+  );
+}
+
+
+$$(".visitor_scroll_view").on('taphold',".entry_force",function () {
+   var entry_id = $$(this).attr("visitor_id");
+    
+    app.dialog.create({
+      title: 'Force Action',
+      text: 'Please select an action to proceed',
+      buttons: [
+        {
+          text: 'Force Approve',
+        },
+        {
+          text: 'Force Reject',
+        },
+        {
+          text: 'Cancel',
+        },
+      ],
+      onClick: function(dialog, index) {
+         if (index === 0) {
+            force_update(entry_id,"AIS")
+         }
+         if (index === 1) {
+            force_update(entry_id,"RIS")
+         }
+         if (index === 2) {
+            app.dialog.close();
+         }
+      },
+      verticalButtons: true,
+    }).open();
+ 
+});
+
  $$(".visitor_scroll_view").on('click',".card-click",function () {
  
   var id = $$(this).attr("visitor_id");
@@ -450,7 +623,7 @@ if(data.status=="PEN"){
   status_txt="Pending";
   txt_color ="yellow";
   
-  button_part=    '<button class="col button button-fill button-round update-btn" style="color:white;background-color:#FB6C5E;margin-right:10px" action="back" id="'+data.tracker_id+'">BACK</button>';
+  button_part=    '<button class="col button button-fill button-round update-btn" style="color:white;background-color:#FB6C5E;margin-right:10px" action="back" force_open="0" id="'+data.tracker_id+'">BACK</button>';
                    
   call_btn = "<br><button class=' button button-fill button-round call_resident' style='color:white;background-color:#89DAFF;width:75px !important' value='"+contact+"'>Call</button>";
         
@@ -458,8 +631,8 @@ if(data.status=="PEN"){
   status_txt="Approved";
   txt_color ="#38DB69";
 
-  button_part=    '<button class="col button button-outline button-round update-btn" style="color:red;border-color:red;margin-right:10px" action="reject" id="'+data.tracker_id+'">REJECT</button>'+
-                    '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="approved" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
+  button_part=    '<button class="col button button-outline button-round update-btn" style="color:red;border-color:red;margin-right:10px" action="reject" force_open="0" id="'+data.tracker_id+'">REJECT</button>'+
+                    '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="approved" force_open="0" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
       
    
 }else if(data.status=="RIR"){
@@ -467,15 +640,15 @@ if(data.status=="PEN"){
   txt_color ="red";
 
   
-button_part=    '<button class="col button button-outline button-round update-btn" style="color:	#FB6C5E;border-color:#FB6C5E;margin-right:10px" action="register" id="'+data.tracker_id+'">RE-REGISTER</button>'+
-                '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="reject" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
+button_part=    '<button class="col button button-outline button-round update-btn" style="color:	#FB6C5E;border-color:#FB6C5E;margin-right:10px" action="register" force_open="0" id="'+data.tracker_id+'">RE-REGISTER</button>'+
+                '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="reject" force_open="0" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
  call_btn = "<br><button class=' button button-fill button-round call_resident' style='color:white;background-color:#89DAFF;width:75px !important' value='"+contact+"'>Call</button>";
 }else if(data.status=="PEX"){
   status_txt="Pending Exit";
   txt_color ="yellow";
 
-  button_part=    '<button class="col button button-outline button-round update-btn" style="color:red;border-color:red;margin-right:10px" action="reject_exit" id="'+data.tracker_id+'">REJECT</button>'+
-                    '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="approved_exit" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
+  button_part=    '<button class="col button button-outline button-round update-btn" style="color:red;border-color:red;margin-right:10px" action="reject_exit" force_open="0" id="'+data.tracker_id+'">REJECT</button>'+
+                    '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="approved_exit" force_open="0" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
       
 
 }
