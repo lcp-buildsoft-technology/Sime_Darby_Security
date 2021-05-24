@@ -1,5 +1,6 @@
 import $$ from "dom7";
 import Framework7 from "framework7/framework7.esm.bundle.js";
+import sound_audio from './sound_audio.js'
 
 // Import F7 Styles
 import "framework7/css/framework7.bundle.css";
@@ -265,6 +266,7 @@ if (auth) {
 
 
   sck.on("visitor_arrive", function(data) {
+
     // console.log(data.status);
     var auth = app.form.getFormData("auth");
     if ($$(app.view.current.router.currentPageEl).data("name") == "visitor") {
@@ -274,7 +276,9 @@ if (auth) {
         null,
         function(data) {
           console.log(data);
+          var notification_sound =sound_audio.sound;
 
+          notification_sound.play();
           if (data.status != "PEX") {
             var new_entry_item = "";
             var color = "";
