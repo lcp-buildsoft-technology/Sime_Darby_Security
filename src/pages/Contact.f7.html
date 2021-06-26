@@ -62,6 +62,10 @@
 
     
 <script>
+  function myFunction(phone){
+  console.log("android calling");
+  document.location.href = "tel:" + phone;
+}
         import request from '../js/request.js';
         export default {
         
@@ -192,7 +196,7 @@ var itemsPerLoad = 5;
     $$('.infinite-scroll-preloader').hide();
     var found = [];
     for (var i = 0; i < items.length; i++) {
-      if (items[i].title.toLowerCase().indexOf(query.toLowerCase()) >= 0 || query.trim() === '') found.push(i);
+      if ((items[i].title.toLowerCase().indexOf(query.toLowerCase()) >= 0 || items[i].title.toUpperCase().indexOf(query.toUpperCase()) >= 0) || (items[i].subtitle.toLowerCase().indexOf(query.toLowerCase()) >= 0 || items[i].subtitle.toUpperCase().indexOf(query.toUpperCase()) >= 0) ) found.push(i);
     }
 
     return found; //*return array with mathced indexes

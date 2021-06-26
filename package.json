@@ -77,6 +77,7 @@
     "framework7": "^4.4.0",
     "framework7-cli": "^4.0.8",
     "framework7-icons": "^2.3.1",
+    "io.framework7.simedarbysecurity": "file:cordova",
     "node-onvif": "^0.1.7",
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.2.0",

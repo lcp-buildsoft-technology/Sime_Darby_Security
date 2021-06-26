@@ -685,30 +685,33 @@ $$("#app").on("taphold", ".phone_call", function() {
 
       var contact_list = [];
       for (var i = 0; i < data.length; i++) {
-        var phone_num = data[i].resident.user.profile.phone_number;
+        var k =0
+        var phone_num = data[k].resident.user.profile.phone_number;
         var contact = {
           text:
             data[i].resident.user.first_name +
             " " +
             data[i].resident.user.last_name,
-          onClick: function() {
-            console.log(phone_num);
-            if (app.device.android) {
-              console.log("android calling");
-              document.location.href = "tel:" + phone_num;
-            } else {
-              var toastCenter = app.toast.create({
-                text: "Cannot make phone call on Web, long press",
-                position: "center",
-                closeTimeout: 2000
-              });
+          // onClick: function() {
+          //   console.log(phone_num);
+          //   console.log(data,i);
+          //   if (app.device.android) {
+          //     console.log("android calling");
+          //     document.location.href = "tel:" + phone_num;
+          //   } else {
+          //     var toastCenter = app.toast.create({
+          //       text: "Cannot make phone call on Web, long press",
+          //       position: "center",
+          //       closeTimeout: 2000
+          //     });
 
-              toastCenter.open();
-            }
-          }
+          //     toastCenter.open();
+          //   }
+          // }
         };
 
         contact_list.push(contact);
+        
       }
 
       var close_btn = {
@@ -725,7 +728,12 @@ $$("#app").on("taphold", ".phone_call", function() {
           title: "Family List",
           text: "Select a resident to call",
           buttons: contact_list,
+          onClick: function(dialog, index) {
+            console.log("android calling");
+            document.location.href = "tel:" + data[index].resident.user.profile.phone_number;
+          },
           verticalButtons: true
+          
         })
         .open();
     },

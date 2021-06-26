@@ -101,166 +101,166 @@
 
               //socket and prepend to list
 
-              sck.on("visitor_arrive", function(data) {
-                // console.log(data.status);
-                // alert(data.status);
-                if (
-                  $$(app.view.current.router.currentPageEl).data("name") ==
-                  "visitor"
-                ) {
-                  request.get(
-                    "visitor_entry/" + data.track_id,
-                    { Authorization: "JWT " + auth.token },
-                    null,
-                    function(data) {
-                      console.log(data);
+              // sck.on("visitor_arrive", function(data) {
+              //   // console.log(data.status);
+              //   // alert(data.status);
+              //   if (
+              //     $$(app.view.current.router.currentPageEl).data("name") ==
+              //     "visitor"
+              //   ) {
+              //     request.get(
+              //       "visitor_entry/" + data.track_id,
+              //       { Authorization: "JWT " + auth.token },
+              //       null,
+              //       function(data) {
+              //         console.log(data);
 
-                      if (data.status != "PEX") {
-                        var new_entry_item = "";
-                        var color = "";
-                        var status = "";
+              //         if (data.status != "PEX") {
+              //           var new_entry_item = "";
+              //           var color = "";
+              //           var status = "";
 
-                        if (data.status == "AIR") {
-                          color = "forestgreen";
-                          status = "Approved";
-                        } else if (data.status == "RIR") {
-                          color = "red";
-                          status = "Rejected";
-                        } else if (data.status == "PEN") {
-                          color = "#FB6C5E";
-                          status = "Pending";
-                        }
+              //           if (data.status == "AIR") {
+              //             color = "forestgreen";
+              //             status = "Approved";
+              //           } else if (data.status == "RIR") {
+              //             color = "red";
+              //             status = "Rejected";
+              //           } else if (data.status == "PEN") {
+              //             color = "#FB6C5E";
+              //             status = "Pending";
+              //           }
 
-                        var status_id = "status_" + data.tracker_id;
-                        var card_id = "card_" + data.tracker_id;
+              //           var status_id = "status_" + data.tracker_id;
+              //           var card_id = "card_" + data.tracker_id;
 
-                        var address = "";
-                        if (data.entry_type != "I") {
-                          address = data.lot.name + "," + data.lot.street.name;
-                        }
+              //           var address = "";
+              //           if (data.entry_type != "I") {
+              //             address = data.lot.name + "," + data.lot.street.name;
+              //           }
 
-                        new_entry_item =
-                          "<div class='card card_in  card_width " +
-                          card_id +
-                          " ' >" +
-                          "<div class='card-content card-click  content_heigt' visitor_id='" +
-                          data.tracker_id +
-                          "'>" +
-                          '<div class="row no-gap">' +
-                          '<div class="col-20 card-left-content">' +
-                          '<div class="card-left-content_inner">' +
-                          '<i class="material-icons">chevron_right</i>' +
-                          "<p>CEHCK IN</p>" +
-                          " </div>" +
-                          "</div>" +
-                          '<div class="col-70 card-center-content">' +
-                          '<div class="card-center-content_inner">' +
-                          "<div>" +
-                          address +
-                          "</div>" +
-                          '<div style="width: 100%;">' +
-                          '<div style="display: inline-block;">' +
-                          data.visitor_car_plate +
-                          "</div>" +
-                          '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;">Status: <b class="' +
-                          status_id +
-                          '" style="color: ' +
-                          color +
-                          '"> ' +
-                          status +
-                          "</b></div>" +
-                          " </div>" +
-                          "</div>" +
-                          "</div>" +
-                          '<div class="col-10 card-right-content">' +
-                          '<div class="card-right-content_inner">' +
-                          ' <i class="material-icons">more_vert</i>' +
-                          " </div>" +
-                          " </div>" +
-                          "</div>" +
-                          "</div>" +
-                          " </div>";
+              //           new_entry_item =
+              //             "<div class='card card_in  card_width " +
+              //             card_id +
+              //             " ' >" +
+              //             "<div class='card-content card-click  content_heigt' visitor_id='" +
+              //             data.tracker_id +
+              //             "'>" +
+              //             '<div class="row no-gap">' +
+              //             '<div class="col-20 card-left-content">' +
+              //             '<div class="card-left-content_inner">' +
+              //             '<i class="material-icons">chevron_right</i>' +
+              //             "<p>CEHCK IN</p>" +
+              //             " </div>" +
+              //             "</div>" +
+              //             '<div class="col-70 card-center-content">' +
+              //             '<div class="card-center-content_inner">' +
+              //             "<div>" +
+              //             address +
+              //             "</div>" +
+              //             '<div style="width: 100%;">' +
+              //             '<div style="display: inline-block;">' +
+              //             data.visitor_car_plate +
+              //             "</div>" +
+              //             '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;">Status: <b class="' +
+              //             status_id +
+              //             '" style="color: ' +
+              //             color +
+              //             '"> ' +
+              //             status +
+              //             "</b></div>" +
+              //             " </div>" +
+              //             "</div>" +
+              //             "</div>" +
+              //             '<div class="col-10 card-right-content">' +
+              //             '<div class="card-right-content_inner">' +
+              //             ' <i class="material-icons">more_vert</i>' +
+              //             " </div>" +
+              //             " </div>" +
+              //             "</div>" +
+              //             "</div>" +
+              //             " </div>";
 
-                        if (data.status == "AIR") {
-                          setTimeout(function() {
-                            $$(".approved_entry_list").prepend(new_entry_item);
-                          }, 2000);
-                        } else if (data.status == "RIR") {
-                          setTimeout(function() {
-                            $$(".rejected_entry_list").prepend(new_entry_item);
-                          }, 2000);
-                        } else if (data.status == "PEN") {
-                          setTimeout(function() {
-                            $$(".pending_entry_list").prepend(new_entry_item);
-                          }, 2000);
-                        }
-                      } else {
-                        var card_id = "card_" + data.tracker_id;
+              //           if (data.status == "AIR") {
+              //             setTimeout(function() {
+              //               $$(".approved_entry_list").prepend(new_entry_item);
+              //             }, 2000);
+              //           } else if (data.status == "RIR") {
+              //             setTimeout(function() {
+              //               $$(".rejected_entry_list").prepend(new_entry_item);
+              //             }, 2000);
+              //           } else if (data.status == "PEN") {
+              //             setTimeout(function() {
+              //               $$(".pending_entry_list").prepend(new_entry_item);
+              //             }, 2000);
+              //           }
+              //         } else {
+              //           var card_id = "card_" + data.tracker_id;
 
-                        var address = "";
-                        if (data.entry_type != "I") {
-                          address = data.lot.name + "," + data.lot.street.name;
-                        } else {
-                          address = "Impromtu";
-                        }
+              //           var address = "";
+              //           if (data.entry_type != "I") {
+              //             address = data.lot.name + "," + data.lot.street.name;
+              //           } else {
+              //             address = "Impromtu";
+              //           }
 
-                        var new_exit_item =
-                          '<div class="card  card_in card_width ' +
-                          card_id +
-                          '"  >' +
-                          "<div class='card-content card-click  content_heigt' visitor_id='" +
-                          data.tracker_id +
-                          "'>" +
-                          ' <div class="row no-gap">' +
-                          '<div class="col-20 card-left-content">' +
-                          '<div class="card-left-content_inner">' +
-                          ' <i class="material-icons">chevron_left</i>' +
-                          "<p>CEHCK OUT</p>" +
-                          "</div>" +
-                          "</div>" +
-                          '<div class="col-70 card-center-content">' +
-                          '<div class="card-center-content_inner">' +
-                          " <div>" +
-                          address +
-                          "</div>" +
-                          " <div>" +
-                          data.visitor_car_plate +
-                          "</div>" +
-                          "</div>" +
-                          "</div>" +
-                          '<div class="col-10 card-right-content">' +
-                          '<div class="card-right-content_inner">' +
-                          '<i class="material-icons">more_vert</i>' +
-                          "</div>" +
-                          " </div>" +
-                          "</div>" +
-                          "</div>" +
-                          "</div>";
+              //           var new_exit_item =
+              //             '<div class="card  card_in card_width ' +
+              //             card_id +
+              //             '"  >' +
+              //             "<div class='card-content card-click  content_heigt' visitor_id='" +
+              //             data.tracker_id +
+              //             "'>" +
+              //             ' <div class="row no-gap">' +
+              //             '<div class="col-20 card-left-content">' +
+              //             '<div class="card-left-content_inner">' +
+              //             ' <i class="material-icons">chevron_left</i>' +
+              //             "<p>CEHCK OUT</p>" +
+              //             "</div>" +
+              //             "</div>" +
+              //             '<div class="col-70 card-center-content">' +
+              //             '<div class="card-center-content_inner">' +
+              //             " <div>" +
+              //             address +
+              //             "</div>" +
+              //             " <div>" +
+              //             data.visitor_car_plate +
+              //             "</div>" +
+              //             "</div>" +
+              //             "</div>" +
+              //             '<div class="col-10 card-right-content">' +
+              //             '<div class="card-right-content_inner">' +
+              //             '<i class="material-icons">more_vert</i>' +
+              //             "</div>" +
+              //             " </div>" +
+              //             "</div>" +
+              //             "</div>" +
+              //             "</div>";
 
-                        setTimeout(function() {
-                          $$(".visitor_scroll_view_out").prepend(new_exit_item);
-                        }, 2000);
-                      }
-                    }
-                  );
-                }
-              });
+              //           setTimeout(function() {
+              //             $$(".visitor_scroll_view_out").prepend(new_exit_item);
+              //           }, 2000);
+              //         }
+              //       }
+              //     );
+              //   }
+              // });
 
               //remove card item
-              sck.on("visitor_remove", function(data) {
-                if (
-                  $$(app.view.current.router.currentPageEl).data("name") ==
-                  "visitor"
-                ) {
-                  $$(".card_" + data.track_id).removeClass("card_in");
-                  setTimeout(function() {
-                    $$(".card_" + data.track_id).addClass("card_out");
-                  }, 500);
-                  setTimeout(function() {
-                    $$(".card_" + data.track_id).remove();
-                  }, 1500);
-                }
-              });
+              // sck.on("visitor_remove", function(data) {
+              //   if (
+              //     $$(app.view.current.router.currentPageEl).data("name") ==
+              //     "visitor"
+              //   ) {
+              //     $$(".card_" + data.track_id).removeClass("card_in");
+              //     setTimeout(function() {
+              //       $$(".card_" + data.track_id).addClass("card_out");
+              //     }, 500);
+              //     setTimeout(function() {
+              //       $$(".card_" + data.track_id).remove();
+              //     }, 1500);
+              //   }
+              // });
 
               router.navigate({ name: "main" });
             },

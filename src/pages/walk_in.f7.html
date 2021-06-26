@@ -432,8 +432,12 @@
                   },
                   {
                     text: "Phone camera"
+                  },
+                  {
+                    text: "Close"
                   }
                 ],
+                
                 onClick: function(dialog, index) {
                   if (index === 0) {
                     //Button 1 clicked
@@ -499,6 +503,8 @@
                     function onFail(message) {
                       app.dialog.alert("Failed because: " + message, "");
                     }
+                  }else if(index === 2){
+                    app.dialog.close();
                   }
                 },
                 verticalButtons: true

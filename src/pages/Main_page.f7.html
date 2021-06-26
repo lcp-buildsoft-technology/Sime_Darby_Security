@@ -149,6 +149,7 @@ console.log("logout");
 app.dialog.confirm('Are you want to Logout?', function () {
 
   app.panel.close();
+  app.views.main.router.clearPreviousHistory();
   router.navigate({name:"login"});
   router.clearPreviousHistory();
   app.form.removeFormData('auth');

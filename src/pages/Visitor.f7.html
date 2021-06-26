@@ -13,7 +13,7 @@
                     </a>
                   </div>
                   <div class="title">VISITOR</div>
-                  <div class="right" style="margin-right: 15px;margin-top: 6px;"><a href="#" class="contact_btn"><i class="material-icons">contact_phone</i></a></div>
+                  <div id="contact_phone" class="right" style="margin-right: 15px;margin-top: 6px;"><a href="#" class="contact_btn"><i class="material-icons">contact_phone</i></a></div>
                 </div>
               </div>
 
@@ -190,6 +190,7 @@
             if (app.device.desktop) {
         
               $$('.mobile_view').css("display", "none");
+              document.getElementById("contact_phone").remove();
             }else{
               $$('.desktop_view').css("display", "none");
             }
