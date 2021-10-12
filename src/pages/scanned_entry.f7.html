@@ -79,21 +79,25 @@
          <div style="margin-left:15px;margin-bottom: 5px;"><b style="display: inline-block;color:#333;">Preview </b> </div>
              
          <div class="preview">
-          <div data-pagination='{"el": ".swiper-pagination"}' data-space-between="50" class="swiper-container swiper-init demo-swiper">
-             <div class="swiper-pagination"></div>
-             <div class="swiper-wrapper">
-                 <div class="swiper-slide img-front camera_btn" x="EF" id='EF'>No Image (Car plate)</div>
-                 <div class="swiper-slide img-face camera_btn" x="FC" id='FC'>No Image (Face)</div>
-                 <div class="swiper-slide img-face camera_btn" x="IC" id='IC'>No Image (IC)</div>
-     
-             </div> 
-           </div>
-         </div>
+          <div
+            data-pagination='{"el": ".swiper-pagination"}'
+            data-space-between="50"
+            class="swiper-container swiper-init demo-swiper"
+          >
+            <div class="swiper-pagination"></div>
+            <div class="swiper-wrapper">
+              <div class="swiper-slide img-front camera_btn" x="EF" id="EF">No Image (Car plate) </div>
+              <div class="swiper-slide img-face camera_btn" x="FC" id="FC">No Image (Face) </div>
+              <div class="swiper-slide img-face camera_btn" x="IC" id="IC"> No Image (IC)</div>
+            </div>
+          </div>
+        </div>
+
             
 
           <div class=" row " >
             <div class="col button button-outline button-round"><a href="/main/" data-force="true" data-ignore-cache="true" class="button back"  style="border-color:darkgrey;color:darkgrey" ><b>Cancel</b></a></div>
-            <div class="col button button-outline button-round"><a class="button submit_btn" style="border-color:#00BE47;color:#00BE47;" href="#"><b>Send Approval</b></a></div> 
+            <div class="col button button-outline button-round"><a class="button submit_btn" style="border-color:hsl(142, 100%, 37%);color:#00BE47;" href="#"><b>Send Approval</b></a></div> 
           </div>
 
 
@@ -128,6 +132,8 @@
          var auth = app.form.getFormData("auth");
          var entry_data = app.form.getFormData("scan_entry_data");
          var type='';
+         var security_id = auth.user.id
+        console.log(security_id)
         
          
          switch (entry_data.entry_type){
@@ -183,184 +189,203 @@
      var imgs = [];
   //*camera_btn function////////////////////////////////////////////////////////////////////////////////////////////////
   $$('.camera_btn').on('click', function () {
-    
-    var facecam= ip_cam.FC;
-    var frontcam=ip_cam.EF;
-    var iccam = ip_cam.IC;
-    var x= $$(this).attr("x");
-    if (app.device.android || app.device.ios) {
+    var facecam = ip_cam.FC;
+          var frontcam = ip_cam.EF;
+          var iccam = ip_cam.IC;
+          var x = $$(this).attr("x");
+          if (app.device.android || app.device.ios) {
+            app.dialog
+              .create({
+                title: "Camera Option",
 
-      app.dialog.create({
-    title: 'Camera Option',
-    
-    buttons: [
-      {
-        text: 'IVMS',
-      },
-      {
-        text: 'Phone camera',
-      },
-      
-    ],
-    onClick: function (dialog, index) {
-            if(index === 0){
-                //Button 1 clicked
-                ivms_capture(x,frontcam,facecam,iccam);
-            }
-            else if(index === 1){
-                //Button 2 clicked
-             // cameara pugin deprecated!   
-        console.log("camera");
-        document.addEventListener("deviceready", onDeviceReady, false);
-function onDeviceReady() {
-    console.log(navigator.camera);
-}
+                buttons: [
+                  {
+                    text: "IVMS"
+                  },
+                  {
+                    text: "Phone camera"
+                  },
+                  {
+                    text: "Close"
+                  }
+                ],
+                
+                onClick: function(dialog, index) {
+                  if (index === 0) {
+                    //Button 1 clicked
+                    ivms_capture(x, frontcam, facecam, iccam);
+                  } else if (index === 1) {
+                    //Button 2 clicked
+                    // cameara pugin deprecated!
+                    console.log("camera");
+                    document.addEventListener(
+                      "deviceready",
+                      onDeviceReady,
+                      false
+                    );
+                    function onDeviceReady() {
+                      console.log(navigator.camera);
+                    }
 
+                    console.log(x);
 
+                    navigator.camera.getPicture(onSuccess, onFail, {
+                      quality: 50,
+                      destinationType: Camera.DestinationType.DATA_URL
+                    });
 
+                    function onSuccess(imageURI) {
+                      const byteCharacters = atob(imageURI);
+                      const byteArrays = [];
 
+                      for (
+                        let offset = 0;
+                        offset < byteCharacters.length;
+                        offset += 512
+                      ) {
+                        const slice = byteCharacters.slice(
+                          offset,
+                          offset + 512
+                        );
 
-console.log(x);
-                         
+                        const byteNumbers = new Array(slice.length);
+                        for (let i = 0; i < slice.length; i++) {
+                          byteNumbers[i] = slice.charCodeAt(i);
+                        }
 
+                        const byteArray = new Uint8Array(byteNumbers);
+                        byteArrays.push(byteArray);
+                      }
 
-navigator.camera.getPicture(onSuccess, onFail, { quality: 50,
-    destinationType: Camera.DestinationType.DATA_URL });
+                      const blob = new Blob(byteArrays, { type: "image/jpg" });
 
-function onSuccess(imageURI) {
-  const byteCharacters = atob(imageURI);
-  const byteArrays = [];
+                      console.log(blob);
+                      var im = new Image();
+                      var url = window.URL || window.webkitURL;
+                      im.className = "custom-img";
+                      im.src = url.createObjectURL(blob);
 
-  for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-    const slice = byteCharacters.slice(offset, offset + 512);
+                      $$("#" + x).html("");
+                      $$("#" + x).append(im);
 
-    const byteNumbers = new Array(slice.length);
-    for (let i = 0; i < slice.length; i++) {
-      byteNumbers[i] = slice.charCodeAt(i);
-    }
+                      //imgs.push({"name":x,"value":imageURI.substr(imageURI.lastIndexOf('/')+1)});
+                      imgs[x] = blob;
+                    }
 
-    const byteArray = new Uint8Array(byteNumbers);
-    byteArrays.push(byteArray);
-  }
-
-  const blob = new Blob(byteArrays, {type: "image/jpg"});
-
-
-  console.log(blob);
-  var im = new Image();
-    var url = window.URL || window.webkitURL;
-    im.className = 'custom-img';
-    im.src = url.createObjectURL(blob);
- 
-
- 
-    
-    $$('#'+x).html("");
-    $$('#'+x).append(im);
-
-    //imgs.push({"name":x,"value":imageURI.substr(imageURI.lastIndexOf('/')+1)});
-    imgs[x]=blob;
-  
- }
-
-
-function onFail(message) {
-  app.dialog.alert('Failed because: ' + message,"");
-  
-}
-            }
-           
-        },
-    verticalButtons: true,
-  }).open();
-
-
-   }else{
-
-    ivms_capture(x,frontcam,facecam,iccam);
-
-   }
-
-
+                    function onFail(message) {
+                      app.dialog.alert("Failed because: " + message, "");
+                    }
+                  }else if(index === 2){
+                    app.dialog.close();
+                  }
+                },
+                verticalButtons: true
+              })
+              .open();
+          } else {
+            ivms_capture(x, frontcam, facecam, iccam);
+          }
   
   });
     
 
 
 
-function ivms_capture(x,frontcam,facecam,iccam){
-  
-    
+  function ivms_capture(x, frontcam, facecam, iccam) {
+          app.dialog.preloader("Capture Image...");
 
-  app.dialog.preloader('Caputre Image...');
+          if (x == "EF") {
+            console.log("Front:" + frontcam);
+            var $this = $$("#" + x);
+            request.getimg(
+              frontcam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
 
+                if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $this.html("");
+                  $this.append(im);
+                  imgs[x] = data;
+                  app.dialog.close();
+                }
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+          } else if (x == "FC") {
+            console.log("Face:" + facecam);
+            var $this = $$("#" + x);
+            request.getimg(
+              facecam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
 
-  
-if(x=="EF"){
-   console.log("Front:"+frontcam);
-  var $this=$$('#'+x);
-  request.getimg(frontcam,null, function(data){
-    var im = new Image();
-    var url = window.URL || window.webkitURL;
-    im.className = 'custom-img';
-    im.src = url.createObjectURL(data);
-    $this.html('');
-    $this.append(im);
-    imgs[x]=data ;
-    
-    app.dialog.close();
-     },function(error){
-          console.log(error);
-          app.dialog.close();
-          app.dialog.alert('Unable to connect to Camera!',"");
-     });
- 
-}else if(x=="FC"){
-  console.log("Face:"+facecam);
-  var $this=$$('#'+x);
-  request.getimg(facecam,null, function(data){
-    var im = new Image();
-    var url = window.URL || window.webkitURL;
-    im.className = 'custom-img';
-    im.src = url.createObjectURL(data);
-    $this.html('');
-    $this.append(im);
-    imgs[x]=data ;
-    
-    app.dialog.close();
-     },function(error){
-          console.log(error);
-          app.dialog.close();
-          app.dialog.alert('Unable to connect to Camera!',"");
-     });   
-}else if(x=="IC"){
-  console.log("IC:"+iccam);
-  var $this=$$('#'+x);
-  request.getimg(iccam,null, function(data){
-    var im = new Image();
-    var url = window.URL || window.webkitURL;
-    im.className = 'custom-img';
-    im.src = url.createObjectURL(data);
-    $this.html('');
-    $this.append(im);
-    imgs[x]=data ;
-    
-     app.dialog.close();
-    console.log(data);
-     },function(error){
-          console.log(error);
-          app.dialog.close();
-          app.dialog.alert('Unable to connect to Camera!',"");
-     });   
+                if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $this.html("");
+                  $this.append(im);
+                  imgs[x] = data;
+                  app.dialog.close();
+                }
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+          } else if (x == "IC") {
+            console.log("IC:" + iccam);
+            var $this = $$("#" + x);
+            request.getimg(
+              iccam,
+              null,
+              function(data) {
+                var im = new Image();
 
- 
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
 
-}
+                if (data.size <= 26) {
+                  app.dialog.close();
+                  app.dialog.alert("Please insert IC.", "");
+                } else if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $this.html("");
+                  $this.append(im);
+                  imgs[x] = data;
+                  app.dialog.close();
+                }
 
-
-
-}
-
+                console.log(data);
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+          }
+        }
 
 
 
@@ -390,24 +415,31 @@ $$('.submit_btn').on('click',function(){
 
 
 
-for(const [key, value] of Object.entries(imgs)){
-  switch(key){
-    case "IC":Fdata.append("identity_image",value,key+".jpg");break;
-    case "EF":Fdata.append("entry_car_plate_image",value,key+".jpg");break;
-    case "FC":Fdata.append("driver_image",value,key+".jpg");break;
-  }
-
-  
-}
+    for (const [key, value] of Object.entries(imgs)) {
+            switch (key) {
+              case "IC":
+                Fdata.append("identity_image", value, key + ".jpg");
+                break;
+              case "EF":
+                Fdata.append("entry_car_plate_image", value, key + ".jpg");
+                break;
+              case "FC":
+                Fdata.append("driver_image", value, key + ".jpg");
+                break;
+            }
+          }
+          Fdata.append("security", security_id);
 
 
 
 if(imgs.EF!=null && imgs.FC!=null && imgs.IC!=null){
+  app.dialog.preloader();
   request.postFormData("visitor_entry",{"Authorization":"JWT "+auth.token},Fdata, function(data){
         
      console.log(data);
 
       if(data.status ==  "success"){
+        app.dialog.close();
         app.dialog.alert("Approval Sent!","");
         router.back('/main/', {force:true});
      

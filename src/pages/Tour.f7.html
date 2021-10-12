@@ -121,13 +121,13 @@
                 var longitude = position.coords.longitude;
                 console.log(latitude);
                 console.log(longitude);
-                app.dialog.preloader();
+                // app.dialog.preloader();
                 request.post(
                   "security_postlog",
                   { Authorization: "JWT " + auth.token },
                   { qr_uuid: text, longitude: longitude, latitude: latitude },
                   function(data) {
-                    app.dialog.close();
+                    // app.dialog.close();
                     var now = formatAMPM(new Date());
                     var guard_name =
                       auth.user.first_name + " " + auth.user.last_name;
@@ -154,7 +154,7 @@
                     console.log(xhr)
                     console.log(status)
                     if(status==400 || status=="400" ){
-                      app.dialog.alert("Next tour scan only allow after 30 min of last tour scan");
+                      app.dialog.alert("Next tour scan only allow after 1 min of last tour scan");
 
                     }else{
                       app.dialog.alert("Server connection error");

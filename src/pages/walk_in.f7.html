@@ -189,7 +189,8 @@
         var PassID;
         var auth = app.form.getFormData("auth");
         var entry_data = app.form.getFormData("register_data");
-
+        var security_id = auth.user.id
+        console.log(security_id)
         if (entry_data === undefined) {
           console.log("no re-register data");
         } else {
@@ -639,7 +640,7 @@
                 break;
             }
           }
-
+          Fdata.append("security", security_id);
           $$(".walkin_check").each(function() {
             console.log($$(this).attr("id"));
             if ($$(this).val() == "") {

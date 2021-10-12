@@ -20,7 +20,7 @@ var app = new Framework7({
   id: "io.framework7.simedarbysecurity", // App bundle ID
   name: "Sime Darby Security", // App name
   theme: "md", // Automatic theme detection
-
+  
   // App root data
 
   touch: {
@@ -266,7 +266,7 @@ if (auth) {
 
 
   sck.on("visitor_arrive", function(data) {
-
+    app.dialog.close()
     // console.log(data.status);
     var auth = app.form.getFormData("auth");
     if ($$(app.view.current.router.currentPageEl).data("name") == "visitor") {
@@ -293,6 +293,10 @@ if (auth) {
             } else if (data.status == "PEN") {
               color = "#FB6C5E";
               status = "Pending";
+            
+            }else if (data.status == "OEN") {
+              color = "#FBB35E";
+              status = "On Hold";
             }
 
             var status_id = "status_" + data.tracker_id;
@@ -310,6 +314,7 @@ if (auth) {
               "<div class='card-content card-click entry_force  content_heigt' visitor_id='" +
               data.tracker_id +
               "'>" +
+              '<input type="text" id="visit_id" value="'+data.tracker_id+'" style="display:none">'+
               '<div class="row no-gap">' +
               '<div class="col-20 card-left-content">' +
               '<div class="card-left-content_inner">' +
@@ -357,6 +362,11 @@ if (auth) {
               setTimeout(function() {
                 $$(".pending_entry_list").prepend(new_entry_item);
               }, 2000);
+            
+            } else if (data.status == "OEN") {
+              setTimeout(function() {
+                $$(".onhold_entry_list").prepend(new_entry_item);
+              }, 2000);
             }
           } else {
             var card_id = "card_" + data.tracker_id;
@@ -375,6 +385,7 @@ if (auth) {
               "<div class='card-content card-click  content_heigt' visitor_id='" +
               data.tracker_id +
               "'>" +
+              '<input type="text" id="visit_id" value="'+data.tracker_id+'" style="display:none">'+
               ' <div class="row no-gap">' +
               '<div class="col-20 card-left-content">' +
               '<div class="card-left-content_inner">' +
@@ -434,6 +445,7 @@ if (auth) {
             });
 
             notification.open();
+            app.views.main.router.navigate({name:"visitor"});
           }
          
       
@@ -444,6 +456,8 @@ if (auth) {
 
     }
   });
+
+  
 
   //remove card item
   sck.on("visitor_remove", function(data) {
@@ -486,6 +500,7 @@ $$(document).on("click", ".cancel", function() {
 
 $$("#app").on("click", ".update-btn", function() {
   var auth = app.form.getFormData("auth");
+  console.log(navigator.connection.type)
   console.log($$(this));
   var action = $$(this).attr("action");
   var entry_id = $$(this).attr("id");
@@ -496,22 +511,196 @@ $$("#app").on("click", ".update-btn", function() {
   var post_request = false;
   if (action == "approved") {
     up_status = "AIS";
-    post_request = true;
+    if (app.device.desktop) {
+      post_request = true;
+    }else{
+      if (navigator.connection.type === "wifi" ) {
+      post_request = true;
+      console.log(true)
+    } else {
+      var dialog1 = app.dialog.create({
+          title: 'Open Boom Gate Failed',
+          text: 'Please change your connection internet to WIFI, Thank You',
+          buttons: [
+            {
+              text: 'Close',
+              onClick: function () {
+                app.dialog.close();
+              }
+            }
+          ]
+        })
+
+        dialog1.open()
+        post_request = false;
+      console.log(false)
+    }
+  }
+   
+    
   } else if (action == "reject") {
     up_status = "RIS";
-    post_request = true;
+    if (app.device.desktop) {
+      post_request = true;
+    }else{
+      if (navigator.connection.type === "wifi" ) {
+      post_request = true;
+      console.log(true)
+    } else {
+      var dialog1 = app.dialog.create({
+          title: 'Open Boom Gate Failed',
+          text: 'Please change your connection internet to WIFI, Thank You',
+          buttons: [
+            {
+              text: 'Close',
+              onClick: function () {
+                app.dialog.close();
+              }
+            }
+          ]
+        })
+
+        dialog1.open()
+        post_request = false;
+      console.log(false)
+    }
+  }
   } else if (action == "reject_exit") {
     up_status = "ROS";
-    post_request = true;
+    if (app.device.desktop) {
+      post_request = true;
+    }else{
+      if (navigator.connection.type === "wifi" ) {
+      post_request = true;
+      console.log(true)
+    } else {
+      var dialog1 = app.dialog.create({
+          title: 'Open Boom Gate Failed',
+          text: 'Please change your connection internet to WIFI, Thank You',
+          buttons: [
+            {
+              text: 'Close',
+              onClick: function () {
+                app.dialog.close();
+              }
+            }
+          ]
+        })
+
+        dialog1.open()
+        post_request = false;
+      console.log(false)
+    }
+  }
   } else if (action == "approved_exit") {
     up_status = "AOS";
-    post_request = true;
+    if (app.device.desktop) {
+      post_request = true;
+    }else{
+      if (navigator.connection.type === "wifi" ) {
+      post_request = true;
+      console.log(true)
+    } else {
+      var dialog1 = app.dialog.create({
+          title: 'Open Boom Gate Failed',
+          text: 'Please change your connection internet to WIFI, Thank You',
+          buttons: [
+            {
+              text: 'Close',
+              onClick: function () {
+                app.dialog.close();
+              }
+            }
+          ]
+        })
+
+        dialog1.open()
+        post_request = false;
+      console.log(false)
+    }
+  }
   } else if (action == "register") {
     up_status = "RIS";
-    post_request = true;
+    if (app.device.desktop) {
+      post_request = true;
+    }else{
+      if (navigator.connection.type === "wifi" ) {
+      post_request = true;
+      console.log(true)
+    } else {
+      var dialog1 = app.dialog.create({
+          title: 'Open Boom Gate Failed',
+          text: 'Please change your connection internet to WIFI, Thank You',
+          buttons: [
+            {
+              text: 'Close',
+              onClick: function () {
+                app.dialog.close();
+              }
+            }
+          ]
+        })
+
+        dialog1.open()
+        post_request = false;
+      console.log(false)
+    }
+  }
   } else if (action == "check_out") {
     up_status = "AOS";
-    post_request = true;
+    if (app.device.desktop) {
+      post_request = true;
+    }else{
+      if (navigator.connection.type === "wifi" ) {
+      post_request = true;
+      console.log(true)
+    } else {
+      var dialog1 = app.dialog.create({
+          title: 'Open Boom Gate Failed',
+          text: 'Please change your connection internet to WIFI, Thank You',
+          buttons: [
+            {
+              text: 'Close',
+              onClick: function () {
+                app.dialog.close();
+              }
+            }
+          ]
+        })
+
+        dialog1.open()
+        post_request = false;
+      console.log(false)
+    }
+  }
+  
+  } else if (action == "onhold") {
+    up_status = "OEN";
+    if (app.device.desktop) {
+      post_request = true;
+    }else{
+      if (navigator.connection.type === "wifi" ) {
+      post_request = true;
+      console.log(true)
+    } else {
+      var dialog1 = app.dialog.create({
+          title: 'Open Boom Gate Failed',
+          text: 'Please change your connection internet to WIFI, Thank You',
+          buttons: [
+            {
+              text: 'Close',
+              onClick: function () {
+                app.dialog.close();
+              }
+            }
+          ]
+        })
+
+        dialog1.open()
+        post_request = false;
+      console.log(false)
+    }
+  }
   }
 
   if (post_request == true) {
@@ -549,7 +738,9 @@ $$("#app").on("click", ".update-btn", function() {
               app.views.main.router.navigate({ name: "walkin" });
             }
           );
-        } else {
+        } else if (action == "onhold"){
+
+      }else{
           app.dialog.preloader();
           request.get(
             "security_boomgate",

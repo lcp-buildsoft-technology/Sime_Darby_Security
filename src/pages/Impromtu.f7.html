@@ -164,7 +164,7 @@
         var PassID;
         var boomgate_ip = "";
         var auth = app.form.getFormData("auth");
-
+        var security_id = auth.user.id
         var ip_cam = [];
         app.dialog.preloader();
         request.get(
@@ -231,8 +231,24 @@
           }
         );
 
-        var purpose_list = ["Multiple Delivery", "Dump Truck"];
-        var pickerDevice_purpose = app.picker.create({
+        var purpose_list = [];
+
+        var pickerDevice_purpose;
+
+        request.get("reasons",{"Authorization":"JWT "+auth.token},null, function(data){
+          console.log("here")
+          console.log(data)
+
+        var resons=data.results;
+        var all_resons="";
+        for(var i=0;i<resons.length;i++){
+          
+          purpose_list.push(resons[i].reason)
+          console.log("hres")
+          console.log(resons[i].reason)
+        }
+
+        pickerDevice_purpose = app.picker.create({
           inputEl: "#demo-picker-purpose",
           cols: [
             {
@@ -240,6 +256,7 @@
               values: purpose_list
             }
           ]
+        });
         });
 
         var imgs = [];
@@ -312,7 +329,7 @@
                         byteArrays.push(byteArray);
                       }
 
-                      const blob = new Blob(byteArrays, { type: "image/jpg" });
+                      const blob = new Blob(byteArrays, { type: "jpg" });
 
                       console.log(blob);
                       var im = new Image();
@@ -437,7 +454,7 @@
             );
           }
         }
-
+        
         $$(".submit_btn").on("click", function() {
           var f = document.getElementById("my-form");
           var Fdata = new FormData(f);
@@ -454,7 +471,7 @@
                 break;
             }
           }
-
+          Fdata.append("security", security_id);
           var isValid = true;
           $$(".impromt_check").each(function() {
             console.log($$(this).attr("id"));

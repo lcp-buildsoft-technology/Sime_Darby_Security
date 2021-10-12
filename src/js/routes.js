@@ -9,6 +9,7 @@ import IMPROMTU from '../pages/Impromtu.f7.html';
 import VISITOR from '../pages/Visitor.f7.html';
 import CONTACT from '../pages/Contact.f7.html';
 import HISTORY from '../pages/History.f7.html';
+import HISTORYVISITOR from '../pages/HistoryVisitor.f7.html';
 import GPS from '../pages/gps.f7.html';
 import TOUR from '../pages/Tour.f7.html';
 import TOUR_MAP from '../pages/Tour_map.f7.html';
@@ -59,6 +60,10 @@ var routes = [
   { name: "history",
     path: '/history/',
     component: HISTORY,
+  },
+  { name: "historyvisit",
+    path: '/historyvisit/',
+    component: HISTORYVISITOR,
   },
   {
     name: "walkin",

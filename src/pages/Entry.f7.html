@@ -52,13 +52,13 @@
  
                    <div class="row entry_bot" >
 
-                    <div class="col-45 home_btn" style='max-height: 6vh; text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;  line-height: 14px;margin:0 2%;cursor: pointer;'>
+                    <div class="col-100 home_btn" style='max-height: 6vh; text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;  line-height: 14px;margin:0 2%;cursor: pointer;'>
                                 <b><p>HOME</p></b>
                         </div>
             
-                        <div class="col-45 gps_btn" style='max-height: 6vh;  text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;  line-height: 14px;margin:0 2%;cursor: pointer;'>
+                        <!-- <div class="col-45 gps_btn" style='max-height: 6vh;  text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;  line-height: 14px;margin:0 2%;cursor: pointer;'>
                             <b><p>GPS</p></b>
-                    </div>
+                    </div> -->
                 </div>
                 
             
@@ -102,7 +102,8 @@ pageInit:function(){
 
 
 if(app.device.desktop){
-  $$('.gps_btn').show();
+  // $$('.gps_btn').hide();
+  // $$('.home_btn').addClass("col-100");
   
 }else{
   $$('.gps_btn').hide();
