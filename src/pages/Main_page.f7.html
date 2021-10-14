@@ -146,6 +146,7 @@
 
       
 </template>
+
 <script>
 import request from '../js/request.js';
 import Framework7 from 'framework7/framework7.esm.bundle.js';
@@ -203,11 +204,11 @@ if (auth) {
   //socket
 
   console.log(auth);
-  sck.emit("user", {
-    id: auth.user.id,
-    area: auth.user.area,
-    role: "security"
-  });
+  // sck.emit("user", {
+  //   id: auth.user.id,
+  //   area: auth.user.area.id,
+  //   role: "security"
+  // });
 
 //  sck.on("visitor_arrive", function(data) {
 

@@ -232,7 +232,7 @@ if (auth) {
   console.log(auth);
   sck.emit("user", {
     id: auth.user.id,
-    area: auth.user.area,
+    area: auth.user.area.id,
     role: "security"
   });
 
@@ -243,7 +243,7 @@ if (auth) {
       if (sck.connected == false) {
         sck.emit("user", {
           id: auth.user.id,
-          area: auth.user.area,
+          area: auth.user.area.id,
           role: "security"
         });
       }

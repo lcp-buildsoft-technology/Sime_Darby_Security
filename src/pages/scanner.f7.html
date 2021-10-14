@@ -112,7 +112,7 @@
                               console.log("scan");
                               console.log(text);
                             
-                            request.post("visitors/check_qr",{"Authorization":"JWT "+auth.token},{ qr_uuid:text, area_id:auth.user.area},function (data){
+                            request.post("visitors/check_qr",{"Authorization":"JWT "+auth.token},{ qr_uuid:text, area_id:auth.user.area.id},function (data){
                              
                               app.form.storeFormData("scan_entry_data", data);
                          

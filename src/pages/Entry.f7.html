@@ -50,19 +50,24 @@
         
 
  
-                   <div class="row entry_bot" >
+                <div class="row entry_bot show_tracker" >
 
-                    <div class="col-100 home_btn" style='max-height: 6vh; text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;  line-height: 14px;margin:0 2%;cursor: pointer;'>
+                    <div class="col-45 home_btn" style='max-height: 6vh; text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;  line-height: 14px;margin:0 2%;cursor: pointer;'>
                                 <b><p>HOME</p></b>
                         </div>
             
-                        <!-- <div class="col-45 gps_btn" style='max-height: 6vh;  text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;  line-height: 14px;margin:0 2%;cursor: pointer;'>
+                        <div class="col-45 gps_btn" style='max-height: 6vh;  text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;  line-height: 14px;margin:0 2%;cursor: pointer;'>
                             <b><p>GPS</p></b>
-                    </div> -->
+                    </div>
                 </div>
                 
             
+                <div class="row entry_bot hide_tracker">
 
+                  <div class="col-100 home_btn" style='max-height: 6vh; text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;  line-height: 14px;margin:0 2%;cursor: pointer;'>
+                              <b><p>HOME</p></b>
+                      </div>
+              </div>
 
             
             </div>
@@ -74,8 +79,11 @@
 
       
 </template>
+<script src="https://vmsnodejsweb.azurewebsites.net/socket.io/socket.io.js"></script>
 <script>
 import request from '../js/request.js';
+import socket from 'socket.io-client/dist/socket.io.js';
+import CONFIG from "../js/config.js";
 export default {
 
     data:function(){
@@ -90,7 +98,13 @@ pageInit:function(){
   var $$=this.$$;
      var app=this.$app;
      var router=this.$router;
-
+     var auth = app.form.getFormData("auth");
+    
+     if(auth.user.area.gps_tracker == true){
+       $$('.hide_tracker').hide();
+     }else{
+      $$('.show_tracker').hide();
+     }
 
      if (app.device.android) {
     console.log('It is android device');
@@ -131,12 +145,25 @@ $$('.gps_btn').on('click', function () {
 
  // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
+ var sck = socket.connect(CONFIG.SOCKET);
 //*walkin function////////////////////////////////////////////////////////////////////////////////////////////////
 $$('.walkin_btn').on('click', function () {
     console.log("walkin");
-  router.navigate({name:"walkin"});
+    console.log(CONFIG.SOCKET);
+    // router.navigate({name:"walkin"});
+
+    console.log(auth.user.area.id);
+    sck.emit('user',{role:"ivms",id:1,area:auth.user.area.id});
+  
+      
+sck.on('impromptu_arrive', function (data) {
+
+         
+                console.log(data);
+console.log('abc')
+
+});
+ 
 
 
 });

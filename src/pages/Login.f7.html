@@ -93,11 +93,11 @@
               var sck = socket.connect(CONFIG.SOCKET);
 
               console.log(auth);
-              sck.emit("user", {
-                id: auth.user.id,
-                area: auth.user.area,
-                role: "security"
-              });
+              // sck.emit("user", {
+              //   id: auth.user.id,
+              //   area: auth.user.area,
+              //   role: "security"
+              // });
 
               //socket and prepend to list
 
