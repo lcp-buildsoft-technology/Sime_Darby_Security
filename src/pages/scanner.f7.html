@@ -1,0 +1,195 @@
+<template>
+    <div class="page" >
+            <div class="navbar">
+                    <div class="navbar-inner">
+                      <div class="left">
+                        <a href="#" class="cancel cancel_margin" data-panel="left">
+                          <i class="icon icon-back"></i>
+                          <i class="if-not-md">Back</i>
+                        </a>
+                      </div>
+                      <div class="title sliding" style="color: white;">Scanner</div>
+                    </div>
+                  </div>    
+      <div class="page-content">
+          <img src="./static/focus.png" style="height: 300px;width: 300px;" class=" center_position" id="focus">
+        <h1 class="center_position" id="text_content">Scan qrcode through Scanner device</h1>
+        
+        <form id="form" autocomplete="off">
+            <input id="scanner" type="text" name="uuid" onblur="this.focus()" autofocus autocomplete="off"/>
+        </form>
+      </div>
+    </div>
+  </template>
+  <style>
+    html, body{
+        background-color:transparent;
+    }
+    .page-previous{
+           display:none;
+      }
+      .page-current{
+          background-color:transparent;
+      }
+    #form{
+        opacity:0;
+        position:absolute;
+        top:0;
+    }
+  </style>
+  <script>
+        import request from '../js/request.js';
+        import socket from 'socket.io-client/dist/socket.io.js';
+  import CONFIG from "../js/config.js";
+  export default {
+      
+      on:{
+          pageInit:function(){
+            var app = this.$app;
+            var router=this.$router;
+            var $$  = this.$$;
+            var auth = app.form.getFormData("auth");
+            var QRScanner = window.QRScanner;
+            var sck = socket.connect(CONFIG.SOCKET)
+            var offline = sck.disconnected;
+            
+            app.form.storeFormData("offline", sck.disconnected);
+            sck.on('connect', function(office_mode) {
+              console.log('check 2', sck.connected);
+
+                app.form.storeFormData("offline", false);
+            });
+            
+            setTimeout(function(){
+              offline = app.form.getFormData("offline");
+              console.log(offline)
+           
+
+
+            if (app.device.android) {
+                document.getElementById("scanner").style.display = "none";
+                
+                document.getElementById("text_content").style.display = "none";
+
+
+
+                QRScanner.prepare(onDone); // show the prompt
+
+            }else{
+              document.getElementById("focus").style.display = "none";
+            }
+
+
+            function onDone(err, status){
+                if (err) {
+                    var toastCenter = app.toast.create({
+                    text: "Something error!",
+                    position: 'center',
+                    closeTimeout: 2000,
+                });
+
+                toastCenter.open();
+                console.error(err);
+                }
+                if (status.authorized) {
+                    QRScanner.show();
+
+                   // window.setInterval(function(){
+                        console.log("scanning");
+                    QRScanner.scan(scan);
+               // },500);
+
+                } else if (status.denied) {
+        
+                    var toastCenter = app.toast.create({
+                    text: "Camera permission: Denied",
+                    position: 'center',
+                    closeTimeout: 2000,
+                    });
+
+                toastCenter.open();
+                } else {
+            
+                    var toastCenter = app.toast.create({
+                    text: "Camera permission: Off",
+                    position: 'center',
+                    closeTimeout: 2000,
+                    });
+
+                    toastCenter.open();
+                }
+            }
+
+
+            function scan(err, text){
+       
+              if(err){
+                            
+                          }else{
+                              console.log("scan");
+                              console.log(text);
+                            if(offline == false){
+                            request.post("visitors/check_qr",{"Authorization":"JWT "+auth.token},{ qr_uuid:text, area_id:auth.user.area.id},'',function (data){
+                             
+                              app.form.storeFormData("scan_entry_data", data);
+                              console.log(data);
+                        
+                              QRScanner.destroy(function(status) {
+                                console.log(status);
+                              });
+                              app.views.main.router.back("/scan_entry/", { force: true });
+                              
+                            },function (){
+                              app.dialog.alert("Invalid QR Code!","");
+                              setTimeout(  QRScanner.scan(scan), 1500);                            
+                             
+                              });  
+              
+                          }else{
+                            request.post("check_qr.php",null,{ qr_uuid:text, area_id:auth.user.area.id},'OFF',function (data){
+                             
+                             app.form.storeFormData("scan_entry_data", data);
+                        
+                       
+                             QRScanner.destroy(function(status) {
+                               console.log(status);
+                             });
+                             app.views.main.router.back("/scan_entry/", { force: true });
+                             
+                           },function (){
+                             app.dialog.alert("Invalid QR Code!","");
+                             setTimeout(  QRScanner.scan(scan), 1500);
+                             }); 
+                           }
+                        }
+                  }
+
+       
+            $$(".page-content #scanner").attr("autocomplete", "off");
+                var typingTimer;                //timer identifier
+                $$('.page-content').on('keyup',"#scanner", function () {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(doneTyping, doneTypingInterval);
+                });
+
+                //on keydown, clear the countdown 
+                $$('.page-content').on('keydown',"#scanner", function () {
+                clearTimeout(typingTimer);
+                });
+
+                function doneTyping () {
+                    var text=$$(".page-content #scanner").val();
+                    console.log(text);
+                    //submit form;
+                 
+                     app.dialog.alert(text,"");
+
+                    $$(".page-content #scanner").val("");
+                }
+              },300);
+            
+          }
+          
+      }
+  }
+  </script>

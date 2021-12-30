@@ -1,0 +1,202 @@
+<template>
+  <!-- Main Screen -->
+
+  <div class="page tour_option" id="tour_option" data-name="tour_option">
+    <div class="page-content  login_bg">
+      <div
+        style=" margin: auto;width: 50%; padding: 10px;"
+        id="tour_option_page"
+      >
+        <div class="row">
+          <!-- Each "cell" has col-[width in percents] class -->
+          <div class="col-100" style="text-align: center;">
+            <div class="custom-button-large map_btn">
+              <i class="material-icons custom-icon-large"> room</i>
+              <div class="custom-label">
+                <h2>LOG</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-100" style="text-align: center;">
+            <div class="custom-button-large tour_btn">
+              <i class="material-icons custom-icon-large"> fullscreen</i>
+              <div class="custom-label">
+                <h2>TOUR SCANNER</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row entry_bot">
+        <div
+          class="col home_btn"
+          style="max-height: 6vh; text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;  line-height: 14px;margin:0 2%;cursor: pointer;"
+        >
+          <b><p>HOME</p></b>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import request from "../js/request.js";
+  export default {
+    data: function() {
+      var app = this.$app;
+      var auth = app.form.getFormData("auth");
+      return {
+        user: auth.user
+      };
+    },
+    on: {
+      pageInit: function() {
+        var $$ = this.$$;
+        var app = this.$app;
+        var router = this.$router;
+        var auth = app.form.getFormData("auth");
+
+        if (app.device.android) {
+          console.log("It is android device");
+          document.getElementById("tour_option_page").style.marginTop = "15%";
+        } else {
+          document.getElementById("tour_option_page").style.marginTop = "2%";
+        }
+
+        //*home function////////////////////////////////////////////////////////////////////////////////////////////////
+        $$(".home_btn").on("click", function() {
+          console.log("home");
+          router.back("/main/", { force: true });
+        });
+
+        // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //*tour list function////////////////////////////////////////////////////////////////////////////////////////////////
+        $$(".map_btn").on("click", function() {
+          router.navigate({ name: "tour_map" });
+        });
+
+        // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //*tour function////////////////////////////////////////////////////////////////////////////////////////////////
+
+        var statuses = [];
+
+        $$(".tour_btn").on("click", function() {
+          var camera_granted = false;
+          var location_granted = false;
+          cordova.plugins.diagnostic.isCameraAuthorized({
+            successCallback: function(authorized) {
+              if (authorized) {
+                // camera_granted=true;
+
+                cordova.plugins.diagnostic.isLocationAuthorized(
+                  function(authorized) {
+                    if (authorized) {
+                      // location_granted=true;
+                      router.navigate({ name: "tour" });
+                    } else {
+                      cordova.plugins.diagnostic.requestLocationAuthorization(
+                        function(status) {
+                          switch (status) {
+                            case cordova.plugins.diagnostic.permissionStatus
+                              .NOT_REQUESTED:
+                              alert("Location Permission not requested");
+                              break;
+                            case cordova.plugins.diagnostic.permissionStatus
+                              .GRANTED:
+                              router.navigate({ name: "tour" });
+                              break;
+                            case cordova.plugins.diagnostic.permissionStatus
+                              .DENIED_ONCE:
+                              alert("Location Permission denied");
+                              break;
+                            case cordova.plugins.diagnostic.permissionStatus
+                              .DENIED_ALWAYS:
+                              alert(
+                                "Location Permission permanently denied, please manually enable location permission in app setting!"
+                              );
+                              break;
+                          }
+                        },
+                        function(error) {
+                          alert(error);
+                        }
+                      );
+                    }
+                  },
+                  function(error) {
+                    alert("The following error occurred: " + error);
+                  }
+                );
+              } else {
+                cordova.plugins.diagnostic.requestCameraAuthorization({
+                  successCallback: function(status) {
+                    switch (status) {
+                      case cordova.plugins.diagnostic.permissionStatus
+                        .NOT_REQUESTED:
+                        alert("Camera Permission not requested");
+                        break;
+                      case cordova.plugins.diagnostic.permissionStatus.GRANTED:
+                        cordova.plugins.diagnostic.requestLocationAuthorization(
+                          function(status) {
+                            switch (status) {
+                              case cordova.plugins.diagnostic.permissionStatus
+                                .NOT_REQUESTED:
+                                alert("Location Permission not requested");
+                                break;
+                              case cordova.plugins.diagnostic.permissionStatus
+                                .GRANTED:
+                                router.navigate({ name: "tour" });
+                                break;
+                              case cordova.plugins.diagnostic.permissionStatus
+                                .DENIED_ONCE:
+                                alert("Location Permission denied");
+                                break;
+                              case cordova.plugins.diagnostic.permissionStatus
+                                .DENIED_ALWAYS:
+                                alert(
+                                  "Location Permission permanently denied, please manually enable location permission in app setting!"
+                                );
+                                break;
+                            }
+                          },
+                          function(error) {
+                            alert(error);
+                          }
+                        );
+                        break;
+                      case cordova.plugins.diagnostic.permissionStatus
+                        .DENIED_ONCE:
+                        alert("Camera Permission denied");
+                        break;
+                      case cordova.plugins.diagnostic.permissionStatus
+                        .DENIED_ALWAYS:
+                        alert(
+                          "Camera Permission permanently denied, please manually enable location permission in app setting!"
+                        );
+                        break;
+                    }
+                  },
+                  errorCallback: function(error) {
+                    alret(error);
+                  },
+                  externalStorage: true
+                });
+              }
+            },
+            errorCallback: function(error) {
+              alert("The following error occurred: " + error);
+            },
+            externalStorage: true
+          });
+        });
+
+        // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      }
+    }
+  };
+</script>

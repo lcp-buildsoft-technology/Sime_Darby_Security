@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!--
+  Customize this policy to fit your own app's needs. For more guidance, see:
+      https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+  Some notes:
+    * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+    * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+    * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+      * Enable inline JS: add 'unsafe-inline' to default-src
+  -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover">
+  <link href="path/to/framework7-icons.css">
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7XCS4gWqpqaJjVcT6F-Eal8DZMfrJggc"></script>
+
+  <meta name="theme-color" content="#EF8354">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
+  <link href="https://fonts.googleapis.com/css?family=Julius+Sans+One" rel="stylesheet">
+  <title>Sime Darby Security</title>
+  
+  
+  
+  
+  <!-- built styles file will be auto injected -->
+  <style>html {
+    -webkit-user-select: none;
+}</style>
+</head>
+<body>
+  <div id="app">
+    <!-- Status bar overlay for fullscreen mode-->
+    <div class="statusbar"></div>
+  
+
+
+
+    
+    <!-- Your main view, should have "view-main" class -->
+    <div class="view view-main view-init safe-areas" data-url="/login/"></div>
+    <div class="reasons popup">
+      <div class="">
+        <div class="navbar">
+          <div class="navbar-inner">
+          <div class="left">       
+          <a href="#" class="link popup-close"><i class="material-icons"> arrow_back</i></a>
+        </div>
+            <div class="title"><p style=" text-transform: uppercase;color:white;">Open Boom Gate</p></div>
+        </div>
+      </div>
+              
+       <div class="block">
+
+
+
+        <div class="list">
+              <ul id="reason-list">
+              </ul>
+              <input type="hidden" name="type" id="gate-type">
+            </div>
+
+
+         </div>
+
+
+
+              <div class="btm_nav">
+              
+                <div class="row">
+
+                <a href="#" class="link cancel col-50" id="cancel" >
+                 
+                    <button class="col button button-outline button-round " style="border-color:darkgrey;color:darkgrey"><b>Cancel</b></button>
+                  
+                </a>
+
+
+                <a href="#" class="link open-gate-reason col-50" id="open" >
+                
+                   <button class="col button button-outline button-round " style="border-color:#00BE47;color:#00BE47;"><b>Open Boom Gate</b></button>
+                  
+                </a>
+
+             
+              </div>
+              
+            </div>
+
+           </div>
+
+    </div>
+  </div>
+  <% if (process.env.TARGET === 'cordova') { %>
+  <script src="cordova.js"></script>
+  <% } %>
+  <!-- built script files will be auto injected -->
+
+
+ 
+
+</body>
+</html>

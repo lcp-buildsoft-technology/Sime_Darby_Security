@@ -1,0 +1,2879 @@
+<template >
+
+
+        <div class="page" id="visitor" data-name="visitor">
+            <div class="page-content" >
+              <!-- Static Navbar -->
+              <div class="navbar">
+                <div class="navbar-inner">
+                  <div class="left">
+                    <a class="link back">
+                        <i class="material-icons"> arrow_back</i>
+                      <span class="if-not-md">Back</span>
+                    </a>
+                  </div>
+                  <div class="title">VISITOR</div>
+                  <div id="contact_phone" class="right" style="margin-right: 15px;margin-top: 6px;"><a href="#" class="contact_btn"><i class="material-icons">contact_phone</i></a></div>
+                </div>
+              </div>
+
+
+
+              <div class="toolbar tabbar toolbar-top " style="top:0;">
+                  <div class="toolbar-inner">
+                    <a href="#tab-1" class="tab-link tab-link-active">Check-in</a>
+                    <a href="#tab-2" class="tab-link">Check-out</a>
+           
+                  </div>
+              </div>
+    
+              <div class="desktop_view">
+                <div class="row">
+                    <!-- Each "cell" has col-[width in percents] class -->
+                    <div class="col-50" >
+                      <center>
+                        <div class="visitor_content_desktop" style="text-align: left;">
+                          
+                            <div class="visitor_scroll_view visitor_scroll_view_in" >
+                              <div class="approved_entry_list"></div>
+                              <div class="rejected_entry_list"></div>
+                              <div class="pending_entry_list"></div>
+                              <div class="onhold_entry_list"></div>
+                            </div>
+                                            
+                        </div>
+                      </center>    
+                    </div>
+                    <div class="col-50"  >
+                      <center>
+                        <div class="visitor_content_desktop" style="text-align: left;">
+                              <div class="visitor_scroll_view visitor_scroll_view_out" >
+                              </div>
+                        </div>
+                      </center>
+                    </div>
+                </div>
+              </div>
+
+              
+              <div class="tabs-swipeable-wrap mobile_view" style="height:auto;">
+                <div class="tabs">
+                  <div id="tab-1" class="page-content tab tab-active" style="padding-top:0;">
+                    <div >
+                      <div class="visitor_content">
+                      
+                           <div class="visitor_scroll_view visitor_scroll_view_in" >
+                              <div class="approved_entry_list"></div>
+                              <div class="rejected_entry_list"></div>
+                              <div class="pending_entry_list"></div>
+                              <div class="onhold_entry_list"></div>
+                            </div>                     
+                      
+                      </div>
+                    </div>
+                  </div>
+                  <div id="tab-2" class="page-content tab" style="padding-top:0;">
+                    <div >
+                        <div class="visitor_content">
+                        
+                            <div class="visitor_scroll_view visitor_scroll_view_out" >
+                            </div>
+                       </div>
+                     
+                    </div>
+                  </div>
+              
+                </div>
+              </div>
+            
+
+
+
+
+
+             
+                  
+                  
+                  
+             
+                  
+                  
+        
+             
+
+
+
+
+
+
+               <div class="visitor_content" style="padding-top:2.5vh;border-top: solid #FB6C5E">
+
+               <div  id="button-part">
+               <div class="row">
+                    <!-- Each "cell" has col-[width in percents] class -->
+                    <div class="col-50" style='text-align: center;'>
+                        
+                            <div class="custom-button1   popover-open" data-popover=".popover-links">
+                                <i class="material-icons custom-icon1"> directions_car</i>
+                            </div>
+                            <div class="custom-label1">
+                                <h3>Open Boom Gate</h3>
+                            </div>
+                        
+                    </div>
+
+
+                    <div class="col-50" style='text-align: center;'> 
+                        
+                            <div class="custom-button1 history_btn">
+                                <i class="material-icons custom-icon1"> dvr</i>
+                            </div>
+                            <div class="custom-label1">
+                                <h3>Visitor History</h3>
+                            </div>
+                        
+                    </div>     
+                </div>      
+                        
+                </div>
+               
+                </div>
+    
+              
+
+
+
+                <div class="popover popover-links">
+                  <div class="popover-inner">
+                    <div class="list">
+                      <ul>
+                        <li><a class="list-button item-link boom-gate-btn popover-close" href="#" data-value="E">Check-in</a></li>
+                        <li><a class="list-button item-link boom-gate-btn popover-close" href="#" data-value="X">Check-out</a></li>
+                 
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+            </div>
+          </div>
+          
+    </template>
+
+
+    
+<script>
+        import request from '../js/request.js';
+        import socket from 'socket.io-client/dist/socket.io.js';
+        import CONFIG from "../js/config.js";
+        export default {
+        
+            data:function(){
+              var dynamicPopup;
+              var app=this.$app;
+              var auth = app.form.getFormData("auth");
+             
+              return{
+                user:auth.user,
+              }
+            },
+        on:{
+          
+        pageInit:function(){
+          var $$=this.$$;
+             var app=this.$app;
+             var router=this.$router;
+             var resons;
+             var auth = app.form.getFormData("auth");
+             console.log(navigator.connection.type)
+            console.log(auth.token)
+            var sck = socket.connect(CONFIG.SOCKET)
+            var offline = sck.disconnected;
+            app.form.storeFormData("offline", sck.disconnected);
+            sck.on('connect', function(office_mode) {
+              console.log('check 2', sck.connected);
+
+                app.form.storeFormData("offline", false);
+            });
+            
+            setTimeout(function(){
+              var auth = app.form.getFormData("auth");
+              offline = app.form.getFormData("offline");
+              console.log(offline)
+           
+
+
+            var gate_type;
+
+            if (app.device.desktop) {
+        
+              $$('.mobile_view').css("display", "none");
+              document.getElementById("contact_phone").remove();
+            }else{
+              $$('.desktop_view').css("display", "none");
+            }
+            var ip_cam = [];
+        var hasAddress = false;
+
+        if(offline == false){
+          request.get(
+            "security_ipcam",
+            { Authorization: "JWT " + auth.token },
+            null,'',
+            function(data) {
+              for (var i = 0; i < data.results.length; i++) {
+                ip_cam[data.results[i].type] = data.results[i].url;
+              }
+              console.log(ip_cam);
+            },function(xhr, status){
+            
+            }
+          );
+        }else{
+          request.post(
+          "security_ipcam.php",
+          null,
+          {area:auth.user.area.id},'OFF',
+          function(data) {
+            console.log(data)
+            for (var i = 0; i < data.results.length; i++) {
+              ip_cam[data.results[i].type] = data.results[i].url;
+            }
+            console.log(ip_cam);
+          }
+        );
+        }
+        //*camera_btn function////////////////////////////////////////////////////////////////////////////////////////////////
+        $$(".camera_btn3").on("click", function() {
+
+var facecam = ip_cam.FC;
+var frontcam = ip_cam.EF;
+var iccam = ip_cam.IC;
+
+var x = $$(this).attr("x");
+var id = $$('#visit_id').val();
+var entry_id = $$('.entry_force').attr("visitor_id");
+console.log(entry_id,id);
+if (app.device.android || app.device.ios) {
+  app.dialog
+    .create({
+      title: "Camera Option",
+
+      buttons: [
+        {
+          text: "IVMS"
+        },
+        {
+          text: "Phone camera"
+        },
+        {
+          text: "Close"
+        }
+      ],
+      
+      onClick: function(dialog, index) {
+        if (index === 0) {
+          //Button 1 clicked
+          ivms_capture(x, frontcam, facecam, iccam);
+        } else if (index === 1) {
+          //Button 2 clicked
+          // cameara pugin deprecated!
+          console.log("camera");
+          document.addEventListener(
+            "deviceready",
+            onDeviceReady,
+            false
+          );
+          function onDeviceReady() {
+            console.log(navigator.camera);
+          }
+
+          console.log(x);
+
+          navigator.camera.getPicture(onSuccess, onFail, {
+            quality: 50,
+            destinationType: Camera.DestinationType.DATA_URL
+          });
+
+          function onSuccess(imageURI) {
+            const byteCharacters = atob(imageURI);
+            const byteArrays = [];
+            var imgs = [];
+
+            for (
+              let offset = 0;
+              offset < byteCharacters.length;
+              offset += 512
+            ) {
+              const slice = byteCharacters.slice(
+                offset,
+                offset + 512
+              );
+
+              const byteNumbers = new Array(slice.length);
+              for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+              }
+
+              const byteArray = new Uint8Array(byteNumbers);
+              byteArrays.push(byteArray);
+            }
+
+            const blob = new Blob(byteArrays, { type: "image/jpg" });
+
+            console.log(blob);
+            var im = new Image();
+            var url = window.URL || window.webkitURL;
+            im.className = "custom-img";
+            im.src = url.createObjectURL(blob);
+
+            $$("#" + x).html("");
+            $$("#" + x).append(im);
+
+            //imgs.push({"name":x,"value":imageURI.substr(imageURI.lastIndexOf('/')+1)});
+            imgs[x] = blob;
+            
+            for (const [key, value] of Object.entries(imgs)) {
+              switch (key) {
+                case "IC":
+                var entry_id =$$('#visit_id').val();
+                var Fdata = new FormData();
+                  Fdata.append("identity_image", value, key + ".jpg");
+                  Fdata.append("driver_image", "");
+                  Fdata.append("entry_car_plate_image", "");
+                  Fdata.append("status", "");
+                  console.log(value)
+                  force_update_driver(entry_id,Fdata)
+                  break;
+                case "EF":
+                var entry_id = $$('#visit_id').val();
+                var Fdata = new FormData();
+                Fdata.append("identity_image", "");
+                  Fdata.append("entry_car_plate_image", value, key + ".jpg");
+                  Fdata.append("driver_image", "");
+                  Fdata.append("status", "");
+                  console.log(value)
+                  force_update_driver(entry_id,Fdata)
+                  break;
+                case "FC":
+                var entry_id =$$('#visit_id').val();
+                var Fdata = new FormData();
+                Fdata.append("identity_image", "");
+                  Fdata.append("driver_image", value, key + ".jpg");
+                  Fdata.append("entry_car_plate_image", "");
+                  Fdata.append("status", "");
+                  console.log(value)
+                  force_update_driver(entry_id,Fdata)
+                  break;
+              }
+            }
+
+         
+            
+          }
+
+          function onFail(message) {
+            app.dialog.alert("Failed because: " + message, "");
+          }
+        }else if(index === 2){
+          app.dialog.close();
+        }
+      },
+      verticalButtons: true
+    })
+    .open();
+} else {
+  ivms_capture(x, frontcam, facecam, iccam);
+}
+});
+
+        
+        function ivms_capture(x, frontcam, facecam, iccam) {
+          app.dialog.preloader("Capture Image...");
+          var imgs = [];
+          
+          console.log(x, frontcam, facecam, iccam)
+          if (x == "EF") {
+            console.log("Front:" + frontcam);
+            var $this = $$("#" + x);
+            request.getimg(
+              frontcam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+               
+                if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $this.html("");
+                  $this.append(im);
+                  imgs[x] = data;
+                  var Fdata = new FormData();
+                  var entry_id =$$('#visit_id').val();
+                  for (const [key, value] of Object.entries(imgs)) {
+                    
+                        switch (key) {
+                           
+                          case "EF":
+                          Fdata.append("identity_image", "");
+                            Fdata.append("entry_car_plate_image", value, key + ".jpg");
+                            Fdata.append("driver_image", "");
+                            Fdata.append("status", "");
+                            force_update_driver(entry_id,Fdata)
+                            console.log("abc",Fdata)
+                            break;
+                         
+                        }
+                      }
+                      // Fdata.append("status", "")
+                      // force_update_driver(entry_id,Fdata)
+                  app.dialog.close();
+                }
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+          } else if (x == "FC") {
+            console.log("Face:" + facecam);
+            var $this = $$("#" + x);
+            request.getimg(
+              facecam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+                
+                if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $this.html("");
+                  $this.append(im);
+                  imgs[x] = data;
+                  var Fdata = new FormData();
+                  var entry_id = $$('#visit_id').val();
+                  for (const [key, value] of Object.entries(imgs)) {
+                        switch (key) {
+                          case "FC":
+                          Fdata.append("identity_image", "");
+                            Fdata.append("driver_image", value, key + ".jpg");
+                            Fdata.append("entry_car_plate_image", "");
+                            Fdata.append("status", "");
+                            force_update_driver(entry_id,Fdata)
+                            console.log("abc",Fdata)
+                            break;
+                        }
+                      }
+                      // Fdata.append("status", "")
+                      // force_update_driver(entry_id,Fdata)
+                  app.dialog.close();
+                }
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+          } else if (x == "IC") {
+            console.log("IC:" + iccam);
+            var $this = $$("#" + x);
+            request.getimg(
+              iccam,
+              null,
+              function(data) {
+                var im = new Image();
+
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+               
+                if (data.size <= 26) {
+                  app.dialog.close();
+                  app.dialog.alert("Please insert IC.", "");
+                } else if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $this.html("");
+                  $this.append(im);
+                  imgs[x] = data;
+                  var Fdata = new FormData();
+                  var entry_id =$$('#visit_id').val();
+                  for (const [key, value] of Object.entries(imgs)) {
+                        switch (key) {
+                          case "IC":
+                            Fdata.append("identity_image", value, key + ".jpg");
+                            Fdata.append("driver_image", "");
+                            Fdata.append("entry_car_plate_image", "");
+                            Fdata.append("status", "");
+                            force_update_driver(entry_id,Fdata)
+                            console.log("abc",Fdata)
+                            break;
+                        }
+                      }
+                      
+                  app.dialog.close();
+                }
+
+                console.log(data);
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+          }
+        }
+        
+
+       
+
+       
+
+        function force_update_driver(entry_id,data){
+
+        console.log(data)
+        app.dialog.preloader();
+        request.put(
+            "visitor_entry/" + entry_id,
+            { Authorization: "JWT " + auth.token },
+            data,
+            function(data) {
+              app.dialog.close();
+              var toastCenter = app.toast.create({
+                text: "<center>Update Image Success!</center>",
+                position: "center",
+                closeTimeout: 2000
+              });
+
+              app.popup.close();
+              
+            },
+            function(xhr, status) {
+              var toastCenter = app.toast.create({
+                text: "<center>Update Image Failed!</center>",
+                position: "center",
+                closeTimeout: 2000
+              });
+              app.dialog.close();
+            }
+        );
+      }
+
+            //get list when page load
+            if(offline == false){
+        request.get(
+          "visitor_entry",
+          { Authorization: "JWT " + auth.token },
+          { status: "PEX"},'',function(data){
+              console.log(data);
+            
+            var list_item=[];
+              for(var i=0;i<data.length;i++){
+                
+            if(data[i].status!="PEX"){
+            var new_entry_item="";
+            var color="";
+            var status="";
+        
+            
+            if(data[i].status=="AIR"){
+              color="forestgreen";
+              status="Approved";
+            }else if(data[i].status=="RIR"){
+              color="red";
+              status="Rejected";
+           
+            }
+            else if(data[i].status=="PEN"){
+              color="#FB6C5E";
+              status="Pending";
+            
+            }
+            else if(data[i].status=="OEN"){
+              color="#FBB35E";
+              status="On Hold";
+            
+            }
+
+            
+            var status_id="status_"+data[i].tracker_id;
+            var card_id="card_"+data[i].tracker_id;
+
+            var address="";
+            if(data[i].entry_type!="I"){
+              address=  data[i].lot.name+","+data[i].lot.street.name;
+            }
+            new_entry_item ="<div class='card  card_in card_width "+card_id+" '  >"+
+                    "<div class='card-content card-click entry_force content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+                      '<div class="row no-gap">'+
+                        '<div class="col-20 card-left-content">'+
+                          '<div class="card-left-content_inner">'+
+                            '<i class="material-icons">chevron_right</i>'+
+                             '<p>CHECK IN</p>'+
+                         ' </div>'+
+                        '</div>'+
+                        '<div class="col-70 card-center-content">'+
+                          '<div class="card-center-content_inner">'+
+                            '<div>'+address+'</div>'+
+                            '<div style="width: 100%;">'+
+                                    '<div style="display: inline-block;">'+data[i].visitor_car_plate+'</div>'+
+                                    '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;">Status: <b class="'+status_id+'" style="color: '+color+'"> '+status+'</b></div>'+
+                                    '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+                           ' </div>'+
+                          '</div>'+
+                        '</div>' +   
+                        '<div class="col-10 card-right-content">'+
+                          '<div class="card-right-content_inner">'+
+                           ' <i class="material-icons">more_vert</i>'+
+                         ' </div>'+
+                       ' </div>'+
+
+                      '</div>'+
+                    '</div>'+
+                 ' </div>';
+
+         
+
+            var content_item = {status:data[i].status, content:new_entry_item};
+            list_item.push(content_item);
+
+
+            }else{
+                            var card_id="card_"+data[i].tracker_id;
+
+                            var address="";
+            if(data[i].entry_type!="I"){
+              address=  data[i].lot.name+","+data[i].lot.street.name;
+            }else{
+              address ="Impromtu";
+            }
+
+                 var new_exit_item=  '<div class="card  card_in card_width '+card_id+'"   >'+
+                  "<div class='card-content card-click  content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+                         ' <div class="row no-gap">'+
+                            '<div class="col-20 card-left-content">'+
+                              '<div class="card-left-content_inner">'+
+                               ' <i class="material-icons">chevron_left</i>'+
+                                '<p>CHECK OUT</p>'+
+                              '</div>'+
+                            '</div>'+
+                            '<div class="col-70 card-center-content">'+
+                              '<div class="card-center-content_inner">'+
+                                   ' <div>'+address+'</div>'+
+                                   ' <div>'+data[i].visitor_car_plate+'</div>'+
+                                   '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+                              '</div>'+
+                            '</div>'+
+                            '<div class="col-10 card-right-content">'+
+                              '<div class="card-right-content_inner">'+
+                                '<i class="material-icons">more_vert</i>'+
+                              '</div>'+
+                           ' </div>'+
+
+                            '</div>'+
+                          '</div>'+
+                        '</div>';
+
+                        $$('.visitor_scroll_view_out').append(new_exit_item);
+                          }
+              }
+
+   
+              function compare( a, b ) {
+                if ( a.status=="AIR" && b.status=='RIR' ){
+                  return -1;
+                }
+                if ( a.status=="AIR" && b.status=='PEN' ){
+                  return -1;
+                }
+                if ( a.status=="RIR" && b.status=='AIR' ){
+                  return 1;
+                }
+                if ( a.status=="RIR" && b.status=='PEN' ){
+                  return -1;
+                }
+                if ( a.status=="PEN" && b.status=='AIR' ){
+                  return 1;
+                }
+                if ( a.status=="PEN" && b.status=='RIR' ){
+                  return 1;
+                }
+                if ( a.status=="OEN" && b.status=='PEN' ){
+                  return 1;
+                }
+                return 0;
+              }
+
+                list_item.sort( compare );
+              
+
+         
+                function show_list(total,now){
+               
+                  var all=total;
+                  var z=now
+                
+          
+                  if(z<all){
+                    var data_status =list_item[z].status;
+                  var content = list_item[z].content;
+                 
+  if(data_status=="AIR"){
+             setTimeout(function(){ $$('.approved_entry_list').append(content);
+             z++;
+            show_list(all,z);
+            },100) 
+           
+            }else if(data_status=="RIR"){
+              setTimeout(function(){ $$('.rejected_entry_list').append(content);
+              z++;
+            show_list(all,z);
+                
+            },100)
+              
+             
+            }
+            else if(data_status=="PEN"){
+              setTimeout(function(){ $$('.pending_entry_list').append(content);
+              z++;
+            show_list(all,z);
+        
+            },100)
+             
+        
+              
+            }else if(data_status=="OEN"){
+              setTimeout(function(){ $$('.onhold_entry_list').append(content);
+              z++;
+            show_list(all,z);
+        
+            },100)
+             
+        
+              
+            }else{
+              z++;
+            show_list(all,z);
+            }
+          }
+                }
+               
+         
+                show_list(list_item.length,0);
+           
+          
+        
+
+      
+
+
+
+            },function(xhr, status) {
+              var dialog1 = app.dialog.create({
+                        title: 'Record Not Found  !',
+                        text: 'Failed to scan out.',
+                        buttons: [
+                        // {
+                        //     text: 'RETRY NOW',
+                        //     onClick: function () {
+                        //         clearInterval(myTimer);
+                        //         router.refreshPage('/');
+                                
+                        //     }
+                        // },
+                        {
+                            text: 'Close',
+                            onClick: function () {
+                                f7c.$router.refreshPage('/');
+                                app.dialog.close()
+                            }
+                        }
+                        ]
+                    })
+    
+                    dialog1.open();
+             
+            });
+    }else{
+      request.post(
+          "visitor_entry.php",
+           null,
+          { status: "AIR",type: "",area: auth.user.area.id},'OFF',function(data){
+              console.log(data);
+            
+            var list_item=[];
+              for(var i=0;i<data.length;i++){
+                
+            if(data[i].status!="PEX"){
+            var new_entry_item="";
+            var color="";
+            var status="";
+        
+            
+            if(data[i].status=="AIR"){
+              color="forestgreen";
+              status="Approved";
+            }else if(data[i].status=="RIR"){
+              color="red";
+              status="Rejected";
+           
+            }
+            else if(data[i].status=="PEN"){
+              color="#FB6C5E";
+              status="Pending";
+            
+            }
+            else if(data[i].status=="OEN"){
+              color="#FBB35E";
+              status="On Hold";
+            
+            }
+
+            
+            var status_id="status_"+data[i].tracker_id;
+            var card_id="card_"+data[i].tracker_id;
+
+            var address="";
+            if(data[i].entry_type!="I"){
+              address=  data[i].lot.name+","+data[i].lot.street.name;
+            }
+            new_entry_item ="<div class='card  card_in card_width "+card_id+" '  >"+
+                    "<div class='card-content card-click entry_force content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+                      '<div class="row no-gap">'+
+                        '<div class="col-20 card-left-content">'+
+                          '<div class="card-left-content_inner">'+
+                            '<i class="material-icons">chevron_right</i>'+
+                             '<p>CHECK IN</p>'+
+                         ' </div>'+
+                        '</div>'+
+                        '<div class="col-70 card-center-content">'+
+                          '<div class="card-center-content_inner">'+
+                            '<div>'+address+'</div>'+
+                            '<div style="width: 100%;">'+
+                                    '<div style="display: inline-block;">'+data[i].visitor_car_plate+'</div>'+
+                                    '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;">Status: <b class="'+status_id+'" style="color: '+color+'"> '+status+'</b></div>'+
+                                    '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+                           ' </div>'+
+                          '</div>'+
+                        '</div>' +   
+                        '<div class="col-10 card-right-content">'+
+                          '<div class="card-right-content_inner">'+
+                           ' <i class="material-icons">more_vert</i>'+
+                         ' </div>'+
+                       ' </div>'+
+
+                      '</div>'+
+                    '</div>'+
+                 ' </div>';
+
+         
+
+            var content_item = {status:data[i].status, content:new_entry_item};
+            list_item.push(content_item);
+
+
+            }else{
+                            var card_id="card_"+data[i].tracker_id;
+
+                            var address="";
+            if(data[i].entry_type!="I"){
+              address=  data[i].lot.name+","+data[i].lot.street.name;
+            }else{
+              address ="Impromtu";
+            }
+
+                 var new_exit_item=  '<div class="card  card_in card_width '+card_id+'"   >'+
+                  "<div class='card-content card-click  content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+                         ' <div class="row no-gap">'+
+                            '<div class="col-20 card-left-content">'+
+                              '<div class="card-left-content_inner">'+
+                               ' <i class="material-icons">chevron_left</i>'+
+                                '<p>CHECK OUT</p>'+
+                              '</div>'+
+                            '</div>'+
+                            '<div class="col-70 card-center-content">'+
+                              '<div class="card-center-content_inner">'+
+                                   ' <div>'+address+'</div>'+
+                                   ' <div>'+data[i].visitor_car_plate+'</div>'+
+                                   '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+                              '</div>'+
+                            '</div>'+
+                            '<div class="col-10 card-right-content">'+
+                              '<div class="card-right-content_inner">'+
+                                '<i class="material-icons">more_vert</i>'+
+                              '</div>'+
+                           ' </div>'+
+
+                            '</div>'+
+                          '</div>'+
+                        '</div>';
+
+                        $$('.visitor_scroll_view_out').append(new_exit_item);
+                          }
+              }
+
+   
+              function compare( a, b ) {
+                if ( a.status=="AIR" && b.status=='RIR' ){
+                  return -1;
+                }
+                if ( a.status=="AIR" && b.status=='PEN' ){
+                  return -1;
+                }
+                if ( a.status=="RIR" && b.status=='AIR' ){
+                  return 1;
+                }
+                if ( a.status=="RIR" && b.status=='PEN' ){
+                  return -1;
+                }
+                if ( a.status=="PEN" && b.status=='AIR' ){
+                  return 1;
+                }
+                if ( a.status=="PEN" && b.status=='RIR' ){
+                  return 1;
+                }
+                if ( a.status=="OEN" && b.status=='PEN' ){
+                  return 1;
+                }
+                return 0;
+              }
+
+                list_item.sort( compare );
+              
+
+         
+                function show_list(total,now){
+               
+                  var all=total;
+                  var z=now
+                
+          
+                  if(z<all){
+                    var data_status =list_item[z].status;
+                  var content = list_item[z].content;
+                 
+  if(data_status=="AIR"){
+             setTimeout(function(){ $$('.approved_entry_list').append(content);
+             z++;
+            show_list(all,z);
+            },100) 
+           
+            }else if(data_status=="RIR"){
+              setTimeout(function(){ $$('.rejected_entry_list').append(content);
+              z++;
+            show_list(all,z);
+                
+            },100)
+              
+             
+            }
+            else if(data_status=="PEN"){
+              setTimeout(function(){ $$('.pending_entry_list').append(content);
+              z++;
+            show_list(all,z);
+        
+            },100)
+             
+        
+              
+            }else if(data_status=="OEN"){
+              setTimeout(function(){ $$('.onhold_entry_list').append(content);
+              z++;
+            show_list(all,z);
+        
+            },100)
+             
+        
+              
+            }else{
+              z++;
+            show_list(all,z);
+            }
+          }
+                }
+               
+         
+                show_list(list_item.length,0);
+           
+          
+        
+
+      
+
+
+
+            },function(xhr,status,error){
+              var dialog1 = app.dialog.create({
+                        title: 'Record Not Found  !',
+                        text: 'Failed to scan out.',
+                        buttons: [
+                        // {
+                        //     text: 'RETRY NOW',
+                        //     onClick: function () {
+                        //         clearInterval(myTimer);
+                        //         router.refreshPage('/');
+                                
+                        //     }
+                        // },
+                        {
+                            text: 'Close',
+                            onClick: function () {
+                                f7c.$router.refreshPage('/');
+                                app.dialog.close()
+                            }
+                        }
+                        ]
+                    })
+    
+                    dialog1.open();
+            });
+    }
+
+
+  //           request.get(
+  //         "visitor_entry",
+  //         { Authorization: "JWT " + auth.token },
+  //         { status: "AIR"},'',function(data){
+  //             console.log(data);
+            
+  //           var list_item=[];
+  //             for(var i=0;i<data.length;i++){
+                
+  //           if(data[i].status!="PEX"){
+  //           var new_entry_item="";
+  //           var color="";
+  //           var status="";
+        
+            
+  //           if(data[i].status=="AIR"){
+  //             color="forestgreen";
+  //             status="Approved";
+  //           }else if(data[i].status=="RIR"){
+  //             color="red";
+  //             status="Rejected";
+           
+  //           }
+  //           else if(data[i].status=="PEN"){
+  //             color="#FB6C5E";
+  //             status="Pending";
+            
+  //           }
+  //           else if(data[i].status=="OEN"){
+  //             color="#FBB35E";
+  //             status="On Hold";
+            
+  //           }
+
+            
+  //           var status_id="status_"+data[i].tracker_id;
+  //           var card_id="card_"+data[i].tracker_id;
+
+  //           var address="";
+  //           if(data[i].entry_type!="I"){
+  //             address=  data[i].lot.name+","+data[i].lot.street.name;
+  //           }
+  //           new_entry_item ="<div class='card  card_in card_width "+card_id+" '  >"+
+  //                   "<div class='card-content card-click entry_force content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+  //                     '<div class="row no-gap">'+
+  //                       '<div class="col-20 card-left-content">'+
+  //                         '<div class="card-left-content_inner">'+
+  //                           '<i class="material-icons">chevron_right</i>'+
+  //                            '<p>CHECK IN</p>'+
+  //                        ' </div>'+
+  //                       '</div>'+
+  //                       '<div class="col-70 card-center-content">'+
+  //                         '<div class="card-center-content_inner">'+
+  //                           '<div>'+address+'</div>'+
+  //                           '<div style="width: 100%;">'+
+  //                                   '<div style="display: inline-block;">'+data[i].visitor_car_plate+'</div>'+
+  //                                   '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;">Status: <b class="'+status_id+'" style="color: '+color+'"> '+status+'</b></div>'+
+  //                                   '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+  //                          ' </div>'+
+  //                         '</div>'+
+  //                       '</div>' +   
+  //                       '<div class="col-10 card-right-content">'+
+  //                         '<div class="card-right-content_inner">'+
+  //                          ' <i class="material-icons">more_vert</i>'+
+  //                        ' </div>'+
+  //                      ' </div>'+
+
+  //                     '</div>'+
+  //                   '</div>'+
+  //                ' </div>';
+
+         
+
+  //           var content_item = {status:data[i].status, content:new_entry_item};
+  //           list_item.push(content_item);
+
+
+  //           }else{
+  //                           var card_id="card_"+data[i].tracker_id;
+
+  //                           var address="";
+  //           if(data[i].entry_type!="I"){
+  //             address=  data[i].lot.name+","+data[i].lot.street.name;
+  //           }else{
+  //             address ="Impromtu";
+  //           }
+
+  //                var new_exit_item=  '<div class="card  card_in card_width '+card_id+'"   >'+
+  //                 "<div class='card-content card-click  content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+  //                        ' <div class="row no-gap">'+
+  //                           '<div class="col-20 card-left-content">'+
+  //                             '<div class="card-left-content_inner">'+
+  //                              ' <i class="material-icons">chevron_left</i>'+
+  //                               '<p>CHECK OUT</p>'+
+  //                             '</div>'+
+  //                           '</div>'+
+  //                           '<div class="col-70 card-center-content">'+
+  //                             '<div class="card-center-content_inner">'+
+  //                                  ' <div>'+address+'</div>'+
+  //                                  ' <div>'+data[i].visitor_car_plate+'</div>'+
+  //                                  '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+  //                             '</div>'+
+  //                           '</div>'+
+  //                           '<div class="col-10 card-right-content">'+
+  //                             '<div class="card-right-content_inner">'+
+  //                               '<i class="material-icons">more_vert</i>'+
+  //                             '</div>'+
+  //                          ' </div>'+
+
+  //                           '</div>'+
+  //                         '</div>'+
+  //                       '</div>';
+
+  //                       $$('.visitor_scroll_view_out').append(new_exit_item);
+  //                         }
+  //             }
+
+   
+  //             function compare( a, b ) {
+  //               if ( a.status=="AIR" && b.status=='RIR' ){
+  //                 return -1;
+  //               }
+  //               if ( a.status=="AIR" && b.status=='PEN' ){
+  //                 return -1;
+  //               }
+  //               if ( a.status=="RIR" && b.status=='AIR' ){
+  //                 return 1;
+  //               }
+  //               if ( a.status=="RIR" && b.status=='PEN' ){
+  //                 return -1;
+  //               }
+  //               if ( a.status=="PEN" && b.status=='AIR' ){
+  //                 return 1;
+  //               }
+  //               if ( a.status=="PEN" && b.status=='RIR' ){
+  //                 return 1;
+  //               }
+  //               if ( a.status=="OEN" && b.status=='PEN' ){
+  //                 return 1;
+  //               }
+  //               return 0;
+  //             }
+
+  //               list_item.sort( compare );
+              
+
+         
+  //               function show_list(total,now){
+               
+  //                 var all=total;
+  //                 var z=now
+                
+          
+  //                 if(z<all){
+  //                   var data_status =list_item[z].status;
+  //                 var content = list_item[z].content;
+                 
+  // if(data_status=="AIR"){
+  //            setTimeout(function(){ $$('.approved_entry_list').append(content);
+  //            z++;
+  //           show_list(all,z);
+  //           },100) 
+           
+  //           }else if(data_status=="RIR"){
+  //             setTimeout(function(){ $$('.rejected_entry_list').append(content);
+  //             z++;
+  //           show_list(all,z);
+                
+  //           },100)
+              
+             
+  //           }
+  //           else if(data_status=="PEN"){
+  //             setTimeout(function(){ $$('.pending_entry_list').append(content);
+  //             z++;
+  //           show_list(all,z);
+        
+  //           },100)
+             
+        
+              
+  //           }else if(data_status=="OEN"){
+  //             setTimeout(function(){ $$('.onhold_entry_list').append(content);
+  //             z++;
+  //           show_list(all,z);
+        
+  //           },100)
+             
+        
+              
+  //           }else{
+  //             z++;
+  //           show_list(all,z);
+  //           }
+  //         }
+  //               }
+               
+         
+  //               show_list(list_item.length,0);
+           
+          
+        
+
+      
+
+
+
+  //           },function(xhr, status){
+  //             request.post(
+  //         "visitor_entry.php",
+  //          null,
+  //         { status: "AIR",type: "",area: auth.user.area.id},'OFF',function(data){
+  //             console.log(data);
+            
+  //           var list_item=[];
+  //             for(var i=0;i<data.length;i++){
+                
+  //           if(data[i].status!="PEX"){
+  //           var new_entry_item="";
+  //           var color="";
+  //           var status="";
+        
+            
+  //           if(data[i].status=="AIR"){
+  //             color="forestgreen";
+  //             status="Approved";
+  //           }else if(data[i].status=="RIR"){
+  //             color="red";
+  //             status="Rejected";
+           
+  //           }
+  //           else if(data[i].status=="PEN"){
+  //             color="#FB6C5E";
+  //             status="Pending";
+            
+  //           }
+  //           else if(data[i].status=="OEN"){
+  //             color="#FBB35E";
+  //             status="On Hold";
+            
+  //           }
+
+            
+  //           var status_id="status_"+data[i].tracker_id;
+  //           var card_id="card_"+data[i].tracker_id;
+
+  //           var address="";
+  //           if(data[i].entry_type!="I"){
+  //             address=  data[i].lot.name+","+data[i].lot.street.name;
+  //           }
+  //           new_entry_item ="<div class='card  card_in card_width "+card_id+" '  >"+
+  //                   "<div class='card-content card-click entry_force content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+  //                     '<div class="row no-gap">'+
+  //                       '<div class="col-20 card-left-content">'+
+  //                         '<div class="card-left-content_inner">'+
+  //                           '<i class="material-icons">chevron_right</i>'+
+  //                            '<p>CHECK IN</p>'+
+  //                        ' </div>'+
+  //                       '</div>'+
+  //                       '<div class="col-70 card-center-content">'+
+  //                         '<div class="card-center-content_inner">'+
+  //                           '<div>'+address+'</div>'+
+  //                           '<div style="width: 100%;">'+
+  //                                   '<div style="display: inline-block;">'+data[i].visitor_car_plate+'</div>'+
+  //                                   '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;">Status: <b class="'+status_id+'" style="color: '+color+'"> '+status+'</b></div>'+
+  //                                   '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+  //                          ' </div>'+
+  //                         '</div>'+
+  //                       '</div>' +   
+  //                       '<div class="col-10 card-right-content">'+
+  //                         '<div class="card-right-content_inner">'+
+  //                          ' <i class="material-icons">more_vert</i>'+
+  //                        ' </div>'+
+  //                      ' </div>'+
+
+  //                     '</div>'+
+  //                   '</div>'+
+  //                ' </div>';
+
+         
+
+  //           var content_item = {status:data[i].status, content:new_entry_item};
+  //           list_item.push(content_item);
+
+
+  //           }else{
+  //                           var card_id="card_"+data[i].tracker_id;
+
+  //                           var address="";
+  //           if(data[i].entry_type!="I"){
+  //             address=  data[i].lot.name+","+data[i].lot.street.name;
+  //           }else{
+  //             address ="Impromtu";
+  //           }
+
+  //                var new_exit_item=  '<div class="card  card_in card_width '+card_id+'"   >'+
+  //                 "<div class='card-content card-click  content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+  //                        ' <div class="row no-gap">'+
+  //                           '<div class="col-20 card-left-content">'+
+  //                             '<div class="card-left-content_inner">'+
+  //                              ' <i class="material-icons">chevron_left</i>'+
+  //                               '<p>CHECK OUT</p>'+
+  //                             '</div>'+
+  //                           '</div>'+
+  //                           '<div class="col-70 card-center-content">'+
+  //                             '<div class="card-center-content_inner">'+
+  //                                  ' <div>'+address+'</div>'+
+  //                                  ' <div>'+data[i].visitor_car_plate+'</div>'+
+  //                                  '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+  //                             '</div>'+
+  //                           '</div>'+
+  //                           '<div class="col-10 card-right-content">'+
+  //                             '<div class="card-right-content_inner">'+
+  //                               '<i class="material-icons">more_vert</i>'+
+  //                             '</div>'+
+  //                          ' </div>'+
+
+  //                           '</div>'+
+  //                         '</div>'+
+  //                       '</div>';
+
+  //                       $$('.visitor_scroll_view_out').append(new_exit_item);
+  //                         }
+  //             }
+
+   
+  //             function compare( a, b ) {
+  //               if ( a.status=="AIR" && b.status=='RIR' ){
+  //                 return -1;
+  //               }
+  //               if ( a.status=="AIR" && b.status=='PEN' ){
+  //                 return -1;
+  //               }
+  //               if ( a.status=="RIR" && b.status=='AIR' ){
+  //                 return 1;
+  //               }
+  //               if ( a.status=="RIR" && b.status=='PEN' ){
+  //                 return -1;
+  //               }
+  //               if ( a.status=="PEN" && b.status=='AIR' ){
+  //                 return 1;
+  //               }
+  //               if ( a.status=="PEN" && b.status=='RIR' ){
+  //                 return 1;
+  //               }
+  //               if ( a.status=="OEN" && b.status=='PEN' ){
+  //                 return 1;
+  //               }
+  //               return 0;
+  //             }
+
+  //               list_item.sort( compare );
+              
+
+         
+  //               function show_list(total,now){
+               
+  //                 var all=total;
+  //                 var z=now
+                
+          
+  //                 if(z<all){
+  //                   var data_status =list_item[z].status;
+  //                 var content = list_item[z].content;
+                 
+  // if(data_status=="AIR"){
+  //            setTimeout(function(){ $$('.approved_entry_list').append(content);
+  //            z++;
+  //           show_list(all,z);
+  //           },100) 
+           
+  //           }else if(data_status=="RIR"){
+  //             setTimeout(function(){ $$('.rejected_entry_list').append(content);
+  //             z++;
+  //           show_list(all,z);
+                
+  //           },100)
+              
+             
+  //           }
+  //           else if(data_status=="PEN"){
+  //             setTimeout(function(){ $$('.pending_entry_list').append(content);
+  //             z++;
+  //           show_list(all,z);
+        
+  //           },100)
+             
+        
+              
+  //           }else if(data_status=="OEN"){
+  //             setTimeout(function(){ $$('.onhold_entry_list').append(content);
+  //             z++;
+  //           show_list(all,z);
+        
+  //           },100)
+             
+        
+              
+  //           }else{
+  //             z++;
+  //           show_list(all,z);
+  //           }
+  //         }
+  //               }
+               
+         
+  //               show_list(list_item.length,0);
+           
+          
+        
+
+      
+
+
+
+  //           });
+  //           });
+
+           
+  if(offline == false){
+            request.get(
+          "visitor_entry",
+          { Authorization: "JWT " + auth.token },
+          { status: "AIR"},'',function(data){
+              console.log(data);
+            
+            var list_item=[];
+              for(var i=0;i<data.length;i++){
+                
+            if(data[i].status!="PEX"){
+            var new_entry_item="";
+            var color="";
+            var status="";
+        
+            
+            if(data[i].status=="AIR"){
+              color="forestgreen";
+              status="Approved";
+            }else if(data[i].status=="RIR"){
+              color="red";
+              status="Rejected";
+           
+            }
+            else if(data[i].status=="PEN"){
+              color="#FB6C5E";
+              status="Pending";
+            
+            }
+            else if(data[i].status=="OEN"){
+              color="#FBB35E";
+              status="On Hold";
+            
+            }
+
+            
+            var status_id="status_"+data[i].tracker_id;
+            var card_id="card_"+data[i].tracker_id;
+
+            var address="";
+            if(data[i].entry_type!="I"){
+              address=  data[i].lot.name+","+data[i].lot.street.name;
+            }
+            new_entry_item ="<div class='card  card_in card_width "+card_id+" '  >"+
+                    "<div class='card-content card-click entry_force content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+                      '<div class="row no-gap">'+
+                        '<div class="col-20 card-left-content">'+
+                          '<div class="card-left-content_inner">'+
+                            '<i class="material-icons">chevron_right</i>'+
+                             '<p>CHECK IN</p>'+
+                         ' </div>'+
+                        '</div>'+
+                        '<div class="col-70 card-center-content">'+
+                          '<div class="card-center-content_inner">'+
+                            '<div>'+address+'</div>'+
+                            '<div style="width: 100%;">'+
+                                    '<div style="display: inline-block;">'+data[i].visitor_car_plate+'</div>'+
+                                    '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;">Status: <b class="'+status_id+'" style="color: '+color+'"> '+status+'</b></div>'+
+                                    '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+                           ' </div>'+
+                          '</div>'+
+                        '</div>' +   
+                        '<div class="col-10 card-right-content">'+
+                          '<div class="card-right-content_inner">'+
+                           ' <i class="material-icons">more_vert</i>'+
+                         ' </div>'+
+                       ' </div>'+
+
+                      '</div>'+
+                    '</div>'+
+                 ' </div>';
+
+         
+
+            var content_item = {status:data[i].status, content:new_entry_item};
+            list_item.push(content_item);
+
+
+            }else{
+                            var card_id="card_"+data[i].tracker_id;
+
+                            var address="";
+            if(data[i].entry_type!="I"){
+              address=  data[i].lot.name+","+data[i].lot.street.name;
+            }else{
+              address ="Impromtu";
+            }
+
+                 var new_exit_item=  '<div class="card  card_in card_width '+card_id+'"   >'+
+                  "<div class='card-content card-click  content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+                         ' <div class="row no-gap">'+
+                            '<div class="col-20 card-left-content">'+
+                              '<div class="card-left-content_inner">'+
+                               ' <i class="material-icons">chevron_left</i>'+
+                                '<p>CHECK OUT</p>'+
+                              '</div>'+
+                            '</div>'+
+                            '<div class="col-70 card-center-content">'+
+                              '<div class="card-center-content_inner">'+
+                                   ' <div>'+address+'</div>'+
+                                   ' <div>'+data[i].visitor_car_plate+'</div>'+
+                                   '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+                              '</div>'+
+                            '</div>'+
+                            '<div class="col-10 card-right-content">'+
+                              '<div class="card-right-content_inner">'+
+                                '<i class="material-icons">more_vert</i>'+
+                              '</div>'+
+                           ' </div>'+
+
+                            '</div>'+
+                          '</div>'+
+                        '</div>';
+
+                        $$('.visitor_scroll_view_out').append(new_exit_item);
+                          }
+              }
+
+   
+              function compare( a, b ) {
+                if ( a.status=="AIR" && b.status=='RIR' ){
+                  return -1;
+                }
+                if ( a.status=="AIR" && b.status=='PEN' ){
+                  return -1;
+                }
+                if ( a.status=="RIR" && b.status=='AIR' ){
+                  return 1;
+                }
+                if ( a.status=="RIR" && b.status=='PEN' ){
+                  return -1;
+                }
+                if ( a.status=="PEN" && b.status=='AIR' ){
+                  return 1;
+                }
+                if ( a.status=="PEN" && b.status=='RIR' ){
+                  return 1;
+                }
+                if ( a.status=="OEN" && b.status=='PEN' ){
+                  return 1;
+                }
+                return 0;
+              }
+
+                list_item.sort( compare );
+              
+
+         
+                function show_list(total,now){
+               
+                  var all=total;
+                  var z=now
+                
+          
+                  if(z<all){
+                    var data_status =list_item[z].status;
+                  var content = list_item[z].content;
+                 
+  if(data_status=="AIR"){
+             setTimeout(function(){ $$('.approved_entry_list').append(content);
+             z++;
+            show_list(all,z);
+            },100) 
+           
+            }else if(data_status=="RIR"){
+              setTimeout(function(){ $$('.rejected_entry_list').append(content);
+              z++;
+            show_list(all,z);
+                
+            },100)
+              
+             
+            }
+            else if(data_status=="PEN"){
+              setTimeout(function(){ $$('.pending_entry_list').append(content);
+              z++;
+            show_list(all,z);
+        
+            },100)
+             
+        
+              
+            }else if(data_status=="OEN"){
+              setTimeout(function(){ $$('.onhold_entry_list').append(content);
+              z++;
+            show_list(all,z);
+        
+            },100)
+             
+        
+              
+            }else{
+              z++;
+            show_list(all,z);
+            }
+          }
+                }
+               
+         
+                show_list(list_item.length,0);
+           
+          
+        
+
+      
+
+
+
+            },function(xhr, status){
+
+            });
+          }else{
+            request.post(
+          "visitor_entry.php",
+           null,'OFF',
+          { status: "AIR",type: "",area: auth.user.area.id},function(data){
+              console.log(data);
+            
+            var list_item=[];
+              for(var i=0;i<data.length;i++){
+                
+            if(data[i].status!="PEX"){
+            var new_entry_item="";
+            var color="";
+            var status="";
+        
+            
+            if(data[i].status=="AIR"){
+              color="forestgreen";
+              status="Approved";
+            }else if(data[i].status=="RIR"){
+              color="red";
+              status="Rejected";
+           
+            }
+            else if(data[i].status=="PEN"){
+              color="#FB6C5E";
+              status="Pending";
+            
+            }
+            else if(data[i].status=="OEN"){
+              color="#FBB35E";
+              status="On Hold";
+            
+            }
+
+            
+            var status_id="status_"+data[i].tracker_id;
+            var card_id="card_"+data[i].tracker_id;
+
+            var address="";
+            if(data[i].entry_type!="I"){
+              address=  data[i].lot.name+","+data[i].lot.street.name;
+            }
+            new_entry_item ="<div class='card  card_in card_width "+card_id+" '  >"+
+                    "<div class='card-content card-click entry_force content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+                      '<div class="row no-gap">'+
+                        '<div class="col-20 card-left-content">'+
+                          '<div class="card-left-content_inner">'+
+                            '<i class="material-icons">chevron_right</i>'+
+                             '<p>CHECK IN</p>'+
+                         ' </div>'+
+                        '</div>'+
+                        '<div class="col-70 card-center-content">'+
+                          '<div class="card-center-content_inner">'+
+                            '<div>'+address+'</div>'+
+                            '<div style="width: 100%;">'+
+                                    '<div style="display: inline-block;">'+data[i].visitor_car_plate+'</div>'+
+                                    '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;">Status: <b class="'+status_id+'" style="color: '+color+'"> '+status+'</b></div>'+
+                                    '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+                           ' </div>'+
+                          '</div>'+
+                        '</div>' +   
+                        '<div class="col-10 card-right-content">'+
+                          '<div class="card-right-content_inner">'+
+                           ' <i class="material-icons">more_vert</i>'+
+                         ' </div>'+
+                       ' </div>'+
+
+                      '</div>'+
+                    '</div>'+
+                 ' </div>';
+
+         
+
+            var content_item = {status:data[i].status, content:new_entry_item};
+            list_item.push(content_item);
+
+
+            }else{
+                            var card_id="card_"+data[i].tracker_id;
+
+                            var address="";
+            if(data[i].entry_type!="I"){
+              address=  data[i].lot.name+","+data[i].lot.street.name;
+            }else{
+              address ="Impromtu";
+            }
+
+                 var new_exit_item=  '<div class="card  card_in card_width '+card_id+'"   >'+
+                  "<div class='card-content card-click  content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+                         ' <div class="row no-gap">'+
+                            '<div class="col-20 card-left-content">'+
+                              '<div class="card-left-content_inner">'+
+                               ' <i class="material-icons">chevron_left</i>'+
+                                '<p>CHECK OUT</p>'+
+                              '</div>'+
+                            '</div>'+
+                            '<div class="col-70 card-center-content">'+
+                              '<div class="card-center-content_inner">'+
+                                   ' <div>'+address+'</div>'+
+                                   ' <div>'+data[i].visitor_car_plate+'</div>'+
+                                   '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+                              '</div>'+
+                            '</div>'+
+                            '<div class="col-10 card-right-content">'+
+                              '<div class="card-right-content_inner">'+
+                                '<i class="material-icons">more_vert</i>'+
+                              '</div>'+
+                           ' </div>'+
+
+                            '</div>'+
+                          '</div>'+
+                        '</div>';
+
+                        $$('.visitor_scroll_view_out').append(new_exit_item);
+                          }
+              }
+
+   
+              function compare( a, b ) {
+                if ( a.status=="AIR" && b.status=='RIR' ){
+                  return -1;
+                }
+                if ( a.status=="AIR" && b.status=='PEN' ){
+                  return -1;
+                }
+                if ( a.status=="RIR" && b.status=='AIR' ){
+                  return 1;
+                }
+                if ( a.status=="RIR" && b.status=='PEN' ){
+                  return -1;
+                }
+                if ( a.status=="PEN" && b.status=='AIR' ){
+                  return 1;
+                }
+                if ( a.status=="PEN" && b.status=='RIR' ){
+                  return 1;
+                }
+                if ( a.status=="OEN" && b.status=='PEN' ){
+                  return 1;
+                }
+                return 0;
+              }
+
+                list_item.sort( compare );
+              
+
+         
+                function show_list(total,now){
+               
+                  var all=total;
+                  var z=now
+                
+          
+                  if(z<all){
+                    var data_status =list_item[z].status;
+                  var content = list_item[z].content;
+                 
+  if(data_status=="AIR"){
+             setTimeout(function(){ $$('.approved_entry_list').append(content);
+             z++;
+            show_list(all,z);
+            },100) 
+           
+            }else if(data_status=="RIR"){
+              setTimeout(function(){ $$('.rejected_entry_list').append(content);
+              z++;
+            show_list(all,z);
+                
+            },100)
+              
+             
+            }
+            else if(data_status=="PEN"){
+              setTimeout(function(){ $$('.pending_entry_list').append(content);
+              z++;
+            show_list(all,z);
+        
+            },100)
+             
+        
+              
+            }else if(data_status=="OEN"){
+              setTimeout(function(){ $$('.onhold_entry_list').append(content);
+              z++;
+            show_list(all,z);
+        
+            },100)
+             
+        
+              
+            }else{
+              z++;
+            show_list(all,z);
+            }
+          }
+                }
+               
+         
+                show_list(list_item.length,0);
+           
+          
+        
+
+      
+
+
+
+            });
+          }
+            
+
+
+
+
+  // app.dialog.preloader();
+ 
+request.get("reasons",{"Authorization":"JWT "+auth.token},null,'', function(data){
+ 
+
+                resons=data.results;
+                var all_resons="";
+for(var i=0;i<resons.length;i++){
+
+  all_resons+= ' <li>'+
+                         ' <label class="item-radio item-content">'+
+                            '<input type="radio" name="reason-radio" value="'+resons[i].id+'" checked />'+
+                            '<i class="icon icon-radio"></i>'+
+                            '<div class="item-inner">'+
+                              '<div class="item-title">'+resons[i].reason+'</div>'+
+                            '</div>'+
+                          '</label>'+
+                        '</li>';
+
+}
+
+self.dynamicPopup = app.popup.create({
+  el:".reasons",
+   
+  });
+  $$('#reason-list').html(all_resons);
+      app.dialog.close();
+    
+ });
+
+
+             
+
+
+
+//*contact_btn function////////////////////////////////////////////////////////////////////////////////////////////////
+$$('.contact_btn').on('click', function () {
+
+  router.navigate({name:"contact"});
+
+      });
+
+
+
+ // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ 
+
+
+//*contact_btn function////////////////////////////////////////////////////////////////////////////////////////////////
+$$('.history_btn').on('click', function () {
+
+  router.navigate({name:"history"});
+
+      });
+
+
+
+ // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+function force_update(entry_id,up_status){
+  var auth = app.form.getFormData("auth");
+
+  app.dialog.preloader();
+  request.put(
+      "visitor_entry/" + entry_id,
+      { Authorization: "JWT " + auth.token },
+      {
+        entry_id :entry_id,
+        status: up_status,
+        force_open: true,
+      },
+      function(data) {
+        app.dialog.close();
+        var toastCenter = app.toast.create({
+          text: "<center>Entry Update Success!</center>",
+          position: "center",
+          closeTimeout: 2000
+        });
+
+        toastCenter.open();
+
+        app.popup.close();
+
+       
+          // app.dialog.preloader();
+          request.get(
+            "security_boomgate",
+            { Authorization: "JWT " + auth.token },
+            null,'',
+            function(data) {
+              app.dialog.close();
+              var url = data;
+              console.log(url);
+              var gate_url = "";
+              var gate_type = "";
+              if (up_status == "AOS") {
+                gate_type = "X";
+              }
+
+              if (up_status == "AIS" || up_status == "RIS") {
+                gate_type = "E";
+              }
+
+              for (var i = 0; i < url.length; i++) {
+                if (url[i].type == gate_type) {
+                  gate_url = url[i].url;
+                }
+              }
+
+              app.dialog.preloader("Opening Boom gate...");
+
+              request.getimg(
+                gate_url,
+                null,
+                function(data) {
+                  console.log(data);
+                  app.dialog.close();
+                  console.log("boom gate open")
+                  var toastCenter = app.toast.create({
+                    text: "Boomgate Open",
+                    position: "center",
+                    closeTimeout: 2000
+                  });
+
+                  toastCenter.open();
+                },
+                function() {
+                  app.dialog.close();
+                  var toastCenter = app.toast.create({
+                    text: "Cannot connect boomgate!",
+                    position: "center",
+                    closeTimeout: 2000
+                  });
+
+                  toastCenter.open();
+                }
+              );
+            },
+            function() {
+              app.dialog.close();
+              var toastCenter = app.toast.create({
+                text: "Cannot connect boomgate!",
+                position: "center",
+                closeTimeout: 2000
+              });
+
+              toastCenter.open();
+            }
+          );
+        
+      },
+      function(xhr, status) {
+        var toastCenter = app.toast.create({
+          text: "<center>Entry Update Failed!</center>",
+          position: "center",
+          closeTimeout: 2000
+        });
+
+        toastCenter.open();
+        app.dialog.close();
+      }
+  );
+}
+
+
+$$(".visitor_scroll_view").on('taphold',".entry_force",function () {
+   var entry_id = $$(this).attr("visitor_id");
+    console.log(entry_id)
+    app.dialog.create({
+      title: 'Force Action',
+      text: 'Please select an action to proceed',
+      buttons: [
+        {
+          text: 'Force Approve',
+        },
+        {
+          text: 'Force Reject',
+        },
+        {
+          text: 'Cancel',
+        },
+      ],
+      onClick: function(dialog, index) {
+         if (index === 0) {
+          force_update(entry_id,"AIS")
+          if (navigator.connection.type === "wifi" ) {
+            force_update(entry_id,"AIS")
+            console.log(true)
+          } else {
+            var dialog1 = app.dialog.create({
+                title: 'Open Boom Gate Failed',
+                text: 'Please change your connection internet to WIFI, Thank You',
+                buttons: [
+                  {
+                    text: 'Close',
+                    onClick: function () {
+                      app.dialog.close();
+                    }
+                  }
+                ]
+              })
+
+              dialog1.open()
+            console.log(false)
+          }
+         }
+         if (index === 1) {
+          force_update(entry_id,"RIS")
+          if (navigator.connection.type === "wifi" ) {
+            force_update(entry_id,"RIS")
+            console.log(true)
+          } else {
+            var dialog1 = app.dialog.create({
+                title: 'Open Boom Gate Failed',
+                text: 'Please change your connection internet to WIFI, Thank You',
+                buttons: [
+                  {
+                    text: 'Close',
+                    onClick: function () {
+                      app.dialog.close();
+                    }
+                  }
+                ]
+              })
+
+              dialog1.open()
+            console.log(false)
+          }
+          
+         }
+         if (index === 2) {
+            app.dialog.close();
+         }
+      },
+      verticalButtons: true,
+    }).open();
+ 
+});
+
+ $$(".visitor_scroll_view").on('click',".card-click",function () {
+ 
+  var id = $$(this).attr("visitor_id");
+ 
+  var dynamicPopup ;
+  // app.dialog.preloader();
+request.get("visitor_entry/"+id,{"Authorization":"JWT "+auth.token},null,'',function(data){
+console.log(data);
+var status_txt='';
+var txt_color='';
+var button_part='';
+var tittle='';
+var check_out_img='';
+var call_btn='';
+var contact='0';
+if(data.phone_number!=null && data.phone_number!='' ){
+  contact=data.phone_number;
+}
+$$('#visit_id').val(data.tracker_id);
+console.log(data.tracker_id)
+if(data.status=="PEX"){
+  tittle="Check-out";
+  var check_out_img='<div class="swiper-slide img-front " x="XF" id="EF"><img src="'+data.exit_car_plate_image+'" class="custom-img " ></div>';
+}else{
+  tittle="Check-in";
+}
+
+if(data.status=="PEN"){
+  status_txt="Pending";
+  txt_color ="yellow";
+  
+  button_part=    '<button class="col button button-fill button-round update-btn" style="color:white;background-color:#FB6C5E;margin-right:10px" action="back" force_open="0" id="'+data.tracker_id+'">BACK</button>'+
+                  '<button class="col button button-outline button-round update-btn" style="color:#FBB35E;border-color:#FBB35E;margin-left:10px" action="onhold" force_open="0" id="'+data.tracker_id+'">ON HOLD</button>';
+                   
+  call_btn = "<br><button class=' button button-fill button-round call_resident' style='color:white;background-color:#89DAFF;width:75px !important' value='"+contact+"'>Call</button>";
+        
+}else if(data.status=="AIR"){
+  status_txt="Approved";
+  txt_color ="#38DB69";
+
+  button_part=    '<button class="col button button-outline button-round update-btn" style="color:red;border-color:red;margin-right:10px" action="reject" force_open="0" id="'+data.tracker_id+'">REJECT</button>'+
+                    '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="approved" force_open="0" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
+      
+   
+}else if(data.status=="RIR"){
+  status_txt="Rejected";
+  txt_color ="red";
+
+  
+button_part=    '<button class="col button button-outline button-round update-btn" style="color:	#FB6C5E;border-color:#FB6C5E;margin-right:10px" action="register" force_open="0" id="'+data.tracker_id+'">RE-REGISTER</button>'+
+                '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="reject" force_open="0" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
+ call_btn = "<br><button class=' button button-fill button-round call_resident' style='color:white;background-color:#89DAFF;width:75px !important' value='"+contact+"'>Call</button>";
+}else if(data.status=="PEX"){
+  status_txt="Pending Exit";
+  txt_color ="yellow";
+
+  button_part=    '<button class="col button button-outline button-round update-btn" style="color:red;border-color:red;margin-right:10px" action="reject_exit" force_open="0" id="'+data.tracker_id+'">REJECT</button>'+
+                    '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="approved_exit" force_open="0" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
+      
+
+}else if(data.status=="OEN"){
+  status_txt="On Hold Entry";
+  txt_color ="#FBB35E";
+  
+  button_part=    '<button class="col button button-fill button-round update-btn" style="color:white;background-color:#FB6C5E;margin-right:10px" action="back" force_open="0" id="'+data.tracker_id+'">BACK</button>';
+                   
+  call_btn = "<br><button class=' button button-fill button-round call_resident' style='color:white;background-color:#89DAFF;width:75px !important' value='"+contact+"'>Call</button>";
+        
+}
+
+var check_in = data.created_at;
+   
+
+
+  
+  var  check_out ='';
+  var show_check_out='';
+if(data.status=="PEX"){
+    check_out = data.updated_at;
+    show_check_out="<div class='row' >"+
+                    "<div class='col-40'><label>Check-out</label></div>"+
+                    "<div class='col-60'><label style='float:right;text-align: right;'>"+check_out+"</label></div>"+
+                  '</div>';
+  }
+  
+   
+        var address="";
+        var address_tittle="";
+            if(data.entry_type!="I"){
+              address=  data.lot.name+","+data.lot.street.name+","+data.lot.street.area.name;
+              address_tittle = "Address";
+            }else{
+              address=  data.reason;
+              address_tittle = "Purpose";
+            }
+
+
+
+    dynamicPopup = app.popup.create({
+  content: '<div class="popup">'+
+    '<div class="page">'+
+
+
+      ' <div class="navbar">'+
+               ' <div class="navbar-inner">'+
+                  '<div class="left">'+
+                    '<a class="link popup-close">'+
+                        '<i class="material-icons"> arrow_back</i>'+
+                   '   <span class="if-not-md">Back</span>'+
+                   ' </a>'+
+                 ' </div>'+
+                 ' <div class="title">'+tittle+'</div>'+
+               ' </div>'+
+          '    </div>'+
+
+          '<div class="toolbar toolbar-bottom">'+
+                  
+            '<div class="toolbar-inner" style="padding:5px 10px;">'+
+           
+              button_part+
+                '</div>'+
+            '</div>'+
+
+
+              '<div class="page-content" >'+
+
+              
+          '<div class="block">'+
+
+                '<div class="preview">'+
+                '<div data-pagination="{\'el\': \'.swiper-pagination\'}" data-space-between="50" class="swiper-container demo-swiper">'+
+                '<div class="swiper-pagination"></div>'+
+                  '<div class="swiper-wrapper">'+
+                    check_out_img+
+                    '<div class="swiper-slide img-front camera_btn3" x="EF" id="EF"><img src="'+data.entry_car_plate_image+'" class="custom-img" ></div>'+
+                    '<div class="swiper-slide img-face camera_btn3" x="FC" id="FC"><img src="'+data.driver_image+'" class="custom-img" ></div>'+
+                    '<div class="swiper-slide img-ic camera_btn3" x="IC" id="IC"><img src="'+data.identity_image+'" class="custom-img" ></div>'+
+                  '</div> '+
+                '</div>'+
+              '</div>'+
+             
+
+              '<div class="main_font" style="color:#FB6C5E;padding:0 5% ;font-size:2vh">'+
+
+                  "<div class='row' >"+
+                    "<div class='col-25'><label>Status</label></div>"+
+                    "<div class='col-75'><label style='color:"+txt_color+";float:right;'>"+status_txt+"</label></div>"+
+                  '</div>'+
+                  "<div class='row' >"+
+                    "<div class='col-40'><label>Vehicle Plate No.</label></div>"+
+                    "<div class='col-60'><label style='float:right;'>"+data.visitor_car_plate+"</label></div>"+
+                  '</div>'+
+                  "<div class='row' >"+
+                    "<div class='col-30'><label>"+address_tittle+"</label></div>"+
+                    "<div class='col-70'><label style='float:right;text-align: right;'>"+address+"</label></div>"+
+                  '</div>'+
+                  "<div class='row' >"+
+                    "<div class='col-40'><label>Check-in</label></div>"+
+                    "<div class='col-60'><label style='float:right;text-align: right;'>"+check_in+"</label></div>"+
+                  '</div>'+
+                  show_check_out+
+                  call_btn+
+              '</div>'+
+
+
+                '</div>'+
+
+               
+
+            '</div>'+'</div>'+
+
+            '</div>',
+   
+});
+dynamicPopup.open();
+$$(".camera_btn3").on("click", function() {
+
+          var facecam = ip_cam.FC;
+          var frontcam = ip_cam.EF;
+          var iccam = ip_cam.IC;
+        
+          var x = $$(this).attr("x");
+          var id = $$('#visit_id').val();
+          var entry_id = $$('.entry_force').attr("visitor_id");
+          console.log(entry_id,id);
+          if (app.device.android || app.device.ios) {
+            app.dialog
+              .create({
+                title: "Camera Option",
+
+                buttons: [
+                  {
+                    text: "IVMS"
+                  },
+                  {
+                    text: "Phone camera"
+                  },
+                  {
+                    text: "Close"
+                  }
+                ],
+                
+                onClick: function(dialog, index) {
+                  if (index === 0) {
+                    //Button 1 clicked
+                    ivms_capture(x, frontcam, facecam, iccam);
+                  } else if (index === 1) {
+                    //Button 2 clicked
+                    // cameara pugin deprecated!
+                    console.log("camera");
+                    document.addEventListener(
+                      "deviceready",
+                      onDeviceReady,
+                      false
+                    );
+                    function onDeviceReady() {
+                      console.log(navigator.camera);
+                    }
+
+                    console.log(x);
+
+                    navigator.camera.getPicture(onSuccess, onFail, {
+                      quality: 50,
+                      destinationType: Camera.DestinationType.DATA_URL
+                    });
+
+                    function onSuccess(imageURI) {
+                      const byteCharacters = atob(imageURI);
+                      const byteArrays = [];
+                      var imgs = [];
+
+                      for (
+                        let offset = 0;
+                        offset < byteCharacters.length;
+                        offset += 512
+                      ) {
+                        const slice = byteCharacters.slice(
+                          offset,
+                          offset + 512
+                        );
+
+                        const byteNumbers = new Array(slice.length);
+                        for (let i = 0; i < slice.length; i++) {
+                          byteNumbers[i] = slice.charCodeAt(i);
+                        }
+
+                        const byteArray = new Uint8Array(byteNumbers);
+                        byteArrays.push(byteArray);
+                      }
+
+                      const blob = new Blob(byteArrays, { type: "image/jpg" });
+
+                      console.log(blob);
+                      var im = new Image();
+                      var url = window.URL || window.webkitURL;
+                      im.className = "custom-img";
+                      im.src = url.createObjectURL(blob);
+
+                      $$("#" + x).html("");
+                      $$("#" + x).append(im);
+
+                      //imgs.push({"name":x,"value":imageURI.substr(imageURI.lastIndexOf('/')+1)});
+                      imgs[x] = blob;
+                      
+                      for (const [key, value] of Object.entries(imgs)) {
+                        switch (key) {
+                          case "IC":
+                          var entry_id =$$('#visit_id').val();
+                          var Fdata = new FormData();
+                            Fdata.append("identity_image", value, key + ".jpg");
+                            Fdata.append("driver_image", "");
+                            Fdata.append("entry_car_plate_image", "");
+                            Fdata.append("status", "");
+                            console.log(value)
+                            force_update_driver(entry_id,Fdata)
+                            break;
+                          case "EF":
+                          var entry_id = $$('#visit_id').val();
+                          var Fdata = new FormData();
+                          Fdata.append("identity_image", "");
+                            Fdata.append("entry_car_plate_image", value, key + ".jpg");
+                            Fdata.append("driver_image", "");
+                            Fdata.append("status", "");
+                            console.log(value)
+                            force_update_driver(entry_id,Fdata)
+                            break;
+                          case "FC":
+                          var entry_id =$$('#visit_id').val();
+                          var Fdata = new FormData();
+                          Fdata.append("identity_image", "");
+                            Fdata.append("driver_image", value, key + ".jpg");
+                            Fdata.append("entry_car_plate_image", "");
+                            Fdata.append("status", "");
+                            console.log(value)
+                            force_update_driver(entry_id,Fdata)
+                            break;
+                        }
+                      }
+
+                   
+                      
+                    }
+
+                    function onFail(message) {
+                      app.dialog.alert("Failed because: " + message, "");
+                    }
+                  }else if(index === 2){
+                    app.dialog.close();
+                  }
+                },
+                verticalButtons: true
+              })
+              .open();
+          } else {
+            ivms_capture(x, frontcam, facecam, iccam);
+          }
+        });
+
+app.dialog.close();
+app.swiper.create(".demo-swiper",{ pagination: {
+    el: '.swiper-pagination',
+    type: 'bullets',
+  },
+});
+
+},function(error){
+  app.dialog.close();
+  console.log(error);
+});
+});
+ 
+var sck = socket.connect(CONFIG.SOCKET);
+var auth = app.form.getFormData("auth");
+if (app.device.desktop) {
+if (auth) {
+  //socket
+
+  console.log(auth);
+  sck.emit("user", {
+    id: auth.user.id,
+    area: auth.user.area.id,
+    role: "security"
+  });
+ var count = 0;
+ sck.on("visitor_arrive", function(data) {
+   
+  var dynamicPopup ;
+  app.popup.close();
+console.log(data.status);
+var auth = app.form.getFormData("auth");
+  request.get(
+    "visitor_entry/" + data.track_id,
+    { Authorization: "JWT " + auth.token },
+    null,'',
+    function(data) {
+
+      var status_txt='';
+var txt_color='';
+var button_part='';
+var tittle='';
+var check_out_img='';
+var call_btn='';
+var contact='0';
+if(data.phone_number!=null && data.phone_number!='' ){
+  contact=data.phone_number;
+}
+$$('#visit_id').val(data.tracker_id);
+console.log(data.tracker_id)
+if(data.status=="PEX"){
+  tittle="Check-out";
+  var check_out_img='<div class="swiper-slide img-front " x="XF" id="EF"><img src="'+data.exit_car_plate_image+'" class="custom-img " ></div>';
+}else{
+  tittle="Check-in";
+}
+
+if(data.status=="PEN"){
+  status_txt="Pending";
+  txt_color ="yellow";
+  
+  button_part=    '<button class="col button button-fill button-round update-btn" style="color:white;background-color:#FB6C5E;margin-right:10px" action="back" force_open="0" id="'+data.tracker_id+'">BACK</button>'+
+                  '<button class="col button button-outline button-round update-btn" style="color:#FBB35E;border-color:#FBB35E;margin-left:10px" action="onhold" force_open="0" id="'+data.tracker_id+'">ON HOLD</button>';
+                   
+  call_btn = "<br><button class=' button button-fill button-round call_resident' style='color:white;background-color:#89DAFF;width:75px !important' value='"+contact+"'>Call</button>";
+        
+}else if(data.status=="AIR"){
+  status_txt="Approved";
+  txt_color ="#38DB69";
+
+  button_part=    '<button class="col button button-outline button-round update-btn" style="color:red;border-color:red;margin-right:10px" action="reject" force_open="0" id="'+data.tracker_id+'">REJECT</button>'+
+                    '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="approved" force_open="0" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
+      
+   
+}else if(data.status=="RIR"){
+  status_txt="Rejected";
+  txt_color ="red";
+
+  
+button_part=    '<button class="col button button-outline button-round update-btn" style="color:	#FB6C5E;border-color:#FB6C5E;margin-right:10px" action="register" force_open="0" id="'+data.tracker_id+'">RE-REGISTER</button>'+
+                '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="reject" force_open="0" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
+ call_btn = "<br><button class=' button button-fill button-round call_resident' style='color:white;background-color:#89DAFF;width:75px !important' value='"+contact+"'>Call</button>";
+}else if(data.status=="PEX"){
+  status_txt="Pending Exit";
+  txt_color ="yellow";
+
+  button_part=    '<button class="col button button-outline button-round update-btn" style="color:red;border-color:red;margin-right:10px" action="reject_exit" force_open="0" id="'+data.tracker_id+'">REJECT</button>'+
+                    '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="approved_exit" force_open="0" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
+      
+
+}else if(data.status=="OEN"){
+  status_txt="On Hold Entry";
+  txt_color ="#FBB35E";
+  
+  button_part=    '<button class="col button button-fill button-round update-btn" style="color:white;background-color:#FB6C5E;margin-right:10px" action="back" force_open="0" id="'+data.tracker_id+'">BACK</button>';
+                   
+  call_btn = "<br><button class=' button button-fill button-round call_resident' style='color:white;background-color:#89DAFF;width:75px !important' value='"+contact+"'>Call</button>";
+        
+}
+
+var check_in = data.created_at;
+   
+
+
+  
+  var  check_out ='';
+  var show_check_out='';
+if(data.status=="PEX"){
+    check_out = data.updated_at;
+    show_check_out="<div class='row' >"+
+                    "<div class='col-40'><label>Check-out</label></div>"+
+                    "<div class='col-60'><label style='float:right;text-align: right;'>"+check_out+"</label></div>"+
+                  '</div>';
+  }
+  
+   
+        var address="";
+        var address_tittle="";
+            if(data.entry_type!="I"){
+              address=  data.lot.name+","+data.lot.street.name+","+data.lot.street.area.name;
+              address_tittle = "Address";
+            }else{
+              address=  data.reason;
+              address_tittle = "Purpose";
+            }
+
+
+if(data.status=="AIR"){
+ 
+    dynamicPopup = app.popup.create({
+  content: '<div class="popup">'+
+    '<div class="page">'+
+
+
+      ' <div class="navbar">'+
+               ' <div class="navbar-inner">'+
+                  '<div class="left">'+
+                    '<a class="link popup-close">'+
+                        '<i class="material-icons"> arrow_back</i>'+
+                   '   <span class="if-not-md">Back</span>'+
+                   ' </a>'+
+                 ' </div>'+
+                 ' <div class="title">'+tittle+'</div>'+
+               ' </div>'+
+          '    </div>'+
+
+          '<div class="toolbar toolbar-bottom">'+
+                  
+            '<div class="toolbar-inner" style="padding:5px 10px;">'+
+           
+              button_part+
+                '</div>'+
+            '</div>'+
+
+
+              '<div class="page-content" >'+
+
+              
+          '<div class="block">'+
+
+                '<div class="preview">'+
+                '<div data-pagination="{\'el\': \'.swiper-pagination\'}" data-space-between="50" class="swiper-container demo-swiper">'+
+                '<div class="swiper-pagination"></div>'+
+                  '<div class="swiper-wrapper">'+
+                    check_out_img+
+                    '<div class="swiper-slide img-front camera_btn3" x="EF" id="EF"><img src="'+data.entry_car_plate_image+'" class="custom-img" ></div>'+
+                    '<div class="swiper-slide img-face camera_btn3" x="FC" id="FC"><img src="'+data.driver_image+'" class="custom-img" ></div>'+
+                    '<div class="swiper-slide img-ic camera_btn3" x="IC" id="IC"><img src="'+data.identity_image+'" class="custom-img" ></div>'+
+                  '</div> '+
+                '</div>'+
+              '</div>'+
+             
+
+              '<div class="main_font" style="color:#FB6C5E;padding:0 5% ;font-size:2vh">'+
+
+                  "<div class='row' >"+
+                    "<div class='col-25'><label>Status</label></div>"+
+                    "<div class='col-75'><label style='color:"+txt_color+";float:right;'>"+status_txt+"</label></div>"+
+                  '</div>'+
+                  "<div class='row' >"+
+                    "<div class='col-40'><label>Vehicle Plate No.</label></div>"+
+                    "<div class='col-60'><label style='float:right;'>"+data.visitor_car_plate+"</label></div>"+
+                  '</div>'+
+                  "<div class='row' >"+
+                    "<div class='col-30'><label>"+address_tittle+"</label></div>"+
+                    "<div class='col-70'><label style='float:right;text-align: right;'>"+address+"</label></div>"+
+                  '</div>'+
+                  "<div class='row' >"+
+                    "<div class='col-40'><label>Check-in</label></div>"+
+                    "<div class='col-60'><label style='float:right;text-align: right;'>"+check_in+"</label></div>"+
+                  '</div>'+
+                  show_check_out+
+                  call_btn+
+              '</div>'+
+
+
+                '</div>'+
+
+               
+
+            '</div>'+'</div>'+
+
+            '</div>',
+   
+});
+  
+dynamicPopup.open();
+
+
+}
+
+
+$$(".camera_btn3").on("click", function() {
+
+var facecam = ip_cam.FC;
+var frontcam = ip_cam.EF;
+var iccam = ip_cam.IC;
+
+var x = $$(this).attr("x");
+var id = $$('#visit_id').val();
+var entry_id = $$('.entry_force').attr("visitor_id");
+console.log(entry_id,id);
+if (app.device.android || app.device.ios) {
+  app.dialog
+    .create({
+      title: "Camera Option",
+
+      buttons: [
+        {
+          text: "IVMS"
+        },
+        {
+          text: "Phone camera"
+        },
+        {
+          text: "Close"
+        }
+      ],
+      
+      onClick: function(dialog, index) {
+        if (index === 0) {
+          //Button 1 clicked
+          ivms_capture(x, frontcam, facecam, iccam);
+        } else if (index === 1) {
+          //Button 2 clicked
+          // cameara pugin deprecated!
+          console.log("camera");
+          document.addEventListener(
+            "deviceready",
+            onDeviceReady,
+            false
+          );
+          function onDeviceReady() {
+            console.log(navigator.camera);
+          }
+
+          console.log(x);
+
+          navigator.camera.getPicture(onSuccess, onFail, {
+            quality: 50,
+            destinationType: Camera.DestinationType.DATA_URL
+          });
+
+          function onSuccess(imageURI) {
+            const byteCharacters = atob(imageURI);
+            const byteArrays = [];
+            var imgs = [];
+
+            for (
+              let offset = 0;
+              offset < byteCharacters.length;
+              offset += 512
+            ) {
+              const slice = byteCharacters.slice(
+                offset,
+                offset + 512
+              );
+
+              const byteNumbers = new Array(slice.length);
+              for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+              }
+
+              const byteArray = new Uint8Array(byteNumbers);
+              byteArrays.push(byteArray);
+            }
+
+            const blob = new Blob(byteArrays, { type: "image/jpg" });
+
+            console.log(blob);
+            var im = new Image();
+            var url = window.URL || window.webkitURL;
+            im.className = "custom-img";
+            im.src = url.createObjectURL(blob);
+
+            $$("#" + x).html("");
+            $$("#" + x).append(im);
+
+            //imgs.push({"name":x,"value":imageURI.substr(imageURI.lastIndexOf('/')+1)});
+            imgs[x] = blob;
+            
+            for (const [key, value] of Object.entries(imgs)) {
+              switch (key) {
+                case "IC":
+                var entry_id =$$('#visit_id').val();
+                var Fdata = new FormData();
+                  Fdata.append("identity_image", value, key + ".jpg");
+                  Fdata.append("driver_image", "");
+                  Fdata.append("entry_car_plate_image", "");
+                  Fdata.append("status", "");
+                  console.log(value)
+                  force_update_driver(entry_id,Fdata)
+                  break;
+                case "EF":
+                var entry_id = $$('#visit_id').val();
+                var Fdata = new FormData();
+                Fdata.append("identity_image", "");
+                  Fdata.append("entry_car_plate_image", value, key + ".jpg");
+                  Fdata.append("driver_image", "");
+                  Fdata.append("status", "");
+                  console.log(value)
+                  force_update_driver(entry_id,Fdata)
+                  break;
+                case "FC":
+                var entry_id =$$('#visit_id').val();
+                var Fdata = new FormData();
+                Fdata.append("identity_image", "");
+                  Fdata.append("driver_image", value, key + ".jpg");
+                  Fdata.append("entry_car_plate_image", "");
+                  Fdata.append("status", "");
+                  console.log(value)
+                  force_update_driver(entry_id,Fdata)
+                  break;
+              }
+            }
+
+         
+            
+          }
+
+          function onFail(message) {
+            app.dialog.alert("Failed because: " + message, "");
+          }
+        }else if(index === 2){
+          app.dialog.close();
+        }
+      },
+      verticalButtons: true
+    })
+    .open();
+} else {
+  ivms_capture(x, frontcam, facecam, iccam);
+}
+});
+app.swiper.create(".demo-swiper",{ pagination: {
+    el: '.swiper-pagination',
+    type: 'bullets',
+  },});
+},function(xhr, status){
+
+}
+    
+  );
+
+
+});
+sck.disconnect();
+}
+}
+
+
+
+//* directly open boom gate (reason dialog) //////////////////////////////////////////////////////////////////////////////////
+$$(".boom-gate-btn").on('click', function () {
+ 
+  $$('#gate-type').val($$(this).data('value'));
+  
+  dynamicPopup.open();
+
+
+});
+
+
+// end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+$$(document).on('click',".call_resident", function () {
+  var contact = $$(this).attr('value');
+  if(contact!="0" && contact!=""){
+    if (app.device.android) {
+      console.log('android calling');
+      document.location.href = 'tel:'+contact;
+  
+    
+    }else{
+      var entry_id = $$('#visit_id').val();
+      console.log(entry_id);
+      var toastCenter = app.toast.create({
+      text: "Cannot make phone call on Web",
+      position: 'center',
+      closeTimeout: 2000,
+    });
+  
+    toastCenter.open();
+  
+     
+    }
+  
+  }else{
+    var toastCenter = app.toast.create({
+      text: "Resident's phone number not found",
+      position: 'center',
+      closeTimeout: 2000,
+    });
+  
+    toastCenter.open();
+  }
+});
+},300);
+        },pageBeforeOut:function(){
+          var sck = socket.connect(CONFIG.SOCKET);
+        //no function
+          // sck.removeListener;
+    }
+        
+      }
+}
+            </script>
+        

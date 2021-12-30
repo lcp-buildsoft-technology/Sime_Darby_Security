@@ -1,0 +1,360 @@
+<template>
+    
+    <!-- Main Screen -->
+          
+          <div class="page login" id="login" data-name="login">
+            <div class="page-content login-screen-content login_bg">
+              <a href="#" class="logout_btn" style="float: right">  <div class="row">
+                <div class="col-100" style='padding:10px;max-height: 6vh; text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;'>
+                            <b>LOGOUT</b>
+                    </div>
+    
+                </div>
+              </a>
+              <br><br><br>
+              <div class="login-screen-title"> <img src="./static/logo.png" class="img_css"></div>
+              
+              <div style="margin-top: -3%">
+              <div class="row">
+                    <div class="col-100" style='text-align: center;'>
+                    
+                            <div class="custom-label">
+                                    <h1>{{ user.community_name }}</h1>
+                                </div>
+            
+            
+                                <div class="custom-label" >
+                                    <h2 style="color:white">{{ user.area_name }}</h2>
+                                </div>
+            
+                                <div class="custom-label">
+                                    <h3 >{{ user.first_name }} {{ user.last_name }}</h3>
+                                </div>
+                    </div>
+
+
+                </div>
+            </div>
+          
+<center>
+            <div class="main_bot" id="button-part">
+              <div class="row">
+                <div class="col-50" id="history_module" style='text-align: center;'>
+              
+                  <div class="custom-button history_btn">
+                      <i class="material-icons custom-icon"> dvr</i>
+                  </div>
+                  <div class="custom-label">
+                      <h3>WALK IN & IMPROMTU History</h3>
+                  </div>
+              
+                </div>
+                <div class="col-50" id="scan_module" style='text-align: center;'>
+                            
+                  <div class="custom-button scan_btn">
+                      <i class="material-icons custom-icon"> center_focus_strong</i>
+                  </div>
+                  <div class="custom-label">
+                      <h3>SCANNER</h3>
+                  </div>
+            
+              </div>
+            </div>
+              <div class="row" >
+                    <!-- Each "cell" has col-[width in percents] class -->
+                    <div class="col-25" style='text-align: center;'>
+                        
+                            <div class="custom-button visitor_btn">
+                                <i class="material-icons custom-icon"> directions_car</i>
+                            </div>
+                            <div class="custom-label">
+                                <h3>VISITOR</h3>
+                            </div>
+                        
+                    </div>
+
+                    <div class="col-25" id="history_visitor_module" style='text-align: center;'>
+              
+                      <div class="custom-button history_btn">
+                          <i class="material-icons custom-icon"> dvr</i>
+                      </div>
+                      <div class="custom-label">
+                          <h3>Visitor History</h3>
+                      </div>
+                  
+                    </div>
+
+
+
+                    <div class="col-25"  style='text-align: center;'> 
+                        
+                            <div class="custom-button entry_btn">
+                                <i class="material-icons custom-icon"> transfer_within_a_station</i>
+                            </div>
+                            <div class="custom-label">
+                                <h3>ENTRY</h3>
+                            </div>
+                        
+                    </div>     
+                        
+                        
+                    
+
+
+
+                    <div class="col-25" id="tour_module" style='text-align: center;'>
+             
+                      <div class="custom-button tour_btn">
+                          <i class="material-icons custom-icon"> security</i>
+                      </div>
+                      <div class="custom-label">
+                          <h3>TOUR</h3>
+                      </div>
+                   
+                    </div>
+
+
+                    <!--  <a href="https://lcpproject.com/IVMS_meet/security.php"  class="col-20 link external"  target="_blank">
+                        
+
+                        <div style='text-align: center;'>
+                          <div class="custom-button ">
+                              <i class="material-icons custom-icon"> camera</i>
+                          </div>
+                          <div class="custom-label">
+                              <h3>intercom</h3>
+                          </div>
+                        </div>
+                      </a>
+                        -->
+                </div>
+
+           
+                
+                
+                </center>
+                
+             </div>
+            
+            </div>
+
+              
+
+          </div>
+
+
+
+
+      
+</template>
+
+<script>
+import request from '../js/request.js';
+import Framework7 from 'framework7/framework7.esm.bundle.js';
+import socket from "socket.io-client/dist/socket.io.js";
+import CONFIG from "../js/config.js";
+import sound_audio from '../js/sound_audio.js'
+
+export default {
+
+    data:function(){
+      var app=this.$app;
+      var auth = app.form.getFormData("auth");
+      return{
+        user:auth.user,
+      }
+    },
+on:{
+pageInit:function(){
+  var $$=this.$$;
+     var app=this.$app;
+     var router=this.$router;
+     var auth = app.form.getFormData("auth");
+     if (app.device.desktop) {
+    console.log('It is desktop device');
+ 
+    document.getElementById("scan_module").remove();
+    document.getElementById("history_module").remove();
+    
+  }else{
+    document.getElementById("history_visitor_module").remove();
+    
+  }
+
+
+//*logout function////////////////////////////////////////////////////////////////////////////////////////////////
+$$('.logout_btn').on('click', function () {
+console.log("logout");
+
+// app.dialog.confirm('Are you want to Logout?', function () {
+
+//   app.panel.close();
+//   app.views.main.router.clearPreviousHistory();
+//   router.navigate({name:"login"});
+//   router.clearPreviousHistory();
+//   app.form.removeFormData('auth');
+//   });
+
+var dialog1 = app.dialog.create({
+                    title: 'Are you want to logout ?',
+                    text: '<div id="logout_func"></div>',
+                    buttons: [
+                    // {
+                    //     text: 'RETRY NOW',
+                    //     onClick: function () {
+                    //         clearInterval(myTimer);
+                    //         router.refreshPage('/');
+                            
+                    //     }
+                    // },
+                    {
+                        text: 'OK',
+                        onClick: function () {
+                            if($$('#password_logout').val() != 'LOGOUT'){
+                              app.dialog.alert("Please try again.", "Password Wrong");
+                            }else{
+                              app.dialog.close();
+                              app.views.main.router.clearPreviousHistory();
+                              router.navigate({name:"login"});
+                              router.clearPreviousHistory();
+                              app.form.removeFormData('auth');
+                            }
+                            
+                        }
+                    }
+                    ]
+                });
+
+                dialog1.open();
+  $$('#logout_func').html('<p><b>Confirmation to delete :</b><p>'+
+  '<p style="font-size:11px">Type <b>"LOGOUT"</b> to logout the system<p>'+
+  '<div style="border:#FB6C5E solid 1px;padding:5px">'+
+  '<input type="password" name="password" placeholder="Enter your password" id="password_logout" style="color:black;"/>'+
+  '</div>');
+
+});
+
+
+ // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var sck = socket.connect(CONFIG.SOCKET);
+var auth = app.form.getFormData("auth");
+if (app.device.desktop) {
+if (auth) {
+  //socket
+
+  console.log(auth);
+  // sck.emit("user", {
+  //   id: auth.user.id,
+  //   area: auth.user.area.id,
+  //   role: "security"
+  // });
+
+//  sck.on("visitor_arrive", function(data) {
+
+// // console.log(data.status);
+// var auth = app.form.getFormData("auth");
+//   request.get(
+//     "visitor_entry/" + data.track_id,n
+//     { Authorization: "JWT " + auth.token },
+//     null,
+//     function(data) {
+//       console.log(data);
+//       var notification_sound =sound_audio.sound;
+
+//       notification_sound.play();
+      
+
+//         router.navigate({name:"visitor"});
+      
+//     }
+//   );
+
+
+// });
+
+}
+}
+
+//*visitor function////////////////////////////////////////////////////////////////////////////////////////////////
+$$('.visitor_btn').on('click', function () {
+console.log("visitor");
+
+  router.navigate({name:"visitor"});
+
+});
+
+
+
+ // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//*entry function////////////////////////////////////////////////////////////////////////////////////////////////
+$$('.entry_btn').on('click', function () {
+console.log("entry");
+if(auth.user.area.walk_in == false || auth.user.area.walk_in == 0){
+  sck.emit("security_user", {
+      id: auth.user.id,
+      area: auth.user.area.id,
+      role: "security",
+      welcome:true
+    });
+  router.navigate({name:"impromtu-delivery"});
+
+}else{
+  router.navigate({name:"entry"});
+
+}
+  
+      });
+
+$$('.history_btn').on('click', function () {
+  // if (app.device.desktop) {
+  //   router.navigate({name:"history"});
+  // }else{
+    router.navigate({name:"historyvisit"});
+  // }
+});
+
+
+
+ // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ 
+
+ $$('.tour_btn').on('click', function () {
+  if (app.device.desktop) {
+    router.navigate({name:"tour_map"});
+  }else{
+    router.navigate({name:"tour_option"});
+  }
+  
+      });
+
+
+ 
+
+
+//*entry function////////////////////////////////////////////////////////////////////////////////////////////////
+$$('.scan_btn').on('click', function () {
+
+ 
+  
+  router.navigate({name:"scanner"});
+
+  
+});
+
+ // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+}
+
+}
+ 
+
+        
+    }
+    </script>

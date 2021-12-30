@@ -1,0 +1,65 @@
+<template>
+  <div class="page" >
+      <div class="navbar">
+          <div class="navbar-inner">
+            <div class="left">
+              <a class="link back">
+                  <i class="material-icons"> arrow_back</i>
+                <span class="if-not-md">Back</span>
+              </a>
+            </div>
+            <div class="title">GPS Tracker</div>
+          </div>
+        </div>   
+    <div class="page-content"  style='width:100%;height:100%;overflow: hidden;'>
+      <iframe id='gps_frame' src="http://ms03.trackingmate.com/" style='width:100%;height:100%;overflow: hidden;'></iframe>
+      
+    
+    </div>
+  </div>
+</template>
+<style>
+      iframe::-webkit-scrollbar {  
+      display: none;
+  }  
+  </style>
+<script>
+  
+  import request from '../js/request.js';
+  export default {
+  
+      data:function(){
+        var app=this.$app;
+        var auth = app.form.getFormData("auth");
+        return{
+          user:auth.user,
+        }
+      },
+  on:{
+  pageInit:function(){
+      var iframe = document.getElementById("gps_frame");
+      iframe.onload = function() { 
+        iframe.contentWindow.document.getElementById('input_username').value="EV3";
+        iframe.contentWindow.document.getElementById('input_password').value="123456";
+        iframe.contentWindow.document.getElementById('checkBox_autoLogin').checked=true;
+        iframe.contentWindow.document.getElementById('checkBox_RPassWord').checked=true;
+
+
+
+       }; 
+     
+
+
+
+
+
+
+
+      }
+  
+  
+  
+  }
+
+}
+</script>

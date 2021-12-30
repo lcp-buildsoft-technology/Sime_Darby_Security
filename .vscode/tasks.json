@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build-cordova-android-dev",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "npm: build-cordova-android-dev",
+			"detail": "cross-env TARGET=cordova cross-env NODE_ENV=development node ./build/build.js && cd cordova && cordova build android"
+		}
+	]
+}
