@@ -120,17 +120,22 @@
         var items = [];
         app.dialog.preloader();
         var sck = socket.connect(CONFIG.SOCKET)
-        var offline = sck.disconnected;
-          app.form.storeFormData("offline", sck.disconnected);
-          sck.on('connect', function(office_mode) {
-            console.log('check 2', sck.connected);
+        var offline = '';
+            window.setInterval(function () {
+              offline = sck.disconnected;
+              app.form.storeFormData("offline", sck.disconnected);
+              sck.on('connect', function(office_mode) {
+                console.log('check 2', sck.connected);
 
-              app.form.storeFormData("offline", false);
-          });
+                  app.form.storeFormData("offline", false);
+              });
+              var auth = app.form.getFormData("auth");
+              offline = app.form.getFormData("offline");
+              console.log(offline)
+            }, 50);
           
           setTimeout(function(){
-            offline = app.form.getFormData("offline");
-            console.log(offline)
+            
           
         
         if (app.device.desktop) {
@@ -633,6 +638,8 @@
               var txt_color = "";
               var button_part = "";
               var tittle = "";
+              var purpose_tittle = "";
+              var purpose_reason = "";
 
               var check_in = data.created_at;
 
@@ -657,9 +664,20 @@
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
+                if (data.lot != null){
+                  address =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+                address_tittle = "Address";
+                purpose_tittle = "Purpose";
+                purpose_reason = data.reason;
+                }else{
                 address = data.reason;
                 address_tittle = "Purpose";
-              }
+              }}
 
 
 
@@ -736,7 +754,15 @@
                   address_tittle +
                   "</label></div>" +
                   "<div class='col-70'><label style='float:right;text-align: right;'>" +
-                  address +
+                    address +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_reason +
                   "</label></div>" +
                   "</div>" +
                   "<div class='row' >" +
@@ -775,14 +801,16 @@
             null,
             { id: id,},'OFF',
             function(data) {
-              console.log(data);
+           
               var status_txt = "";
               var txt_color = "";
               var button_part = "";
               var tittle = "";
-
-              // var check_in = data.created_at;
-
+              var purpose_tittle = "";
+              var purpose_reason = "";
+              var data = data[0]
+              var check_in = data.created_at;
+             
               tittle = "Entry Details";
 
               status_txt = "CHECKED IN";
@@ -805,9 +833,20 @@
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
+                if (data.lot != null){
+                  address =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+                address_tittle = "Address";
+                purpose_tittle = "Purpose";
+                purpose_reason = data.reason;
+                }else{
                 address = data.reason;
                 address_tittle = "Purpose";
-              }
+              }}
 
 
 
@@ -884,7 +923,15 @@
                   address_tittle +
                   "</label></div>" +
                   "<div class='col-70'><label style='float:right;text-align: right;'>" +
-                  address +
+                    address +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_reason +
                   "</label></div>" +
                   "</div>" +
                   "<div class='row' >" +
@@ -938,7 +985,8 @@
               var txt_color = "";
               var button_part = "";
               var tittle = "";
-
+              var purpose_tittle = "";
+              var purpose_reason = "";
               var check_in = data.created_at;
 
               tittle = "Entry Details";
@@ -962,9 +1010,20 @@
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
+                if (data.lot != null){
+                  address =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+                address_tittle = "Address";
+                purpose_tittle = "Purpose";
+                purpose_reason = data.reason;
+                }else{
                 address = data.reason;
                 address_tittle = "Purpose";
-              }
+              }}
 
 
 
@@ -1041,7 +1100,15 @@
                   address_tittle +
                   "</label></div>" +
                   "<div class='col-70'><label style='float:right;text-align: right;'>" +
-                  address +
+                    address +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_reason +
                   "</label></div>" +
                   "</div>" +
                   "<div class='row' >" +
@@ -1085,8 +1152,10 @@
               var txt_color = "";
               var button_part = "";
               var tittle = "";
-
-              // var check_in = data.created_at;
+              var purpose_tittle = "";
+              var purpose_reason = "";
+              var data = data[0]
+              var check_in = data.created_at;
 
               tittle = "Entry Details";
 
@@ -1110,9 +1179,20 @@
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
+                if (data.lot != null){
+                  address =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+                address_tittle = "Address";
+                purpose_tittle = "Purpose";
+                purpose_reason = data.reason;
+                }else{
                 address = data.reason;
                 address_tittle = "Purpose";
-              }
+              }}
 
 
 
@@ -1189,7 +1269,15 @@
                   address_tittle +
                   "</label></div>" +
                   "<div class='col-70'><label style='float:right;text-align: right;'>" +
-                  address +
+                    address +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_reason +
                   "</label></div>" +
                   "</div>" +
                   "<div class='row' >" +
@@ -1225,7 +1313,7 @@
           );
           }
         });
-      },300);
+      },600);
       }
     }
   };

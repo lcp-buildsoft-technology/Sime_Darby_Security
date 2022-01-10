@@ -30,11 +30,12 @@
               <li>
                 <div class="item-content item-input item-input-outline">
                   <div class="item-inner">
-                    <div class="item-title item-label  item-floating-label" style="color:#FB6C5E;text-align: left"><b>Vehicle Plate No.</b></div>
+                    <div class="item-title " style="color:#FB6C5E;text-align: left"><b>Vehicle Plate No.</b></div>
+                    <!-- item-label  item-floating-label -->
                     <div class="item-input-wrap">
                   
-                      <input type="text"   name="visitor_car_plate" placeholder=""  id="vehicle_plate" style="color:black;" readonly="readonly" >
-                     
+                      <input type="text"   name="visitor_car_plate"   id="vehicle_plate" style="color:black;" readonly="readonly" >
+                     <!-- placeholder="" -->
                        
                     </div>
                   </div>
@@ -44,10 +45,11 @@
                   <li>
                       <div class="item-content item-input item-input-outline">
                         <div class="item-inner">
-                          <div class="item-title item-label item-floating-label" style="color:#FB6C5E;text-align: left"><b>Address</b></div>
+                          <div class="item-title " style="color:#FB6C5E;text-align: left"><b>Address</b></div>
+                          <!-- item-label item-floating-label -->
                           <div class="item-input-wrap">
-                            <input type="text" name="address"    placeholder=" " style="color:black;" readonly="readonly" id="address">
-                             
+                            <input type="text" name="address"  style="color:black;" readonly="readonly" id="address">
+                            <!-- placeholder="" -->
                           </div>
                         </div>
                       </div>
@@ -56,10 +58,11 @@
                     <li>
                 <div class="item-content item-input  item-input-outline">
                   <div class="item-inner">
-                    <div class="item-title item-label  item-floating-label" style="color:#FB6C5E;"><b>Entry Type</b></div>
+                    <div class="item-title" style="color:#FB6C5E;"><b>Entry Type</b></div>
+                    <!-- item-label  item-floating-label -->
                     <div class="item-input-wrap">
-                      <input type="text"    placeholder="Select Resident" readonly="readonly" id="entry_type" style="color:black;">
-                       
+                      <input type="text"  readonly="readonly" id="entry_type" style="color:black;">
+                      <!-- placeholder="" -->
                     </div>
                   </div>
                 </div>
@@ -138,18 +141,22 @@
         console.log(security_id)
         console.log(entry_data);
         var sck = socket.connect(CONFIG.SOCKET)
-       var offline = sck.disconnected;
-          app.form.storeFormData("offline", sck.disconnected);
-          sck.on('connect', function(office_mode) {
-            console.log('check 2', sck.connected);
- 
-              app.form.storeFormData("offline", false);
-          });
+        var offline = '';
+            window.setInterval(function () {
+              offline = sck.disconnected;
+              app.form.storeFormData("offline", sck.disconnected);
+              sck.on('connect', function(office_mode) {
+                console.log('check 2', sck.connected);
+
+                  app.form.storeFormData("offline", false);
+              });
+              var auth = app.form.getFormData("auth");
+              offline = app.form.getFormData("offline");
+              console.log(offline)
+            }, 50);
           
           setTimeout(function(){
-            var auth = app.form.getFormData("auth");
-            offline = app.form.getFormData("offline");
-            console.log(offline)
+            
           
          switch (entry_data.entry_type){
            case "E": type="Single Entry";
@@ -172,12 +179,41 @@
          var ip_cam=[];
         var hasAddress = false;
 
-         request.get("security_ipcam",{"Authorization":"JWT "+auth.token},null,'', function(data){
-          for(var i=0;i<data.results.length;i++){
-              ip_cam[data.results[i].type]=data.results[i].url;
+
+        if(offline == false){
+        request.get(
+          "security_ipcam",
+          { Authorization: "JWT " + auth.token },
+          null,'',
+          function(data) {
+            for (var i = 0; i < data.results.length; i++) {
+              ip_cam[data.results[i].type] = data.results[i].url;
+            }
+            console.log(ip_cam);
+          },function(xhr, status){
+          
           }
-          console.log(ip_cam);
-         });
+        );
+        }else{
+          request.post(
+          "security_ipcam.php",
+          null,
+          {area:auth.user.area.id},'OFF',
+          function(data) {
+            console.log(data)
+            for (var i = 0; i < data.results.length; i++) {
+              ip_cam[data.results[i].type] = data.results[i].url;
+            }
+            console.log(ip_cam);
+          }
+        );
+        }
+        //  request.get("security_ipcam",{"Authorization":"JWT "+auth.token},null,'', function(data){
+        //   for(var i=0;i<data.results.length;i++){
+        //       ip_cam[data.results[i].type]=data.results[i].url;
+        //   }
+        //   console.log(ip_cam);
+        //  });
      
 
 
@@ -320,10 +356,10 @@
                 var url = window.URL || window.webkitURL;
                 im.className = "custom-img";
                 im.src = url.createObjectURL(data);
-
                 if (data.size <= 100) {
                   app.dialog.close();
                   app.dialog.alert("Unable to connect to Camera!", "");
+                  
                 } else {
                   $this.html("");
                   $this.append(im);
@@ -337,6 +373,68 @@
                 app.dialog.alert("Unable to connect to Camera!", "");
               }
             );
+
+            request.getimg(
+              facecam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+
+                console.log(data);
+                if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $$("#FC").html("");
+                  $$("#FC").append(im);
+                  imgs['FC'] = data;
+                  app.dialog.close();
+                }
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+
+            request.getimg(
+              iccam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+                console.log(data)
+                
+                  if (data.size == 26) {
+                    app.dialog.close();
+                    app.dialog.alert("Please insert IC.", "");
+                    console.log(data.size)
+                  } else if (data.size <= 100) {
+                    app.dialog.close();
+                    app.dialog.alert("Unable to connect to Camera!", "");
+                  } else {
+                    $$('#IC').html("");
+                    $$('#IC').append(im);
+                    imgs['IC'] = data;
+                    app.dialog.close();
+                  }
+                
+
+                console.log(data);
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+
           } else if (x == "FC") {
             console.log("Face:" + facecam);
             var $this = $$("#" + x);
@@ -349,6 +447,7 @@
                 im.className = "custom-img";
                 im.src = url.createObjectURL(data);
 
+                console.log(data);
                 if (data.size <= 100) {
                   app.dialog.close();
                   app.dialog.alert("Unable to connect to Camera!", "");
@@ -365,6 +464,66 @@
                 app.dialog.alert("Unable to connect to Camera!", "");
               }
             );
+
+            request.getimg(
+              frontcam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+                if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $$('#EF').html("");
+                  $$('#EF').append(im);
+                  imgs['EF'] = data;
+                  app.dialog.close();
+                  console.log('EFSA')
+                }
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+
+            request.getimg(
+              iccam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+
+             
+                  if (data.size == 26) {
+                    app.dialog.close();
+                    app.dialog.alert("Please insert IC.", "");
+                    console.log(data.size)
+                  } else if (data.size <= 100) {
+                    app.dialog.close();
+                    app.dialog.alert("Unable to connect to Camera!", "");
+                  } else {
+                    $$('#IC').html("");
+                    $$('#IC').append(im);
+                    imgs['IC'] = data;
+                    app.dialog.close();
+                  }
+                
+                console.log(data.blob.type);
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+
           } else if (x == "IC") {
             console.log("IC:" + iccam);
             var $this = $$("#" + x);
@@ -373,25 +532,27 @@
               null,
               function(data) {
                 var im = new Image();
-
                 var url = window.URL || window.webkitURL;
                 im.className = "custom-img";
                 im.src = url.createObjectURL(data);
 
-                if (data.size <= 26) {
-                  app.dialog.close();
-                  app.dialog.alert("Please insert IC.", "");
-                } else if (data.size <= 100) {
-                  app.dialog.close();
-                  app.dialog.alert("Unable to connect to Camera!", "");
-                } else {
-                  $this.html("");
-                  $this.append(im);
-                  imgs[x] = data;
-                  app.dialog.close();
-                }
+                
+                  if (data.size == 26) {
+                    app.dialog.close();
+                    app.dialog.alert("Please insert IC.", "");
+                    console.log(data.size)
+                  } else if (data.size <= 100) {
+                    app.dialog.close();
+                    app.dialog.alert("Unable to connect to Camera!", "");
+                  } else {
+                    $$('#IC').html("");
+                    $$('#IC').append(im);
+                    imgs['IC'] = data;
+                    app.dialog.close();
+                  }
+                
 
-                console.log(data);
+                console.log(data.Blob)
               },
               function(error) {
                 console.log(error);
@@ -517,7 +678,11 @@ request.postFormData(
                   //error
 
                   app.dialog.close();
-                  app.dialog.alert("Please try again.", "Register Impromptu Failed");
+                  router.back("/main/", { force: true });
+                  request.getimg(boomgate_ip, null, function(data) {
+                      console.log(data);
+                    });
+                  app.dialog.alert(" ", "Register Entry Successfull");
                 }
               );
     }

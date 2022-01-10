@@ -14,12 +14,12 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover">
   <link href="path/to/framework7-icons.css">
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7XCS4gWqpqaJjVcT6F-Eal8DZMfrJggc"></script>
+  <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7XCS4gWqpqaJjVcT6F-Eal8DZMfrJggc"></script> -->
 
   <meta name="theme-color" content="#EF8354">
   <meta name="format-detection" content="telephone=no">
   <meta name="msapplication-tap-highlight" content="no">
-  <link href="https://fonts.googleapis.com/css?family=Julius+Sans+One" rel="stylesheet">
+  <!-- <link href="https://fonts.googleapis.com/css?family=Julius+Sans+One" rel="stylesheet"> -->
   <title>Sime Darby Security</title>
   
   
@@ -97,7 +97,121 @@
   <script src="cordova.js"></script>
   <% } %>
   <!-- built script files will be auto injected -->
+  <script>
+    import request from "../js/request.js";
+  import socket from 'socket.io-client/dist/socket.io.js';
+  import CONFIG from "../js/config.js";
+  export default {
 
+    on: {
+      pageInit: function() {
+        var sck = socket.connect(CONFIG.SOCKET)
+        var offline = '';
+            window.setInterval(function () {
+              offline = '';
+              app.form.storeFormData("offline", sck.disconnected);
+              sck.on('connect', function(office_mode) {
+                console.log('check 2', sck.connected);
+
+                  app.form.storeFormData("offline", false);
+              });
+              var auth = app.form.getFormData("auth");
+              offline = app.form.getFormData("offline");
+              console.log(offline)
+            }, 50);
+    if(offline == true){
+        var dialog1 = app.dialog.create({
+              title: 'Switching to offline mode',
+                          text: '<div id="retry_btn"></div>',
+                          buttons: [
+                          // {
+                          //     text: 'RETRY NOW',
+                          //     onClick: function () {
+                          //         clearInterval(myTimer);
+                          //         router.refreshPage('/');
+                                  
+                          //     }
+                          // },
+                          // {
+                          //     text: 'Close',
+                          //     onClick: function () {
+                          //         clearInterval(myTimer);
+                          //         app.dialog.close()
+                          //     }
+                          // }
+                          ]
+                      })
+
+                      dialog1.open();
+                          var timeleft = 5;
+                          var count= 0;
+
+                          var myTimer = setInterval(function(){
+
+                          count= timeleft - 1;
+                          timeleft -= 1;
+                          console.log(count)
+
+                          if(count == 0){
+                              app.dialog.close()
+                              clearInterval(myTimer);
+                              mainView.router.navigate("/login/");
+                              
+                          }else{
+                              $$('#retry_btn').html('We are switching to offline mode.<br><br>Thank you for your patience :) <br><br>Switchong in '+count+' seconds...')
+                          }
+
+                      }, 1000);
+      }else{
+        var dialog1 = app.dialog.create({
+              title: 'Switching to online mode',
+                          text: '<div id="retry_btn"></div>',
+                          buttons: [
+                          // {
+                          //     text: 'RETRY NOW',
+                          //     onClick: function () {
+                          //         clearInterval(myTimer);
+                          //         router.refreshPage('/');
+                                  
+                          //     }
+                          // },
+                          // {
+                          //     text: 'Close',
+                          //     onClick: function () {
+                          //         clearInterval(myTimer);
+                          //         app.dialog.close()
+                          //     }
+                          // }
+                          ]
+                      })
+
+                      dialog1.open();
+                          var timeleft = 5;
+                          var count= 0;
+
+                          var myTimer = setInterval(function(){
+
+                          count= timeleft - 1;
+                          timeleft -= 1;
+                          console.log(count)
+
+                          if(count == 0){
+                              app.dialog.close()
+                              clearInterval(myTimer);
+                              mainView.router.navigate("/login/");
+                              
+                          }else{
+                              $$('#retry_btn').html('We are switching to online mode.<br><br>Thank you for your patience :) <br><br>Switchong in '+count+' seconds...')
+                          }
+
+                      }, 1000);
+      }   
+      
+    }
+    }
+  };
+
+  </script>
 
  
 

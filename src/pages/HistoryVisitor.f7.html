@@ -156,22 +156,45 @@
         }else{
           $$('.desktop_view').css("display", "none");
         }
+        
 
         
 // Loading flag
 var sck = socket.connect(CONFIG.SOCKET)
-        var offline = sck.disconnected;
-          app.form.storeFormData("offline", sck.disconnected);
-          sck.on('connect', function(office_mode) {
-            console.log('check 2', sck.connected);
+        var offline = '';
+            window.setInterval(function () {
+              offline = sck.disconnected;
+              app.form.storeFormData("offline", sck.disconnected);
+              sck.on('connect', function(office_mode) {
+                console.log('check 2', sck.connected);
 
-              app.form.storeFormData("offline", false);
-          });
+                  app.form.storeFormData("offline", false);
+              });
+              var auth = app.form.getFormData("auth");
+              offline = app.form.getFormData("offline");
+              console.log(offline)
+            }, 50);
           
           setTimeout(function(){
-            offline = app.form.getFormData("offline");
-            console.log(offline)
-         
+            
+            if(offline == true){
+              var dialog1 = app.dialog.create({
+              title: 'Current is offline mode',
+              text: 'If record not found, please write down the car plate number after online mode to update the record.',
+              buttons: [
+                {
+                  text: 'Close',
+                  onClick: function () {
+                    app.dialog.close();
+                  }
+                }
+              ]
+            })
+
+            dialog1.open()
+            }
+            
+
           if(offline == false){
         request.get(
           "visitor_entry",
@@ -344,7 +367,7 @@ var sck = socket.connect(CONFIG.SOCKET)
                   address +
                 "</div>" +
                 '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;"> ' +
-                 
+                pass +
                 "</div>" +
                 " </div>" +
                 '<div style="width: 100%;">' +
@@ -371,6 +394,13 @@ var sck = socket.connect(CONFIG.SOCKET)
                 content: new_entry_item
               };
               list_item.push(content_item);
+              items.push({
+                card_id:card_id,
+                visitor_car_plate: data[i].visitor_car_plate,
+                tracker_id:data[i].tracker_id,
+                address:address,
+                created_at:data[i].created_at
+              });
             }
 
             function show_list(total, now) {
@@ -501,7 +531,7 @@ var sck = socket.connect(CONFIG.SOCKET)
             itemTemplate:
             '<div class="item-inner">' +
             "<div class='card  card_in card_width item-title-row" +
-                "{{card_id}}" +
+                "{{card_id}} {{card_id}}" +
                 " '  >" +
                 "<div class='card-content card-click  content_heigt' visitor_id='" +
                 "{{tracker_id}}"+
@@ -587,6 +617,7 @@ var sck = socket.connect(CONFIG.SOCKET)
               }
 
               new_entry_item =
+            
                 "<div class='card  card_in card_width " +
                 card_id +
                 " '  >" +
@@ -629,7 +660,83 @@ var sck = socket.connect(CONFIG.SOCKET)
                 content: new_entry_item
               };
               list_item.push(content_item);
+              items.push({
+                card_id:card_id,
+                visitor_car_plate: data[i].visitor_car_plate,
+                tracker_id:data[i].tracker_id,
+                address:address,
+                created_at:data[i].created_at
+              });
             }
+
+            var allowInfinite = true;
+
+            // Last loaded index
+            var lastItemIndex = $$('.virtual-list div').length;
+
+            // Append items per load
+            var itemsPerLoad = 5;
+
+            var virtualList = app.virtualList.create({
+            // *List Element
+            el: '.virtual-list',
+            // *Pass array with items
+            items: items,
+            // *Custom search function for searchbar
+
+            searchAll: function (query, items) {
+              var found = [];
+              for (var i = 0; i < items.length; i++) {
+                if ((items[i].visitor_car_plate.toLowerCase().indexOf(query.toLowerCase()) >= 0 || items[i].visitor_car_plate.toUpperCase().indexOf(query.toUpperCase()) >= 0)) found.push(i);
+              }
+
+              return found; //*return array with mathced indexes
+
+            },
+            // *List item Template7 template
+            itemTemplate:
+            '<div class="item-inner">' +
+            "<div class='card  card_in card_width item-title-row" +
+                "{{card_id}} {{card_id}}" +
+                " '  >" +
+                "<div class='card-content card-click  content_heigt' visitor_id='" +
+                "{{tracker_id}}"+
+
+                "'>" +
+                '<div class="row no-gap">' +
+                '<div class="col-20 card-left-content">' +
+                '<div class="card-left-content_inner">' +
+                '<i class="material-icons">chevron_right</i>' +
+                "<p>SCAN IN</p>" +
+                " </div>" +
+                "</div>" +
+                '<div class="col-70 card-center-content">' +
+                '<div class="card-center-content_inner">' +
+                "<div>" +
+                  "{{address}}"+
+                "</div>" +
+                '<div style="width: 100%;">' +
+                '<div style="display: inline-block;color:red;" class="item-title">' +
+                  "{{visitor_car_plate}}"+
+                "</div>" +
+                '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;"> <b > ' +
+                  "{{created_at}}"+
+                "</b></div>" +
+                " </div>" +
+                "</div>" +
+                "</div>" +
+                '<div class="col-10 card-right-content">' +
+                '<div class="card-right-content_inner">' +
+                ' <i class="material-icons">more_vert</i>' +
+                " </div>" +
+                " </div>" +
+                "</div>" +
+                "</div>" +
+                " </div>"+
+                "</div>",
+            //* Item height
+            height: app.theme === 'ios' ? 63 : (app.theme === 'md' ? 73 : 46),
+            });
 
             function show_list(total, now) {
               var all = total;
@@ -759,6 +866,8 @@ var sck = socket.connect(CONFIG.SOCKET)
               var txt_color = "";
               var button_part = "";
               var tittle = "";
+              var purpose_tittle = "";
+              var purpose_reason = "";
 
               var check_in = data.created_at;
 
@@ -783,9 +892,20 @@ var sck = socket.connect(CONFIG.SOCKET)
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
+                if (data.lot != null){
+                  address =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+                address_tittle = "Address";
+                purpose_tittle = "Purpose";
+                purpose_reason = data.reason;
+                }else{
                 address = data.reason;
                 address_tittle = "Purpose";
-              }
+              }}
 
 
 
@@ -863,6 +983,14 @@ var sck = socket.connect(CONFIG.SOCKET)
                   "</label></div>" +
                   "<div class='col-70'><label style='float:right;text-align: right;'>" +
                   address +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_reason +
                   "</label></div>" +
                   "</div>" +
                   "<div class='row' >" +
@@ -906,8 +1034,10 @@ var sck = socket.connect(CONFIG.SOCKET)
               var txt_color = "";
               var button_part = "";
               var tittle = "";
-
-              // var check_in = data.created_at;
+              var purpose_tittle = "";
+              var purpose_reason = "";
+              var data = data[0]
+              var check_in = data.created_at; 
 
               tittle = "Entry Details";
 
@@ -931,9 +1061,20 @@ var sck = socket.connect(CONFIG.SOCKET)
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
+                if (data.lot != null){
+                  address =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+                address_tittle = "Address";
+                purpose_tittle = "Purpose";
+                purpose_reason = data.reason;
+                }else{
                 address = data.reason;
                 address_tittle = "Purpose";
-              }
+              }}
 
 
 
@@ -1010,7 +1151,15 @@ var sck = socket.connect(CONFIG.SOCKET)
                   address_tittle +
                   "</label></div>" +
                   "<div class='col-70'><label style='float:right;text-align: right;'>" +
-                  address +
+                    address +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_reason +
                   "</label></div>" +
                   "</div>" +
                   "<div class='row' >" +
@@ -1064,7 +1213,8 @@ var sck = socket.connect(CONFIG.SOCKET)
               var txt_color = "";
               var button_part = "";
               var tittle = "";
-
+              var purpose_tittle = "";
+              var purpose_reason = "";
               var check_in = data.created_at;
 
               tittle = "Entry Details";
@@ -1088,9 +1238,20 @@ var sck = socket.connect(CONFIG.SOCKET)
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
+                if (data.lot != null){
+                  address =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+                address_tittle = "Address";
+                purpose_tittle = "Purpose";
+                purpose_reason = data.reason;
+                }else{
                 address = data.reason;
                 address_tittle = "Purpose";
-              }
+              }}
 
 
 
@@ -1167,7 +1328,15 @@ var sck = socket.connect(CONFIG.SOCKET)
                   address_tittle +
                   "</label></div>" +
                   "<div class='col-70'><label style='float:right;text-align: right;'>" +
-                  address +
+                    address +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_reason +
                   "</label></div>" +
                   "</div>" +
                   "<div class='row' >" +
@@ -1211,8 +1380,10 @@ var sck = socket.connect(CONFIG.SOCKET)
               var txt_color = "";
               var button_part = "";
               var tittle = "";
-
-              // var check_in = data.created_at;
+              var purpose_tittle = "";
+              var purpose_reason = "";
+              var data = data[0]
+              var check_in = data.created_at;
 
               tittle = "Entry Details";
 
@@ -1236,9 +1407,20 @@ var sck = socket.connect(CONFIG.SOCKET)
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
+                if (data.lot != null){
+                  address =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+                address_tittle = "Address";
+                purpose_tittle = "Purpose";
+                purpose_reason = data.reason;
+                }else{
                 address = data.reason;
                 address_tittle = "Purpose";
-              }
+              }}
 
 
 
@@ -1315,7 +1497,15 @@ var sck = socket.connect(CONFIG.SOCKET)
                   address_tittle +
                   "</label></div>" +
                   "<div class='col-70'><label style='float:right;text-align: right;'>" +
-                  address +
+                    address +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_reason +
                   "</label></div>" +
                   "</div>" +
                   "<div class='row' >" +
@@ -1370,7 +1560,8 @@ var sck = socket.connect(CONFIG.SOCKET)
               var txt_color = "";
               var button_part = "";
               var tittle = "";
-
+              var purpose_tittle = "";
+              var purpose_reason = "";
               var check_in = data.created_at;
 
               tittle = "Entry Details";
@@ -1394,9 +1585,20 @@ var sck = socket.connect(CONFIG.SOCKET)
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
+                if (data.lot != null){
+                  address =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+                address_tittle = "Address";
+                purpose_tittle = "Purpose";
+                purpose_reason = data.reason;
+                }else{
                 address = data.reason;
                 address_tittle = "Purpose";
-              }
+              }}
 
 
 
@@ -1473,7 +1675,15 @@ var sck = socket.connect(CONFIG.SOCKET)
                   address_tittle +
                   "</label></div>" +
                   "<div class='col-70'><label style='float:right;text-align: right;'>" +
-                  address +
+                    address +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_reason +
                   "</label></div>" +
                   "</div>" +
                   "<div class='row' >" +
@@ -1517,8 +1727,10 @@ var sck = socket.connect(CONFIG.SOCKET)
               var txt_color = "";
               var button_part = "";
               var tittle = "";
-
-              // var check_in = data.created_at;
+              var purpose_tittle = "";
+              var purpose_reason = "";
+              var data = data[0]
+              var check_in = data.created_at;
 
               tittle = "Entry Details";
 
@@ -1542,9 +1754,20 @@ var sck = socket.connect(CONFIG.SOCKET)
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
+                if (data.lot != null){
+                  address =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+                address_tittle = "Address";
+                purpose_tittle = "Purpose";
+                purpose_reason = data.reason;
+                }else{
                 address = data.reason;
                 address_tittle = "Purpose";
-              }
+              }}
 
 
 
@@ -1621,7 +1844,15 @@ var sck = socket.connect(CONFIG.SOCKET)
                   address_tittle +
                   "</label></div>" +
                   "<div class='col-70'><label style='float:right;text-align: right;'>" +
-                  address +
+                    address +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_reason +
                   "</label></div>" +
                   "</div>" +
                   "<div class='row' >" +
@@ -1657,7 +1888,7 @@ var sck = socket.connect(CONFIG.SOCKET)
           );
           }
         });
-      },300);
+      },600);
       }
     }
   };

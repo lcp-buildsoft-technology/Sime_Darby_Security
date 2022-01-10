@@ -439,19 +439,21 @@
 
         });
         var sck = socket.connect(CONFIG.SOCKET)
-        var offline = sck.disconnected;
-          app.form.storeFormData("offline", sck.disconnected);
-          sck.on('connect', function(office_mode) {
-            console.log('check 2', sck.connected);
+        var offline = '';
+            window.setInterval(function () {
+              offline = sck.disconnected;
+              app.form.storeFormData("offline", sck.disconnected);
+              sck.on('connect', function(office_mode) {
+                console.log('check 2', sck.connected);
 
-              app.form.storeFormData("offline", false);
-          });
+                  app.form.storeFormData("offline", false);
+              });
+              var auth = app.form.getFormData("auth");
+              offline = app.form.getFormData("offline");
+              console.log(offline)
+            }, 50);
           
-          setTimeout(function(){
-            offline = app.form.getFormData("offline");
-            console.log(offline)
-          
-        
+        setTimeout(function(){
 
         function sliceIntoChunks(arr, chunkSize) {
             const res = [];
@@ -1382,6 +1384,7 @@
                 if (data.size <= 100) {
                   app.dialog.close();
                   app.dialog.alert("Unable to connect to Camera!", "");
+                  
                 } else {
                   $this.html("");
                   $this.append(im);
@@ -1688,13 +1691,55 @@
                 // app.dialog.alert("Impromtu Entry Created!", "");
                   app.dialog.close();
                   app.dialog.alert("Please try again.", "Register Impromptu Failed");
+                  var dialog1 = app.dialog.create({
+              title: 'Switching to offline mode',
+                          text: '<div id="retry_btn"></div>',
+                          buttons: [
+                          // {
+                          //     text: 'RETRY NOW',
+                          //     onClick: function () {
+                          //         clearInterval(myTimer);
+                          //         router.refreshPage('/');
+                                  
+                          //     }
+                          // },
+                          // {
+                          //     text: 'Close',
+                          //     onClick: function () {
+                          //         clearInterval(myTimer);
+                          //         app.dialog.close()
+                          //     }
+                          // }
+                          ]
+                      })
+
+                      dialog1.open();
+                          var timeleft = 5;
+                          var count= 0;
+
+                          var myTimer = setInterval(function(){
+
+                          count= timeleft - 1;
+                          timeleft -= 1;
+                          console.log(count)
+
+                          if(count == 0){
+                              app.dialog.close()
+                              clearInterval(myTimer);
+                             
+                              
+                          }else{
+                              $$('#retry_btn').html('We are switching to offline mode.<br><br>Thank you for your patience :) <br><br>Switchong in '+count+' seconds...')
+                          }
+
+                      }, 1000);
                   // router.back("/main/", { force: true });
 
                 }
               );
             }else{
               Fdata.append("area",auth.user.area.id)
-
+              Fdata.append("community","1")
                 request.postFormData(
                 "visitor_entry_new.php",
                 null,
@@ -1703,7 +1748,7 @@
                 function(data) {
                 app.dialog.close();
                 console.log(data);
-
+                console.log(boomgate_ip);
                 if (data.status == "success") {
                   app.dialog.alert("Impromtu Entry Created!", "");
                   request.getimg(boomgate_ip, null, function(data) {
@@ -1718,6 +1763,9 @@
 
                 app.dialog.close();
                 app.dialog.alert("Impromtu Entry Created!", "");
+                request.getimg(boomgate_ip, null, function(data) {
+                    console.log(data);
+                  });
                 // app.dialog.alert("Please try again.", "Register Impromptu Failed");
                 router.back("/main/", { force: true });
 
@@ -1755,11 +1803,53 @@
 
                   app.dialog.close();
                   app.dialog.alert("Please try again.", "Register Impromptu Failed");
+                  var dialog1 = app.dialog.create({
+              title: 'Switching to offline mode',
+                          text: '<div id="retry_btn"></div>',
+                          buttons: [
+                          // {
+                          //     text: 'RETRY NOW',
+                          //     onClick: function () {
+                          //         clearInterval(myTimer);
+                          //         router.refreshPage('/');
+                                  
+                          //     }
+                          // },
+                          // {
+                          //     text: 'Close',
+                          //     onClick: function () {
+                          //         clearInterval(myTimer);
+                          //         app.dialog.close()
+                          //     }
+                          // }
+                          ]
+                      })
+
+                      dialog1.open();
+                          var timeleft = 5;
+                          var count= 0;
+
+                          var myTimer = setInterval(function(){
+
+                          count= timeleft - 1;
+                          timeleft -= 1;
+                          console.log(count)
+
+                          if(count == 0){
+                              app.dialog.close()
+                              clearInterval(myTimer);
+                             
+                              
+                          }else{
+                              $$('#retry_btn').html('We are switching to offline mode.<br><br>Thank you for your patience :) <br><br>Switchong in '+count+' seconds...')
+                          }
+
+                      }, 1000);
                 }
               );
               }else{
                 Fdata.append("area",auth.user.area.id)
-
+                Fdata.append("community","1")
                 request.postFormData(
                 "visitor_entry_new.php",
                 null,
@@ -1768,7 +1858,7 @@
                 function(data) {
                 app.dialog.close();
                 console.log(data);
-
+                console.log(boomgate_ip);
                 if (data.status == "success") {
                   app.dialog.alert("Impromtu Entry Created!", "");
                   request.getimg(boomgate_ip, null, function(data) {
@@ -1783,6 +1873,9 @@
 
                 app.dialog.close();
                 app.dialog.alert("Impromtu Entry Created!", "");
+                request.getimg(boomgate_ip, null, function(data) {
+                    console.log(data);
+                  });
                 // app.dialog.alert("Please try again.", "Register Impromptu Failed");
                 router.back("/main/", { force: true });
 
@@ -1805,7 +1898,7 @@
             
           }
         });
-      },300);
+      },600);
         // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
       }
     }

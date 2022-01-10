@@ -188,13 +188,19 @@
              console.log(navigator.connection.type)
             console.log(auth.token)
             var sck = socket.connect(CONFIG.SOCKET)
-            var offline = sck.disconnected;
-            app.form.storeFormData("offline", sck.disconnected);
-            sck.on('connect', function(office_mode) {
-              console.log('check 2', sck.connected);
+            var offline = '';
+            window.setInterval(function () {
+              offline = sck.disconnected;
+              app.form.storeFormData("offline", sck.disconnected);
+              sck.on('connect', function(office_mode) {
+                console.log('check 2', sck.connected);
 
-                app.form.storeFormData("offline", false);
-            });
+                  app.form.storeFormData("offline", false);
+              });
+              var auth = app.form.getFormData("auth");
+              offline = app.form.getFormData("offline");
+              console.log(offline)
+            }, 50);
             
             setTimeout(function(){
               var auth = app.form.getFormData("auth");
@@ -810,7 +816,7 @@ if (app.device.android || app.device.ios) {
       request.post(
           "visitor_entry.php",
            null,
-          { status: "AIR",type: "",area: auth.user.area.id},'OFF',function(data){
+          { status: "PEX",type: "",area: auth.user.area.id},'OFF',function(data){
               console.log(data);
             
             var list_item=[];
@@ -1013,32 +1019,33 @@ if (app.device.android || app.device.ios) {
       
 
 
-
-            },function(xhr,status,error){
-              var dialog1 = app.dialog.create({
-                        title: 'Record Not Found  !',
-                        text: 'Failed to scan out.',
-                        buttons: [
-                        // {
-                        //     text: 'RETRY NOW',
-                        //     onClick: function () {
-                        //         clearInterval(myTimer);
-                        //         router.refreshPage('/');
+              }
+            // ,function(xhr,status,error){
+            //   var dialog1 = app.dialog.create({
+            //             title: 'Record Not Found  !',
+            //             text: 'Failed to scan out.',
+            //             buttons: [
+            //             // {
+            //             //     text: 'RETRY NOW',
+            //             //     onClick: function () {
+            //             //         clearInterval(myTimer);
+            //             //         router.refreshPage('/');
                                 
-                        //     }
-                        // },
-                        {
-                            text: 'Close',
-                            onClick: function () {
-                                f7c.$router.refreshPage('/');
-                                app.dialog.close()
-                            }
-                        }
-                        ]
-                    })
+            //             //     }
+            //             // },
+            //             {
+            //                 text: 'Close',
+            //                 onClick: function () {
+            //                     f7c.$router.refreshPage('/');
+            //                     app.dialog.close()
+            //                 }
+            //             }
+            //             ]
+            //         })
     
-                    dialog1.open();
-            });
+            //         dialog1.open();
+            // }
+            );
     }
 
 
@@ -1675,8 +1682,8 @@ if (app.device.android || app.device.ios) {
           }else{
             request.post(
           "visitor_entry.php",
-           null,'OFF',
-          { status: "AIR",type: "",area: auth.user.area.id},function(data){
+           null,
+          { status: "AIR",type: "",area: auth.user.area.id},'OFF',function(data){
               console.log(data);
             
             var list_item=[];
@@ -1888,7 +1895,7 @@ if (app.device.android || app.device.ios) {
 
 
   // app.dialog.preloader();
- 
+ if(offline == false){
 request.get("reasons",{"Authorization":"JWT "+auth.token},null,'', function(data){
  
 
@@ -1916,6 +1923,36 @@ self.dynamicPopup = app.popup.create({
       app.dialog.close();
     
  });
+ }else{
+
+ request.get("reason.php",null,null,'off',function(data){
+ 
+
+ resons=data.results;
+ var all_resons="";
+for(var i=0;i<resons.length;i++){
+
+all_resons+= ' <li>'+
+          ' <label class="item-radio item-content">'+
+             '<input type="radio" name="reason-radio" value="'+resons[i].id+'" checked />'+
+             '<i class="icon icon-radio"></i>'+
+             '<div class="item-inner">'+
+               '<div class="item-title">'+resons[i].reason+'</div>'+
+             '</div>'+
+           '</label>'+
+         '</li>';
+
+}
+
+self.dynamicPopup = app.popup.create({
+el:".reasons",
+
+});
+$$('#reason-list').html(all_resons);
+app.dialog.close();
+
+});
+ }
 
 
              
@@ -2134,6 +2171,7 @@ $$(".visitor_scroll_view").on('taphold',".entry_force",function () {
  
   var dynamicPopup ;
   // app.dialog.preloader();
+  if(offline == false){
 request.get("visitor_entry/"+id,{"Authorization":"JWT "+auth.token},null,'',function(data){
 console.log(data);
 var status_txt='';
@@ -2457,6 +2495,336 @@ app.swiper.create(".demo-swiper",{ pagination: {
   app.dialog.close();
   console.log(error);
 });
+  }else{
+    request.post(
+            "visitor_entry_detail.php",
+            null,
+            { id: id,},'OFF',
+            function(data) {
+console.log(data);
+var status_txt='';
+var txt_color='';
+var button_part='';
+var tittle='';
+var check_out_img='';
+var call_btn='';
+var contact='0';
+var data = data[0]
+if(data.phone_number!=null && data.phone_number!='' ){
+  contact=data.phone_number;
+}
+$$('#visit_id').val(data.tracker_id);
+console.log(data.tracker_id)
+if(data.status=="PEX"){
+  tittle="Check-out";
+  var check_out_img='<div class="swiper-slide img-front " x="XF" id="EF"><img src="'+data.exit_car_plate_image+'" class="custom-img " ></div>';
+}else{
+  tittle="Check-in";
+}
+
+if(data.status=="PEN"){
+  status_txt="Pending";
+  txt_color ="yellow";
+  
+  button_part=    '<button class="col button button-fill button-round update-btn" style="color:white;background-color:#FB6C5E;margin-right:10px" action="back" force_open="0" id="'+data.tracker_id+'">BACK</button>'+
+                  '<button class="col button button-outline button-round update-btn" style="color:#FBB35E;border-color:#FBB35E;margin-left:10px" action="onhold" force_open="0" id="'+data.tracker_id+'">ON HOLD</button>';
+                   
+  call_btn = "<br><button class=' button button-fill button-round call_resident' style='color:white;background-color:#89DAFF;width:75px !important' value='"+contact+"'>Call</button>";
+        
+}else if(data.status=="AIR"){
+  status_txt="Approved";
+  txt_color ="#38DB69";
+
+  button_part=    '<button class="col button button-outline button-round update-btn" style="color:red;border-color:red;margin-right:10px" action="reject" force_open="0" id="'+data.tracker_id+'">REJECT</button>'+
+                    '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="approved" force_open="0" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
+      
+   
+}else if(data.status=="RIR"){
+  status_txt="Rejected";
+  txt_color ="red";
+
+  
+button_part=    '<button class="col button button-outline button-round update-btn" style="color:	#FB6C5E;border-color:#FB6C5E;margin-right:10px" action="register" force_open="0" id="'+data.tracker_id+'">RE-REGISTER</button>'+
+                '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="reject" force_open="0" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
+ call_btn = "<br><button class=' button button-fill button-round call_resident' style='color:white;background-color:#89DAFF;width:75px !important' value='"+contact+"'>Call</button>";
+}else if(data.status=="PEX"){
+  status_txt="Pending Exit";
+  txt_color ="yellow";
+
+  button_part=    '<button class="col button button-outline button-round update-btn" style="color:red;border-color:red;margin-right:10px" action="reject_exit" force_open="0" id="'+data.tracker_id+'">REJECT</button>'+
+                    '<button class="col button button-outline button-round update-btn" style="color:#38DB69;border-color:#38DB69;margin-left:10px" action="approved_exit" force_open="0" id="'+data.tracker_id+'">OPEN BOOM GATE</button>';
+      
+
+}else if(data.status=="OEN"){
+  status_txt="On Hold Entry";
+  txt_color ="#FBB35E";
+  
+  button_part=    '<button class="col button button-fill button-round update-btn" style="color:white;background-color:#FB6C5E;margin-right:10px" action="back" force_open="0" id="'+data.tracker_id+'">BACK</button>';
+                   
+  call_btn = "<br><button class=' button button-fill button-round call_resident' style='color:white;background-color:#89DAFF;width:75px !important' value='"+contact+"'>Call</button>";
+        
+}
+
+var check_in = data.created_at;
+   
+
+
+  
+  var  check_out ='';
+  var show_check_out='';
+if(data.status=="PEX"){
+    check_out = data.updated_at;
+    show_check_out="<div class='row' >"+
+                    "<div class='col-40'><label>Check-out</label></div>"+
+                    "<div class='col-60'><label style='float:right;text-align: right;'>"+check_out+"</label></div>"+
+                  '</div>';
+  }
+  
+   
+        var address="";
+        var address_tittle="";
+            if(data.entry_type!="I"){
+              address=  data.lot.name+","+data.lot.street.name+","+data.lot.street.area.name;
+              address_tittle = "Address";
+            }else{
+              address=  data.reason;
+              address_tittle = "Purpose";
+            }
+
+
+
+    dynamicPopup = app.popup.create({
+  content: '<div class="popup">'+
+    '<div class="page">'+
+
+
+      ' <div class="navbar">'+
+               ' <div class="navbar-inner">'+
+                  '<div class="left">'+
+                    '<a class="link popup-close">'+
+                        '<i class="material-icons"> arrow_back</i>'+
+                   '   <span class="if-not-md">Back</span>'+
+                   ' </a>'+
+                 ' </div>'+
+                 ' <div class="title">'+tittle+'</div>'+
+               ' </div>'+
+          '    </div>'+
+
+          '<div class="toolbar toolbar-bottom">'+
+                  
+            '<div class="toolbar-inner" style="padding:5px 10px;">'+
+           
+              button_part+
+                '</div>'+
+            '</div>'+
+
+
+              '<div class="page-content" >'+
+
+              
+          '<div class="block">'+
+
+                '<div class="preview">'+
+                '<div data-pagination="{\'el\': \'.swiper-pagination\'}" data-space-between="50" class="swiper-container demo-swiper">'+
+                '<div class="swiper-pagination"></div>'+
+                  '<div class="swiper-wrapper">'+
+                    check_out_img+
+                    '<div class="swiper-slide img-front camera_btn3" x="EF" id="EF"><img src="'+data.entry_car_plate_image+'" class="custom-img" ></div>'+
+                    '<div class="swiper-slide img-face camera_btn3" x="FC" id="FC"><img src="'+data.driver_image+'" class="custom-img" ></div>'+
+                    '<div class="swiper-slide img-ic camera_btn3" x="IC" id="IC"><img src="'+data.identity_image+'" class="custom-img" ></div>'+
+                  '</div> '+
+                '</div>'+
+              '</div>'+
+             
+
+              '<div class="main_font" style="color:#FB6C5E;padding:0 5% ;font-size:2vh">'+
+
+                  "<div class='row' >"+
+                    "<div class='col-25'><label>Status</label></div>"+
+                    "<div class='col-75'><label style='color:"+txt_color+";float:right;'>"+status_txt+"</label></div>"+
+                  '</div>'+
+                  "<div class='row' >"+
+                    "<div class='col-40'><label>Vehicle Plate No.</label></div>"+
+                    "<div class='col-60'><label style='float:right;'>"+data.visitor_car_plate+"</label></div>"+
+                  '</div>'+
+                  "<div class='row' >"+
+                    "<div class='col-30'><label>"+address_tittle+"</label></div>"+
+                    "<div class='col-70'><label style='float:right;text-align: right;'>"+address+"</label></div>"+
+                  '</div>'+
+                  "<div class='row' >"+
+                    "<div class='col-40'><label>Check-in</label></div>"+
+                    "<div class='col-60'><label style='float:right;text-align: right;'>"+check_in+"</label></div>"+
+                  '</div>'+
+                  show_check_out+
+                  call_btn+
+              '</div>'+
+
+
+                '</div>'+
+
+               
+
+            '</div>'+'</div>'+
+
+            '</div>',
+   
+});
+dynamicPopup.open();
+$$(".camera_btn3").on("click", function() {
+
+          var facecam = ip_cam.FC;
+          var frontcam = ip_cam.EF;
+          var iccam = ip_cam.IC;
+        
+          var x = $$(this).attr("x");
+          var id = $$('#visit_id').val();
+          var entry_id = $$('.entry_force').attr("visitor_id");
+          console.log(entry_id,id);
+          if (app.device.android || app.device.ios) {
+            app.dialog
+              .create({
+                title: "Camera Option",
+
+                buttons: [
+                  {
+                    text: "IVMS"
+                  },
+                  {
+                    text: "Phone camera"
+                  },
+                  {
+                    text: "Close"
+                  }
+                ],
+                
+                onClick: function(dialog, index) {
+                  if (index === 0) {
+                    //Button 1 clicked
+                    ivms_capture(x, frontcam, facecam, iccam);
+                  } else if (index === 1) {
+                    //Button 2 clicked
+                    // cameara pugin deprecated!
+                    console.log("camera");
+                    document.addEventListener(
+                      "deviceready",
+                      onDeviceReady,
+                      false
+                    );
+                    function onDeviceReady() {
+                      console.log(navigator.camera);
+                    }
+
+                    console.log(x);
+
+                    navigator.camera.getPicture(onSuccess, onFail, {
+                      quality: 50,
+                      destinationType: Camera.DestinationType.DATA_URL
+                    });
+
+                    function onSuccess(imageURI) {
+                      const byteCharacters = atob(imageURI);
+                      const byteArrays = [];
+                      var imgs = [];
+
+                      for (
+                        let offset = 0;
+                        offset < byteCharacters.length;
+                        offset += 512
+                      ) {
+                        const slice = byteCharacters.slice(
+                          offset,
+                          offset + 512
+                        );
+
+                        const byteNumbers = new Array(slice.length);
+                        for (let i = 0; i < slice.length; i++) {
+                          byteNumbers[i] = slice.charCodeAt(i);
+                        }
+
+                        const byteArray = new Uint8Array(byteNumbers);
+                        byteArrays.push(byteArray);
+                      }
+
+                      const blob = new Blob(byteArrays, { type: "image/jpg" });
+
+                      console.log(blob);
+                      var im = new Image();
+                      var url = window.URL || window.webkitURL;
+                      im.className = "custom-img";
+                      im.src = url.createObjectURL(blob);
+
+                      $$("#" + x).html("");
+                      $$("#" + x).append(im);
+
+                      //imgs.push({"name":x,"value":imageURI.substr(imageURI.lastIndexOf('/')+1)});
+                      imgs[x] = blob;
+                      
+                      for (const [key, value] of Object.entries(imgs)) {
+                        switch (key) {
+                          case "IC":
+                          var entry_id =$$('#visit_id').val();
+                          var Fdata = new FormData();
+                            Fdata.append("identity_image", value, key + ".jpg");
+                            Fdata.append("driver_image", "");
+                            Fdata.append("entry_car_plate_image", "");
+                            Fdata.append("status", "");
+                            console.log(value)
+                            force_update_driver(entry_id,Fdata)
+                            break;
+                          case "EF":
+                          var entry_id = $$('#visit_id').val();
+                          var Fdata = new FormData();
+                          Fdata.append("identity_image", "");
+                            Fdata.append("entry_car_plate_image", value, key + ".jpg");
+                            Fdata.append("driver_image", "");
+                            Fdata.append("status", "");
+                            console.log(value)
+                            force_update_driver(entry_id,Fdata)
+                            break;
+                          case "FC":
+                          var entry_id =$$('#visit_id').val();
+                          var Fdata = new FormData();
+                          Fdata.append("identity_image", "");
+                            Fdata.append("driver_image", value, key + ".jpg");
+                            Fdata.append("entry_car_plate_image", "");
+                            Fdata.append("status", "");
+                            console.log(value)
+                            force_update_driver(entry_id,Fdata)
+                            break;
+                        }
+                      }
+
+                   
+                      
+                    }
+
+                    function onFail(message) {
+                      app.dialog.alert("Failed because: " + message, "");
+                    }
+                  }else if(index === 2){
+                    app.dialog.close();
+                  }
+                },
+                verticalButtons: true
+              })
+              .open();
+          } else {
+            ivms_capture(x, frontcam, facecam, iccam);
+          }
+        });
+
+app.dialog.close();
+app.swiper.create(".demo-swiper",{ pagination: {
+    el: '.swiper-pagination',
+    type: 'bullets',
+  },
+});
+
+},function(error){
+  app.dialog.close();
+  console.log(error);
+});
+  }
 });
  
 var sck = socket.connect(CONFIG.SOCKET);
@@ -2866,7 +3234,7 @@ $$(document).on('click',".call_resident", function () {
     toastCenter.open();
   }
 });
-},300);
+},600);
         },pageBeforeOut:function(){
           var sck = socket.connect(CONFIG.SOCKET);
         //no function

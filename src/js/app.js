@@ -90,16 +90,59 @@ var app = new Framework7({
             toastCenter.open();
           },
           function(xhr, status) {
-            app.form.removeFormData("auth");
-            var toastCenter = app.toast.create({
-              text: "Your session has expired!<br>Please Login Again!",
-              position: "center",
-              closeTimeout: 2000
-            });
+            // app.form.removeFormData("auth");
+            // var toastCenter = app.toast.create({
+            //   text: "Your session has expired!<br>Please Login Again!",
+            //   position: "center",
+            //   closeTimeout: 2000
+            // });
 
-            toastCenter.open();
 
-            mainView.router.navigate("/login/", { force: true });
+            // toastCenter.open();
+            var dialog1 = app.dialog.create({
+              title: 'Switching to offline mode',
+                          text: '<div id="retry_btn"></div>',
+                          buttons: [
+                          // {
+                          //     text: 'RETRY NOW',
+                          //     onClick: function () {
+                          //         clearInterval(myTimer);
+                          //         router.refreshPage('/');
+                                  
+                          //     }
+                          // },
+                          // {
+                          //     text: 'Close',
+                          //     onClick: function () {
+                          //         clearInterval(myTimer);
+                          //         app.dialog.close()
+                          //     }
+                          // }
+                          ]
+                      })
+
+                      dialog1.open();
+                          var timeleft = 5;
+                          var count= 0;
+
+                          var myTimer = setInterval(function(){
+
+                          count= timeleft - 1;
+                          timeleft -= 1;
+                          console.log(count)
+
+                          if(count == 0){
+                              app.dialog.close()
+                              clearInterval(myTimer);
+                              mainView.router.navigate("/login/");
+                              
+                          }else{
+                              $$('#retry_btn').html('We are switching to offline mode.<br><br>Thank you for your patience :) <br><br>Switchong in '+count+' seconds...')
+                          }
+
+                      }, 1000);
+
+            
           }
         );
       } else {
@@ -125,7 +168,19 @@ $$("#open").on("click", function(e) {
   formData.append("reason", value);
 
   app.dialog.preloader();
+  var sck = socket.connect(CONFIG.SOCKET)
+  var offline = sck.disconnected;
+    app.form.storeFormData("offline", sck.disconnected);
+    sck.on('connect', function(office_mode) {
+      console.log('check 2', sck.connected);
 
+        app.form.storeFormData("offline", false);
+    });
+    
+    setTimeout(function(){
+      offline = app.form.getFormData("offline");
+      console.log(offline)
+      if(offline == false){
   request.get(
     "security_boomgate",
     { Authorization: "JWT " + auth.token },
@@ -163,32 +218,13 @@ $$("#open").on("click", function(e) {
             console.log(data);
           });
         },function(xhr,error) {
-          request.post(
-            "security_boomgate.php",
-            null,
-            {area:auth.user.area.id},'OFF',
-            function(data) {
-              var url = data;
-              console.log(url);
-              app.dialog.close();
-              app.dialog.preloader("Opening Boom gate...");
-        
-            },
-            function() {
-              var toastCenter = app.toast.create({
-                text: "Cannot connect boomgate!",
-                position: "center",
-                closeTimeout: 2000
-              });
-        
-              toastCenter.open();
-            }
-          );
+
         }
       );
     },
     function() {
       var toastCenter = app.toast.create({
+        
         text: "Cannot connect boomgate!",
         position: "center",
         closeTimeout: 2000
@@ -197,6 +233,51 @@ $$("#open").on("click", function(e) {
       toastCenter.open();
     }
   );
+      }else{
+        request.post(
+          "security_boomgate.php",
+          null,
+          {area:auth.user.area.id},'OFF',
+          function(data) {
+            var url = data;
+            console.log(url);
+            app.dialog.close();
+            app.dialog.preloader("Opening Boom gate...");
+            app.dialog.close();
+            console.log(data);
+            var toastCenter = app.toast.create({
+              text: "Boomgate Open",
+              position: "center",
+              closeTimeout: 2000
+            });
+  
+            toastCenter.open();
+      
+            app.popup.close();
+          var gate_url = "";
+          for (var i = 0; i < url.length; i++) {
+            if (url[i].type == gate_type) {
+              gate_url = url[i].url;
+            }
+          }
+
+          request.getimg(gate_url, null, function(data) {
+            console.log(data);
+          });
+          },
+          function() {
+            app.dialog.close();
+            var toastCenter = app.toast.create({
+              text: "Cannot connect boomgate!",
+              position: "center",
+              closeTimeout: 2000
+            });
+      
+            toastCenter.open();
+          }
+        );
+      }
+    },600);
 });
 
 //set mobile backpress function /////////////////////////////////////////////////////////////////////////////////////////////
@@ -675,6 +756,7 @@ $$("#app").on("click", ".update-btn", function() {
       var dialog1 = app.dialog.create({
           title: 'Open Boom Gate Failed',
           text: 'Please change your connection internet to WIFI, Thank You',
+          
           buttons: [
             {
               text: 'Close',
@@ -746,7 +828,19 @@ $$("#app").on("click", ".update-btn", function() {
     }
   }
   }
+  var sck = socket.connect(CONFIG.SOCKET)
+  var offline = sck.disconnected;
+    app.form.storeFormData("offline", sck.disconnected);
+    sck.on('connect', function(office_mode) {
+      console.log('check 2', sck.connected);
 
+        app.form.storeFormData("offline", false);
+    });
+    
+  setTimeout(function(){
+    offline = app.form.getFormData("offline");
+    console.log(offline)
+    if(offline == false){
   if (post_request == true) {
     // app.dialog.preloader();
     request.put(
@@ -826,6 +920,7 @@ $$("#app").on("click", ".update-btn", function() {
                   });
 
                   toastCenter.open();
+                  
                 },
                 function() {
                   app.dialog.close();
@@ -861,116 +956,7 @@ $$("#app").on("click", ".update-btn", function() {
 
         // toastCenter.open();
         // app.dialog.close();
-        request.post(
-          "update_entry.php",
-           null,
-           formData,'OFF',
-          function(data) {
-            // app.dialog.close();
-            // var toastCenter = app.toast.create({
-            //   text: "<center>Entry Update Success!</center>",
-            //   position: "center",
-            //   closeTimeout: 2000
-            // });
-    
-            // toastCenter.open();
-    
-            app.popup.close();
-    
-            if (action == "register") {
-              // app.dialog.preloader();
-              // request.post(
-              //   "visitor_entry.p",
-              //   null,
-              //   null,
-              //   function(data) {
-              //     app.dialog.close();
-              //     app.form.storeFormData("register_data", data);
-              //     app.popup.close();
-              //     app.views.main.router.navigate({ name: "walkin" });
-              //   }
-              // );
-            } else if (action == "onhold"){
-    
-          }else{
-              // app.dialog.preloader();
-              request.post(
-                "security_boomgate.php",
-                null,
-                {area:auth.user.area.id},'OFF',
-                function(data) {
-                  // app.dialog.close();
-                  var url = data;
-                  console.log(url);
-                  var gate_url = "";
-                  var gate_type = "";
-                  if (up_status == "AOS") {
-                    gate_type = "X";
-                  }
-    
-                  if (up_status == "AIS" || up_status == "RIS") {
-                    gate_type = "E";
-                  }
-    
-                  for (var i = 0; i < url.length; i++) {
-                    if (url[i].type == gate_type) {
-                      gate_url = url[i].url;
-                    }
-                  }
-    
-                  app.dialog.preloader("Opening Boom gate...");
-    
-                  request.getimg(
-                    gate_url,
-                    null,
-                    function(data) {
-                      console.log(data);
-                      app.dialog.close();
-                      console.log("boom gate open")
-                      var toastCenter = app.toast.create({
-                        text: "Boomgate Open",
-                        position: "center",
-                        closeTimeout: 2000
-                      });
-    
-                      toastCenter.open();
-                    },
-                    function() {
-                      app.dialog.close();
-                      var toastCenter = app.toast.create({
-                        text: "Cannot connect boomgate!",
-                        position: "center",
-                        closeTimeout: 2000
-                      });
-    
-                      toastCenter.open();
-                    }
-                  );
-                },
-                function() {
-                  app.dialog.close();
-                  var toastCenter = app.toast.create({
-                    text: "Cannot connect boomgate!",
-                    position: "center",
-                    closeTimeout: 2000
-                  });
-    
-                  toastCenter.open();
-                }
-              );
-            }
-          },
-          function(xhr, status) {
-            var toastCenter = app.toast.create({
-              text: "<center>Entry Update Failed!</center>",
-              position: "center",
-              closeTimeout: 2000
-            });
-    
-            toastCenter.open();
-            app.dialog.close();
-          }
-        );
+        
       }
     );
   } else {
@@ -980,6 +966,144 @@ $$("#app").on("click", ".update-btn", function() {
       console.log("re-register");
     }
   }
+}else{
+  request.post(
+    "security_boomgate.php",
+    null,
+    {area:auth.user.area.id},'OFF',
+    function(data) {
+      console.log('asdada')
+      console.log(data)
+      var gate_type="E"
+      for (var i = 0; i < data.length; i++) {
+      if (data[i].type == gate_type) {
+        boomgate_ip = data[i].url;
+      }
+    }
+
+
+     
+    }
+  );
+  request.post(
+    "update_entry.php",
+     null,
+     {entry_id :entry_id,
+      status: up_status,
+      force_open: force_open,},'OFF',
+    function(data) {
+      // app.dialog.close();
+      // var toastCenter = app.toast.create({
+      //   text: "<center>Entry Update Success!</center>",
+      //   position: "center",
+      //   closeTimeout: 2000
+      // });
+
+      // toastCenter.open();
+
+      app.popup.close();
+
+      if (action == "register") {
+        // app.dialog.preloader();
+        // request.post(
+        //   "visitor_entry.p",
+        //   null,
+        //   null,
+        //   function(data) {
+        //     app.dialog.close();
+        //     app.form.storeFormData("register_data", data);
+        //     app.popup.close();
+        //     app.views.main.router.navigate({ name: "walkin" });
+        //   }
+        // );
+      } else if (action == "onhold"){
+
+    }else{
+        // app.dialog.preloader();
+        request.post(
+          "security_boomgate.php",
+          null,
+          {area:auth.user.area.id},'OFF',
+          function(data) {
+            // app.dialog.close();
+            var url = data;
+            console.log(url);
+            var gate_url = "";
+            var gate_type = "";
+            if (up_status == "AOS") {
+              gate_type = "X";
+            }
+
+            if (up_status == "AIS" || up_status == "RIS") {
+              gate_type = "E";
+            }
+
+            for (var i = 0; i < url.length; i++) {
+              if (url[i].type == gate_type) {
+                gate_url = url[i].url;
+              }
+            }
+            
+
+            app.dialog.preloader("Opening Boom gate...");
+
+            request.getimg(
+              gate_url,
+              null,
+              function(data) {
+                console.log(data);
+                app.dialog.close();
+                console.log("boom gate open")
+                var toastCenter = app.toast.create({
+                  text: "Boomgate Open",
+                  position: "center",
+                  closeTimeout: 2000
+                });
+
+                toastCenter.open();
+
+                $$(".card_" + entry_id).removeClass("card_in");
+                setTimeout(function() {
+                  $$(".card_" + entry_id).addClass("card_out");
+                }, 500);
+              },
+              function() {
+                app.dialog.close();
+                var toastCenter = app.toast.create({
+                  text: "Cannot connect boomgate!",
+                  position: "center",
+                  closeTimeout: 2000
+                });
+
+                toastCenter.open();
+              }
+            );
+          },
+          function() {
+            app.dialog.close();
+            var toastCenter = app.toast.create({
+              text: "Cannot connect boomgate!",
+              position: "center",
+              closeTimeout: 2000
+            });
+
+            toastCenter.open();
+          }
+        );
+      }
+    },
+    function(xhr, status) {
+      var toastCenter = app.toast.create({
+        text: "<center>Entry Update Failed!</center>",
+        position: "center",
+        closeTimeout: 2000
+      });
+
+      toastCenter.open();
+      app.dialog.close();
+    }
+  );
+}},600);
 });
 
 $$(document).on("click", ".log_details", function() {

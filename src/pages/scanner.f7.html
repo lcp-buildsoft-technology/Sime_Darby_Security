@@ -51,18 +51,22 @@
             var auth = app.form.getFormData("auth");
             var QRScanner = window.QRScanner;
             var sck = socket.connect(CONFIG.SOCKET)
-            var offline = sck.disconnected;
-            
-            app.form.storeFormData("offline", sck.disconnected);
-            sck.on('connect', function(office_mode) {
-              console.log('check 2', sck.connected);
+        var offline = '';
+            window.setInterval(function () {
+              offline = sck.disconnected;
+              app.form.storeFormData("offline", sck.disconnected);
+              sck.on('connect', function(office_mode) {
+                console.log('check 2', sck.connected);
 
-                app.form.storeFormData("offline", false);
-            });
-            
-            setTimeout(function(){
+                  app.form.storeFormData("offline", false);
+              });
+              var auth = app.form.getFormData("auth");
               offline = app.form.getFormData("offline");
               console.log(offline)
+            }, 50);
+            
+            setTimeout(function(){
+              
            
 
 
@@ -186,7 +190,7 @@
 
                     $$(".page-content #scanner").val("");
                 }
-              },300);
+              },600);
             
           }
           

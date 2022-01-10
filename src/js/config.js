@@ -5,10 +5,10 @@
 
 var uri = "https://simedarbypropertycommunity.com";
 var sockets = "https://vmsnodejsweb.azurewebsites.net";
-var sockets_off = "http://192.168.0.104:3002";
+var sockets_off = "http://192.168.0.167:3002";
 
 // var uri = 'https://vmsdjangoapp01-clone1.azurewebsites.net/';
-var uri_off = 'http://192.168.0.104/';
+var uri_off = 'http://192.168.0.167:8000/';
 
 
 var BASE_URL = uri + "/v1/";

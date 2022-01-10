@@ -10,7 +10,7 @@ var sck = socket.connect(config.SOCKET);
 console.log(sck.disconnected)
  var offline_mode = sck.disconnected 
  function post(url,header,data,off, success, error) {
-    if(offline_mode == false){
+    if(off == ''){
         Framework7.request({
             url: config.BASE_URL + url + '/',
             method: "POST",
@@ -45,7 +45,7 @@ console.log(sck.disconnected)
     }   
 }
 function postFormData(url,header,data,off, success, error) {
-    if(offline_mode == false){
+    if(off == ''){
         Framework7.request({
             url: config.BASE_URL + url + '/',
             method: "POST",
@@ -82,7 +82,7 @@ function postFormData(url,header,data,off, success, error) {
 }
 
 function get(url,header,data,off, success, error,complete) {
-    if(offline_mode == false){
+    if(off == ''){
 
         Framework7.request({
             url: config.BASE_URL + url + '/',
