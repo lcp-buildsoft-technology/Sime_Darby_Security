@@ -101,7 +101,13 @@
       </div> -->
 
     </div>
+    <div class="fab fab-right-bottom color-cherry" @click="refreshPage">
+      <a href="#">
+          <i class="material-icons" style="color:#FB6C5E;">refresh</i>
+      </a>
   </div>
+  </div>
+  
 </template>
 
 <script>
@@ -118,9 +124,21 @@
         user: auth.user
       };
     },
+    
+        methods: {
+          refreshPage: function () {
+                var self = this;
+                var $$ = this.$$;
+                var app = this.$app;
+                var router = this.$router;
+
+                router.refreshPage();
+            },
+        },
     on: {
       pageBeforeIn: function () {
       },
+      
       pageInit: function() {
         var $$ = this.$$;
         var app = this.$app;
@@ -139,7 +157,7 @@
           $$('.desktop_view').css("display", "none");
         }
 
-
+        
 // Loading flag
 
 
@@ -359,7 +377,7 @@
             itemTemplate:
             '<div class="item-inner">' +
             "<div class='card  card_in card_width item-title-row" +
-                "{{card_id}}" +
+                "{{card_id}} {{card_id}}" +
                 " '  >" +
                 "<div class='card-content card-click  content_heigt' visitor_id='" +
                 "{{tracker_id}}"+
@@ -525,6 +543,8 @@
               var txt_color = "";
               var button_part = "";
               var tittle = "";
+              var purpose_address = "";
+              var purpose_tittle = "";
 
               var check_in = data.created_at;
 
@@ -549,8 +569,22 @@
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
-                address = data.reason;
-                address_tittle = "Purpose";
+                if(data.lot != null){
+                  purpose_address  =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+
+                  purpose_tittle = "Address"; 
+                  address = data.reason;
+                  address_tittle = "Purpose";
+                }else{
+                  address = data.reason;
+                  address_tittle = "Purpose";
+                }
+                
               }
 
 
@@ -621,6 +655,14 @@
                   "<div class='col-40'><label>Vehicle Plate</label></div>" +
                   "<div class='col-60'><label style='float:right;color:red;'>" +
                   data.visitor_car_plate +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_address +
                   "</label></div>" +
                   "</div>" +
                   "<div class='row' >" +
@@ -678,7 +720,9 @@
               var txt_color = "";
               var button_part = "";
               var tittle = "";
-
+              var purpose_address = "";
+              var purpose_tittle = "";
+               
               var check_in = data.created_at;
 
               tittle = "Entry Details";
@@ -702,8 +746,22 @@
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
-                address = data.reason;
-                address_tittle = "Purpose";
+                if(data.lot != null){
+                  purpose_address  =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+
+                  purpose_tittle = "Address"; 
+                  address = data.reason;
+                  address_tittle = "Purpose";
+                }else{
+                  address = data.reason;
+                  address_tittle = "Purpose";
+                }
+                
               }
 
 
@@ -778,6 +836,14 @@
                   "</div>" +
                   "<div class='row' >" +
                   "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_address +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
                   address_tittle +
                   "</label></div>" +
                   "<div class='col-70'><label style='float:right;text-align: right;'>" +
@@ -831,6 +897,8 @@
               var txt_color = "";
               var button_part = "";
               var tittle = "";
+              var purpose_address = "";
+              var purpose_tittle = "";
 
               var check_in = data.created_at;
 
@@ -854,9 +922,22 @@
                   "," +
                   data.lot.street.area.name;
                 address_tittle = "Address";
-              } else {
                 address = data.reason;
-                address_tittle = "Purpose";
+                  address_tittle = "Purpose";
+              } else {
+                if(data.lot != null){
+                  purpose_address  =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+
+                  purpose_tittle = "Address"; 
+                }else{
+                  address = data.reason;
+                  address_tittle = "Purpose";
+                }
               }
 
 
@@ -927,6 +1008,14 @@
                   "<div class='col-40'><label>Vehicle Plate</label></div>" +
                   "<div class='col-60'><label style='float:right;color:red;'>" +
                   data.visitor_car_plate +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_address +
                   "</label></div>" +
                   "</div>" +
                   "<div class='row' >" +

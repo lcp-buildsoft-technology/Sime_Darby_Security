@@ -26,6 +26,9 @@ module.exports = {
     hotUpdateChunkFilename: "hot/hot-update.js",
     hotUpdateMainFilename: "hot/hot-update.json"
   },
+  node: {
+    fs: 'empty'
+  },
   resolve: {
     extensions: [".js", ".json"],
     alias: {

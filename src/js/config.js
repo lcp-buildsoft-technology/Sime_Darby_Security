@@ -3,7 +3,6 @@
 // var BASE_URI ="http://139.162.60.53/";
 
 
-
 // var uri = "https://simedarbypropertycommunity.com";
 var sockets = "https://vmsnodejsweb.azurewebsites.net";
 

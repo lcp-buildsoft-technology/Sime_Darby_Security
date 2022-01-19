@@ -241,7 +241,32 @@ if (app.device.android || app.device.ios) {
       onClick: function(dialog, index) {
         if (index === 0) {
           //Button 1 clicked
-          ivms_capture(x, frontcam, facecam, iccam);
+          if (app.device.desktop) {
+            ivms_capture(x, frontcam, facecam, iccam);
+          }else{
+            if (navigator.connection.type === "wifi" ) {
+              ivms_capture(x, frontcam, facecam, iccam);
+            console.log(true)
+          } else {
+            var dialog1 = app.dialog.create({
+                title: 'Open Boom Gate Failed',
+                text: 'Currently is using Mobile Data Plan. Please use phone camera to capture image',
+                buttons: [
+                  {
+                    text: 'Close',
+                    onClick: function () {
+                      app.dialog.close();
+                    }
+                  }
+                ]
+              })
+
+              dialog1.open()
+
+            console.log(false)
+          }
+        }
+         
         } else if (index === 1) {
           //Button 2 clicked
           // cameara pugin deprecated!
@@ -539,7 +564,455 @@ if (app.device.android || app.device.ios) {
       }
 
             //get list when page load
-            request.get("visitor_entry",{"Authorization":"JWT "+auth.token},null,function(data){
+            request.get(
+          "visitor_entry",
+          { Authorization: "JWT " + auth.token },
+          { status: "PEX"},function(data){
+              console.log(data);
+            
+            var list_item=[];
+              for(var i=0;i<data.length;i++){
+                
+            if(data[i].status!="PEX"){
+            var new_entry_item="";
+            var color="";
+            var status="";
+        
+            
+            if(data[i].status=="AIR"){
+              color="forestgreen";
+              status="Approved";
+            }else if(data[i].status=="RIR"){
+              color="red";
+              status="Rejected";
+           
+            }
+            else if(data[i].status=="PEN"){
+              color="#FB6C5E";
+              status="Pending";
+            
+            }
+            else if(data[i].status=="OEN"){
+              color="#FBB35E";
+              status="On Hold";
+            
+            }
+
+            
+            var status_id="status_"+data[i].tracker_id;
+            var card_id="card_"+data[i].tracker_id;
+
+            var address="";
+            if(data[i].entry_type!="I"){
+              address=  data[i].lot.name+","+data[i].lot.street.name;
+            }
+            new_entry_item ="<div class='card  card_in card_width "+card_id+" '  >"+
+                    "<div class='card-content card-click entry_force content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+                      '<div class="row no-gap">'+
+                        '<div class="col-20 card-left-content">'+
+                          '<div class="card-left-content_inner">'+
+                            '<i class="material-icons">chevron_right</i>'+
+                             '<p>CHECK IN</p>'+
+                         ' </div>'+
+                        '</div>'+
+                        '<div class="col-70 card-center-content">'+
+                          '<div class="card-center-content_inner">'+
+                            '<div>'+address+'</div>'+
+                            '<div style="width: 100%;">'+
+                                    '<div style="display: inline-block;">'+data[i].visitor_car_plate+'</div>'+
+                                    '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;">Status: <b class="'+status_id+'" style="color: '+color+'"> '+status+'</b></div>'+
+                                    '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+                           ' </div>'+
+                          '</div>'+
+                        '</div>' +   
+                        '<div class="col-10 card-right-content">'+
+                          '<div class="card-right-content_inner">'+
+                           ' <i class="material-icons">more_vert</i>'+
+                         ' </div>'+
+                       ' </div>'+
+
+                      '</div>'+
+                    '</div>'+
+                 ' </div>';
+
+         
+
+            var content_item = {status:data[i].status, content:new_entry_item};
+            list_item.push(content_item);
+
+
+            }else{
+                            var card_id="card_"+data[i].tracker_id;
+
+                            var address="";
+            if(data[i].entry_type!="I"){
+              address=  data[i].lot.name+","+data[i].lot.street.name;
+            }else{
+              address ="Impromtu";
+            }
+
+                 var new_exit_item=  '<div class="card  card_in card_width '+card_id+'"   >'+
+                  "<div class='card-content card-click  content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+                         ' <div class="row no-gap">'+
+                            '<div class="col-20 card-left-content">'+
+                              '<div class="card-left-content_inner">'+
+                               ' <i class="material-icons">chevron_left</i>'+
+                                '<p>CHECK OUT</p>'+
+                              '</div>'+
+                            '</div>'+
+                            '<div class="col-70 card-center-content">'+
+                              '<div class="card-center-content_inner">'+
+                                   ' <div>'+address+'</div>'+
+                                   ' <div>'+data[i].visitor_car_plate+'</div>'+
+                                   '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+                              '</div>'+
+                            '</div>'+
+                            '<div class="col-10 card-right-content">'+
+                              '<div class="card-right-content_inner">'+
+                                '<i class="material-icons">more_vert</i>'+
+                              '</div>'+
+                           ' </div>'+
+
+                            '</div>'+
+                          '</div>'+
+                        '</div>';
+
+                        $$('.visitor_scroll_view_out').append(new_exit_item);
+                          }
+              }
+
+   
+              function compare( a, b ) {
+                if ( a.status=="AIR" && b.status=='RIR' ){
+                  return -1;
+                }
+                if ( a.status=="AIR" && b.status=='PEN' ){
+                  return -1;
+                }
+                if ( a.status=="RIR" && b.status=='AIR' ){
+                  return 1;
+                }
+                if ( a.status=="RIR" && b.status=='PEN' ){
+                  return -1;
+                }
+                if ( a.status=="PEN" && b.status=='AIR' ){
+                  return 1;
+                }
+                if ( a.status=="PEN" && b.status=='RIR' ){
+                  return 1;
+                }
+                if ( a.status=="OEN" && b.status=='PEN' ){
+                  return 1;
+                }
+                return 0;
+              }
+
+                list_item.sort( compare );
+              
+
+         
+                function show_list(total,now){
+               
+                  var all=total;
+                  var z=now
+                
+          
+                  if(z<all){
+                    var data_status =list_item[z].status;
+                  var content = list_item[z].content;
+                 
+  if(data_status=="AIR"){
+             setTimeout(function(){ $$('.approved_entry_list').append(content);
+             z++;
+            show_list(all,z);
+            },100) 
+           
+            }else if(data_status=="RIR"){
+              setTimeout(function(){ $$('.rejected_entry_list').append(content);
+              z++;
+            show_list(all,z);
+                
+            },100)
+              
+             
+            }
+            else if(data_status=="PEN"){
+              setTimeout(function(){ $$('.pending_entry_list').append(content);
+              z++;
+            show_list(all,z);
+        
+            },100)
+             
+        
+              
+            }else if(data_status=="OEN"){
+              setTimeout(function(){ $$('.onhold_entry_list').append(content);
+              z++;
+            show_list(all,z);
+        
+            },100)
+             
+        
+              
+            }else{
+              z++;
+            show_list(all,z);
+            }
+          }
+                }
+               
+         
+                show_list(list_item.length,0);
+           
+          
+        
+
+      
+
+
+
+            },function(xhr, status) {
+              var dialog1 = app.dialog.create({
+                        title: 'Record Not Found  !',
+                        text: 'Failed to scan out.',
+                        buttons: [
+                        // {
+                        //     text: 'RETRY NOW',
+                        //     onClick: function () {
+                        //         clearInterval(myTimer);
+                        //         router.refreshPage('/');
+                                
+                        //     }
+                        // },
+                        {
+                            text: 'Close',
+                            onClick: function () {
+                                f7c.$router.refreshPage('/');
+                                app.dialog.close()
+                            }
+                        }
+                        ]
+                    })
+    
+                    dialog1.open();
+      });
+
+
+  //           request.get(
+  //         "visitor_entry",
+  //         { Authorization: "JWT " + auth.token },
+  //         { status: "AIR"},function(data){
+  //             console.log(data);
+            
+  //           var list_item=[];
+  //             for(var i=0;i<data.length;i++){
+                
+  //           if(data[i].status!="PEX"){
+  //           var new_entry_item="";
+  //           var color="";
+  //           var status="";
+        
+            
+  //           if(data[i].status=="AIR"){
+  //             color="forestgreen";
+  //             status="Approved";
+  //           }else if(data[i].status=="RIR"){
+  //             color="red";
+  //             status="Rejected";
+           
+  //           }
+  //           else if(data[i].status=="PEN"){
+  //             color="#FB6C5E";
+  //             status="Pending";
+            
+  //           }
+  //           else if(data[i].status=="OEN"){
+  //             color="#FBB35E";
+  //             status="On Hold";
+            
+  //           }
+
+            
+  //           var status_id="status_"+data[i].tracker_id;
+  //           var card_id="card_"+data[i].tracker_id;
+
+  //           var address="";
+  //           if(data[i].entry_type!="I"){
+  //             address=  data[i].lot.name+","+data[i].lot.street.name;
+  //           }
+  //           new_entry_item ="<div class='card  card_in card_width "+card_id+" '  >"+
+  //                   "<div class='card-content card-click entry_force content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+  //                     '<div class="row no-gap">'+
+  //                       '<div class="col-20 card-left-content">'+
+  //                         '<div class="card-left-content_inner">'+
+  //                           '<i class="material-icons">chevron_right</i>'+
+  //                            '<p>CHECK IN</p>'+
+  //                        ' </div>'+
+  //                       '</div>'+
+  //                       '<div class="col-70 card-center-content">'+
+  //                         '<div class="card-center-content_inner">'+
+  //                           '<div>'+address+'</div>'+
+  //                           '<div style="width: 100%;">'+
+  //                                   '<div style="display: inline-block;">'+data[i].visitor_car_plate+'</div>'+
+  //                                   '<div style="display: inline-block;position: absolute; right:0;margin-right:15px;">Status: <b class="'+status_id+'" style="color: '+color+'"> '+status+'</b></div>'+
+  //                                   '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+  //                          ' </div>'+
+  //                         '</div>'+
+  //                       '</div>' +   
+  //                       '<div class="col-10 card-right-content">'+
+  //                         '<div class="card-right-content_inner">'+
+  //                          ' <i class="material-icons">more_vert</i>'+
+  //                        ' </div>'+
+  //                      ' </div>'+
+
+  //                     '</div>'+
+  //                   '</div>'+
+  //                ' </div>';
+
+         
+
+  //           var content_item = {status:data[i].status, content:new_entry_item};
+  //           list_item.push(content_item);
+
+
+  //           }else{
+  //                           var card_id="card_"+data[i].tracker_id;
+
+  //                           var address="";
+  //           if(data[i].entry_type!="I"){
+  //             address=  data[i].lot.name+","+data[i].lot.street.name;
+  //           }else{
+  //             address ="Impromtu";
+  //           }
+
+  //                var new_exit_item=  '<div class="card  card_in card_width '+card_id+'"   >'+
+  //                 "<div class='card-content card-click  content_heigt' visitor_id='"+data[i].tracker_id+"'>"+
+  //                        ' <div class="row no-gap">'+
+  //                           '<div class="col-20 card-left-content">'+
+  //                             '<div class="card-left-content_inner">'+
+  //                              ' <i class="material-icons">chevron_left</i>'+
+  //                               '<p>CHECK OUT</p>'+
+  //                             '</div>'+
+  //                           '</div>'+
+  //                           '<div class="col-70 card-center-content">'+
+  //                             '<div class="card-center-content_inner">'+
+  //                                  ' <div>'+address+'</div>'+
+  //                                  ' <div>'+data[i].visitor_car_plate+'</div>'+
+  //                                  '<input type="text" id="visit_id" value="'+data[i].tracker_id+'" style="display:none">'+
+  //                             '</div>'+
+  //                           '</div>'+
+  //                           '<div class="col-10 card-right-content">'+
+  //                             '<div class="card-right-content_inner">'+
+  //                               '<i class="material-icons">more_vert</i>'+
+  //                             '</div>'+
+  //                          ' </div>'+
+
+  //                           '</div>'+
+  //                         '</div>'+
+  //                       '</div>';
+
+  //                       $$('.visitor_scroll_view_out').append(new_exit_item);
+  //                         }
+  //             }
+
+   
+  //             function compare( a, b ) {
+  //               if ( a.status=="AIR" && b.status=='RIR' ){
+  //                 return -1;
+  //               }
+  //               if ( a.status=="AIR" && b.status=='PEN' ){
+  //                 return -1;
+  //               }
+  //               if ( a.status=="RIR" && b.status=='AIR' ){
+  //                 return 1;
+  //               }
+  //               if ( a.status=="RIR" && b.status=='PEN' ){
+  //                 return -1;
+  //               }
+  //               if ( a.status=="PEN" && b.status=='AIR' ){
+  //                 return 1;
+  //               }
+  //               if ( a.status=="PEN" && b.status=='RIR' ){
+  //                 return 1;
+  //               }
+  //               if ( a.status=="OEN" && b.status=='PEN' ){
+  //                 return 1;
+  //               }
+  //               return 0;
+  //             }
+
+  //               list_item.sort( compare );
+              
+
+         
+  //               function show_list(total,now){
+               
+  //                 var all=total;
+  //                 var z=now
+                
+          
+  //                 if(z<all){
+  //                   var data_status =list_item[z].status;
+  //                 var content = list_item[z].content;
+                 
+  // if(data_status=="AIR"){
+  //            setTimeout(function(){ $$('.approved_entry_list').append(content);
+  //            z++;
+  //           show_list(all,z);
+  //           },100) 
+           
+  //           }else if(data_status=="RIR"){
+  //             setTimeout(function(){ $$('.rejected_entry_list').append(content);
+  //             z++;
+  //           show_list(all,z);
+                
+  //           },100)
+              
+             
+  //           }
+  //           else if(data_status=="PEN"){
+  //             setTimeout(function(){ $$('.pending_entry_list').append(content);
+  //             z++;
+  //           show_list(all,z);
+        
+  //           },100)
+             
+        
+              
+  //           }else if(data_status=="OEN"){
+  //             setTimeout(function(){ $$('.onhold_entry_list').append(content);
+  //             z++;
+  //           show_list(all,z);
+        
+  //           },100)
+             
+        
+              
+  //           }else{
+  //             z++;
+  //           show_list(all,z);
+  //           }
+  //         }
+  //               }
+               
+         
+  //               show_list(list_item.length,0);
+           
+          
+        
+
+      
+
+
+
+  //           });
+
+           
+
+            request.get(
+          "visitor_entry",
+          { Authorization: "JWT " + auth.token },
+          { status: "AIR"},function(data){
               console.log(data);
             
             var list_item=[];
@@ -745,12 +1218,7 @@ if (app.device.android || app.device.ios) {
 
             });
 
-
-
-
-
-
-
+            
 
 
 
@@ -941,14 +1409,17 @@ $$(".visitor_scroll_view").on('taphold',".entry_force",function () {
       ],
       onClick: function(dialog, index) {
          if (index === 0) {
-          force_update(entry_id,"AIS")
-          if (navigator.connection.type === "wifi" ) {
+          // force_update(entry_id,"AIS")
+          if (app.device.desktop) {
             force_update(entry_id,"AIS")
+          }else{
+            if (navigator.connection.type === "wifi" ) {
+              force_update(entry_id,"AIS")
             console.log(true)
           } else {
             var dialog1 = app.dialog.create({
                 title: 'Open Boom Gate Failed',
-                text: 'Please change your connection internet to WIFI, Thank You',
+                text: 'Currently is using Mobile Data Plan. Please use manual button to open the boomgate ',
                 buttons: [
                   {
                     text: 'Close',
@@ -960,18 +1431,23 @@ $$(".visitor_scroll_view").on('taphold',".entry_force",function () {
               })
 
               dialog1.open()
+
             console.log(false)
           }
+        }
+
          }
-         if (index === 1) {
-          force_update(entry_id,"RIS")
-          if (navigator.connection.type === "wifi" ) {
+         if (index === 1) { 
+           if (app.device.desktop) {
             force_update(entry_id,"RIS")
+          }else{
+            if (navigator.connection.type === "wifi" ) {
+              force_update(entry_id,"RIS")
             console.log(true)
           } else {
             var dialog1 = app.dialog.create({
                 title: 'Open Boom Gate Failed',
-                text: 'Please change your connection internet to WIFI, Thank You',
+                text: 'Currently is using Mobile Data Plan. Please use manual button to open the boomgate ',
                 buttons: [
                   {
                     text: 'Close',
@@ -983,8 +1459,31 @@ $$(".visitor_scroll_view").on('taphold',".entry_force",function () {
               })
 
               dialog1.open()
+
             console.log(false)
           }
+        }
+          // force_update(entry_id,"RIS")
+          // if (navigator.connection.type === "wifi" ) {
+          //   force_update(entry_id,"RIS")
+          //   console.log(true)
+          // } else {
+          //   var dialog1 = app.dialog.create({
+          //       title: 'Open Boom Gate Failed',
+          //       text: 'Please change your connection internet to WIFI, Thank You',
+          //       buttons: [
+          //         {
+          //           text: 'Close',
+          //           onClick: function () {
+          //             app.dialog.close();
+          //           }
+          //         }
+          //       ]
+          //     })
+
+          //     dialog1.open()
+          //   console.log(false)
+          // }
           
          }
          if (index === 2) {
@@ -1326,6 +1825,7 @@ app.swiper.create(".demo-swiper",{ pagination: {
   console.log(error);
 });
 });
+ 
 var sck = socket.connect(CONFIG.SOCKET);
 var auth = app.form.getFormData("auth");
 if (app.device.desktop) {
@@ -1338,8 +1838,9 @@ if (auth) {
     area: auth.user.area.id,
     role: "security"
   });
-
+ var count = 0;
  sck.on("visitor_arrive", function(data) {
+   
   var dynamicPopup ;
   app.popup.close();
 console.log(data.status);
@@ -1440,6 +1941,7 @@ if(data.status=="PEX"){
 
 
 if(data.status=="AIR"){
+ 
     dynamicPopup = app.popup.create({
   content: '<div class="popup">'+
     '<div class="page">'+
@@ -1516,8 +2018,13 @@ if(data.status=="AIR"){
             '</div>',
    
 });
+  
 dynamicPopup.open();
+
+
 }
+
+
 $$(".camera_btn3").on("click", function() {
 
 var facecam = ip_cam.FC;
@@ -1670,7 +2177,7 @@ app.swiper.create(".demo-swiper",{ pagination: {
 
 
 });
-
+sck.disconnect();
 }
 }
 

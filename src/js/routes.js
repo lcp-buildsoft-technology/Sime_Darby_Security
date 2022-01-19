@@ -15,7 +15,7 @@ import TOUR from '../pages/Tour.f7.html';
 import TOUR_MAP from '../pages/Tour_map.f7.html';
 import TOUR_OPTION from '../pages/Tour_option.f7.html';
 import TOUR_LOG from '../pages/Tour_log_details.f7.html';
-
+import IMPROMTUDELIVERY from '../pages/Impromtu_delivery.f7.html';
 import SCAN_ENTRY from '../pages/scanned_entry.f7.html';
 
 var routes = [  
@@ -48,6 +48,10 @@ var routes = [
   { name: "impromtu",
   path: '/impromtu/',
   component: IMPROMTU,
+  },
+  { name: "impromtu-delivery",
+  path: '/impromtu-delivery/',
+  component: IMPROMTUDELIVERY,
   },
   { name: "scan_entry",
   path: '/scan_entry/',

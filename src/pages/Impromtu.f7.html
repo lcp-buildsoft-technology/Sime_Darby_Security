@@ -5,7 +5,7 @@
       <div class="navbar">
         <div class="navbar-inner">
           <div class="left">
-            <a class="link back">
+            <a class="link link_back back">
               <i class="material-icons"> arrow_back</i>
               <span class="if-not-md">Back</span>
             </a>
@@ -125,7 +125,7 @@
           <div class=" row ">
             <div class="col button button-outline button-round">
               <a
-                class="button back"
+                class="button back link_back"
                 style="border-color:darkgrey;color:darkgrey"
                 href="#"
                 ><b>Cancel</b></a
@@ -145,9 +145,15 @@
     </div>
   </div>
 </template>
-
+<style>
+  .picker{
+    height:450px !important;
+  }
+</style>
 <script>
   import request from "../js/request.js";
+  import socket from 'socket.io-client/dist/socket.io.js';
+  import CONFIG from "../js/config.js";
   export default {
     data: function() {
       var app = this.$app;
@@ -167,6 +173,16 @@
         var security_id = auth.user.id
         var ip_cam = [];
         app.dialog.preloader();
+        var sck = socket.connect(CONFIG.SOCKET);
+        $$('.link_back').on('click', function () {
+          sck.emit("security_user", {
+            id: auth.user.id,
+            area: auth.user.area.id,
+            role: "security",
+            welcome:false
+          });
+
+        });
         request.get(
           "security_ipcam",
           { Authorization: "JWT " + auth.token },
@@ -373,7 +389,6 @@
                 var url = window.URL || window.webkitURL;
                 im.className = "custom-img";
                 im.src = url.createObjectURL(data);
-
                 if (data.size <= 100) {
                   app.dialog.close();
                   app.dialog.alert("Unable to connect to Camera!", "");
@@ -390,6 +405,66 @@
                 app.dialog.alert("Unable to connect to Camera!", "");
               }
             );
+
+            request.getimg(
+              facecam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+
+                console.log(data);
+                if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $$("#FC").html("");
+                  $$("#FC").append(im);
+                  imgs['FC'] = data;
+                  app.dialog.close();
+                }
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+
+            request.getimg(
+              iccam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+
+                if (data.size == 26) {
+                  app.dialog.close();
+                  app.dialog.alert("Please insert IC.", "");
+                  console.log(data.size)
+                } else if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $$('#IC').html("");
+                  $$('#IC').append(im);
+                  imgs['IC'] = data;
+                  app.dialog.close();
+                }
+
+                console.log(data);
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+
           } else if (x == "FC") {
             console.log("Face:" + facecam);
             var $this = $$("#" + x);
@@ -419,6 +494,65 @@
                 app.dialog.alert("Unable to connect to Camera!", "");
               }
             );
+
+            request.getimg(
+              frontcam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+                if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $$('#EF').html("");
+                  $$('#EF').append(im);
+                  imgs['EF'] = data;
+                  app.dialog.close();
+                  console.log('EFSA')
+                }
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+
+            request.getimg(
+              iccam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+
+                if (data.size == 26) {
+                  app.dialog.close();
+                  app.dialog.alert("Please insert IC.", "");
+                  console.log(data.size)
+                } else if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $$('#IC').html("");
+                  $$('#IC').append(im);
+                  imgs['IC'] = data;
+                  app.dialog.close();
+                }
+
+                console.log(data);
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+
           } else if (x == "IC") {
             console.log("IC:" + iccam);
             var $this = $$("#" + x);
@@ -434,6 +568,7 @@
                 if (data.size == 26) {
                   app.dialog.close();
                   app.dialog.alert("Please insert IC.", "");
+                  console.log(data.size)
                 } else if (data.size <= 100) {
                   app.dialog.close();
                   app.dialog.alert("Unable to connect to Camera!", "");
@@ -504,13 +639,16 @@
                   //error
 
                   app.dialog.close();
-                  app.dialog.alert("Server connection error");
+                  app.dialog.alert("Please try again.", "Register Impromptu Failed");
                 }
               );
             } else {
+              app.dialog.close();
               app.dialog.alert("Please capture all image!", "");
             }
           } else {
+            
+            app.dialog.close();
             app.dialog.alert("All field must be insert!", "");
           }
         });

@@ -420,6 +420,8 @@
               var txt_color = "";
               var button_part = "";
               var tittle = "";
+              var purpose_address = "";
+              var purpose_tittle = "";
 
               var check_in = data.created_at;
 
@@ -444,8 +446,22 @@
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
-                address = data.reason;
-                address_tittle = "Purpose";
+                if(data.lot != null){
+                  purpose_address  =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+
+                  purpose_tittle = "Address"; 
+                  address = data.reason;
+                  address_tittle = "Purpose";
+                }else{
+                  address = data.reason;
+                  address_tittle = "Purpose";
+                }
+                
               }
 
 
@@ -520,6 +536,14 @@
                   "</div>" +
                   "<div class='row' >" +
                   "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_address +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
                   address_tittle +
                   "</label></div>" +
                   "<div class='col-70'><label style='float:right;text-align: right;'>" +
@@ -573,6 +597,8 @@
               var txt_color = "";
               var button_part = "";
               var tittle = "";
+              var purpose_address = "";
+              var purpose_tittle = "";
 
               var check_in = data.created_at;
 
@@ -597,9 +623,24 @@
                   data.lot.street.area.name;
                 address_tittle = "Address";
               } else {
-                address = data.reason;
-                address_tittle = "Purpose";
+                if(data.lot != null){
+                  purpose_address  =
+                  data.lot.name +
+                  "," +
+                  data.lot.street.name +
+                  "," +
+                  data.lot.street.area.name;
+
+                  purpose_tittle = "Address"; 
+                  address = data.reason;
+                  address_tittle = "Purpose";
+                }else{
+                  address = data.reason;
+                  address_tittle = "Purpose";
+                }
+                
               }
+
 
 
 
@@ -669,6 +710,14 @@
                   "<div class='col-40'><label>Vehicle Plate</label></div>" +
                   "<div class='col-60'><label style='float:right;color:red;'>" +
                   data.visitor_car_plate +
+                  "</label></div>" +
+                  "</div>" +
+                  "<div class='row' >" +
+                  "<div class='col-30'><label>" +
+                  purpose_tittle +
+                  "</label></div>" +
+                  "<div class='col-70'><label style='float:right;text-align: right;'>" +
+                  purpose_address +
                   "</label></div>" +
                   "</div>" +
                   "<div class='row' >" +

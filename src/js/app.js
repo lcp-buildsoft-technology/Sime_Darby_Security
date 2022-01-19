@@ -112,6 +112,8 @@ var app = new Framework7({
   }
 });
 
+
+
 //directly open boom gate submit btn
 $$("#open").on("click", function(e) {
   e.preventDefault();
@@ -255,13 +257,33 @@ if (auth) {
   sck.on("visitor_exit", function(data) {
       console.log("visitor exit before")
       console.log(data);
-      var toastCenter = app.toast.create({
-        text: "<center>Invalid qrcode scanned on exit!</center>",
-        position: "center",
-        closeTimeout: 5000
-      });
+    
 
-      toastCenter.open();
+      var dialog1 = app.dialog.create({
+        title: 'Error',
+        text: 'Invalid qrcode scanned on exit !',
+        buttons: [
+        // {
+        //     text: 'RETRY NOW',
+        //     onClick: function () {
+        //         clearInterval(myTimer);
+        //         router.refreshPage('/');
+                
+        //     }
+        // },
+        {
+            text: 'Close',
+            onClick: function () {
+                
+                app.dialog.close()
+            }
+        }
+        ]
+    })
+
+    dialog1.open();
+
+
   });
 
 
@@ -511,200 +533,35 @@ $$("#app").on("click", ".update-btn", function() {
   var post_request = false;
   if (action == "approved") {
     up_status = "AIS";
-    if (app.device.desktop) {
-      post_request = true;
-    }else{
-      if (navigator.connection.type === "wifi" ) {
-      post_request = true;
-      console.log(true)
-    } else {
-      var dialog1 = app.dialog.create({
-          title: 'Open Boom Gate Failed',
-          text: 'Please change your connection internet to WIFI, Thank You',
-          buttons: [
-            {
-              text: 'Close',
-              onClick: function () {
-                app.dialog.close();
-              }
-            }
-          ]
-        })
-
-        dialog1.open()
-        post_request = false;
-      console.log(false)
-    }
-  }
-   
-    
+    post_request = true;
   } else if (action == "reject") {
     up_status = "RIS";
-    if (app.device.desktop) {
-      post_request = true;
-    }else{
-      if (navigator.connection.type === "wifi" ) {
-      post_request = true;
-      console.log(true)
-    } else {
-      var dialog1 = app.dialog.create({
-          title: 'Open Boom Gate Failed',
-          text: 'Please change your connection internet to WIFI, Thank You',
-          buttons: [
-            {
-              text: 'Close',
-              onClick: function () {
-                app.dialog.close();
-              }
-            }
-          ]
-        })
-
-        dialog1.open()
-        post_request = false;
-      console.log(false)
-    }
-  }
+    post_request = true;
+  
   } else if (action == "reject_exit") {
     up_status = "ROS";
-    if (app.device.desktop) {
       post_request = true;
-    }else{
-      if (navigator.connection.type === "wifi" ) {
-      post_request = true;
-      console.log(true)
-    } else {
-      var dialog1 = app.dialog.create({
-          title: 'Open Boom Gate Failed',
-          text: 'Please change your connection internet to WIFI, Thank You',
-          buttons: [
-            {
-              text: 'Close',
-              onClick: function () {
-                app.dialog.close();
-              }
-            }
-          ]
-        })
-
-        dialog1.open()
-        post_request = false;
-      console.log(false)
-    }
-  }
+    
   } else if (action == "approved_exit") {
     up_status = "AOS";
-    if (app.device.desktop) {
-      post_request = true;
-    }else{
-      if (navigator.connection.type === "wifi" ) {
-      post_request = true;
-      console.log(true)
-    } else {
-      var dialog1 = app.dialog.create({
-          title: 'Open Boom Gate Failed',
-          text: 'Please change your connection internet to WIFI, Thank You',
-          buttons: [
-            {
-              text: 'Close',
-              onClick: function () {
-                app.dialog.close();
-              }
-            }
-          ]
-        })
-
-        dialog1.open()
-        post_request = false;
-      console.log(false)
-    }
-  }
+    post_request = true;
+     
   } else if (action == "register") {
     up_status = "RIS";
-    if (app.device.desktop) {
       post_request = true;
-    }else{
-      if (navigator.connection.type === "wifi" ) {
-      post_request = true;
-      console.log(true)
-    } else {
-      var dialog1 = app.dialog.create({
-          title: 'Open Boom Gate Failed',
-          text: 'Please change your connection internet to WIFI, Thank You',
-          buttons: [
-            {
-              text: 'Close',
-              onClick: function () {
-                app.dialog.close();
-              }
-            }
-          ]
-        })
-
-        dialog1.open()
-        post_request = false;
-      console.log(false)
-    }
-  }
   } else if (action == "check_out") {
     up_status = "AOS";
-    if (app.device.desktop) {
+ 
       post_request = true;
-    }else{
-      if (navigator.connection.type === "wifi" ) {
-      post_request = true;
-      console.log(true)
-    } else {
-      var dialog1 = app.dialog.create({
-          title: 'Open Boom Gate Failed',
-          text: 'Please change your connection internet to WIFI, Thank You',
-          buttons: [
-            {
-              text: 'Close',
-              onClick: function () {
-                app.dialog.close();
-              }
-            }
-          ]
-        })
-
-        dialog1.open()
-        post_request = false;
-      console.log(false)
-    }
-  }
+    
   
   } else if (action == "onhold") {
     up_status = "OEN";
-    if (app.device.desktop) {
-      post_request = true;
-    }else{
-      if (navigator.connection.type === "wifi" ) {
-      post_request = true;
-      console.log(true)
-    } else {
-      var dialog1 = app.dialog.create({
-          title: 'Open Boom Gate Failed',
-          text: 'Please change your connection internet to WIFI, Thank You',
-          buttons: [
-            {
-              text: 'Close',
-              onClick: function () {
-                app.dialog.close();
-              }
-            }
-          ]
-        })
-
-        dialog1.open()
-        post_request = false;
-      console.log(false)
-    }
-  }
+    post_request = true;
   }
 
   if (post_request == true) {
-    app.dialog.preloader();
+    // app.dialog.preloader();
     request.put(
       "visitor_entry/" + entry_id,
       { Authorization: "JWT " + auth.token },
@@ -714,14 +571,14 @@ $$("#app").on("click", ".update-btn", function() {
         force_open: force_open,
       },
       function(data) {
-        app.dialog.close();
-        var toastCenter = app.toast.create({
-          text: "<center>Entry Update Success!</center>",
-          position: "center",
-          closeTimeout: 2000
-        });
+        // app.dialog.close();
+        // var toastCenter = app.toast.create({
+        //   text: "<center>Entry Update Success!</center>",
+        //   position: "center",
+        //   closeTimeout: 2000
+        // });
 
-        toastCenter.open();
+        // toastCenter.open();
 
         app.popup.close();
 
@@ -741,47 +598,126 @@ $$("#app").on("click", ".update-btn", function() {
         } else if (action == "onhold"){
 
       }else{
-          app.dialog.preloader();
-          request.get(
-            "security_boomgate",
-            { Authorization: "JWT " + auth.token },
-            null,
-            function(data) {
-              app.dialog.close();
-              var url = data;
-              console.log(url);
-              var gate_url = "";
-              var gate_type = "";
-              if (up_status == "AOS") {
-                gate_type = "X";
-              }
-
-              if (up_status == "AIS" || up_status == "RIS") {
-                gate_type = "E";
-              }
-
-              for (var i = 0; i < url.length; i++) {
-                if (url[i].type == gate_type) {
-                  gate_url = url[i].url;
+          // app.dialog.preloader();
+          if (app.device.desktop) {
+            request.get(
+              "security_boomgate",
+              { Authorization: "JWT " + auth.token },
+              null,
+              function(data) {
+                // app.dialog.close();
+                var url = data;
+                console.log(url);
+                var gate_url = "";
+                var gate_type = "";
+                if (up_status == "AOS") {
+                  gate_type = "X";
                 }
+  
+                if (up_status == "AIS" || up_status == "RIS") {
+                  gate_type = "E";
+                }
+  
+                for (var i = 0; i < url.length; i++) {
+                  if (url[i].type == gate_type) {
+                    gate_url = url[i].url;
+                  }
+                }
+  
+                app.dialog.preloader("Opening Boom gate...");
+  
+                request.getimg(
+                  gate_url,
+                  null,
+                  function(data) {
+                    console.log(data);
+                    app.dialog.close();
+                    console.log("boom gate open")
+                    var toastCenter = app.toast.create({
+                      text: "Boomgate Open",
+                      position: "center",
+                      closeTimeout: 2000
+                    });
+  
+                    toastCenter.open();
+                  },
+                  function() {
+                    app.dialog.close();
+                    var toastCenter = app.toast.create({
+                      text: "Cannot connect boomgate!",
+                      position: "center",
+                      closeTimeout: 2000
+                    });
+  
+                    toastCenter.open();
+                  }
+                );
+              },
+              function() {
+                app.dialog.close();
+                var toastCenter = app.toast.create({
+                  text: "Cannot connect boomgate!",
+                  position: "center",
+                  closeTimeout: 2000
+                });
+  
+                toastCenter.open();
               }
-
-              app.dialog.preloader("Opening Boom gate...");
-
-              request.getimg(
-                gate_url,
+            );
+          }else{
+            if (navigator.connection.type === "wifi" ) {
+              request.get(
+                "security_boomgate",
+                { Authorization: "JWT " + auth.token },
                 null,
                 function(data) {
-                  console.log(data);
-                  app.dialog.close();
-                  console.log("boom gate open")
-                  var toastCenter = app.toast.create({
-                    text: "Boomgate Open",
-                    position: "center",
-                    closeTimeout: 2000
-                  });
-
-                  toastCenter.open();
+                  // app.dialog.close();
+                  var url = data;
+                  console.log(url);
+                  var gate_url = "";
+                  var gate_type = "";
+                  if (up_status == "AOS") {
+                    gate_type = "X";
+                  }
+    
+                  if (up_status == "AIS" || up_status == "RIS") {
+                    gate_type = "E";
+                  }
+    
+                  for (var i = 0; i < url.length; i++) {
+                    if (url[i].type == gate_type) {
+                      gate_url = url[i].url;
+                    }
+                  }
+    
+                  app.dialog.preloader("Opening Boom gate...");
+    
+                  request.getimg(
+                    gate_url,
+                    null,
+                    function(data) {
+                      console.log(data);
+                      app.dialog.close();
+                      console.log("boom gate open")
+                      var toastCenter = app.toast.create({
+                        text: "Boomgate Open",
+                        position: "center",
+                        closeTimeout: 2000
+                      });
+    
+                      toastCenter.open();
+                    },
+                    function() {
+                      app.dialog.close();
+                      var toastCenter = app.toast.create({
+                        text: "Cannot connect boomgate!",
+                        position: "center",
+                        closeTimeout: 2000
+                      });
+    
+                      toastCenter.open();
+                    }
+                  );
                 },
                 function() {
                   app.dialog.close();
@@ -790,22 +726,30 @@ $$("#app").on("click", ".update-btn", function() {
                     position: "center",
                     closeTimeout: 2000
                   });
-
+    
                   toastCenter.open();
                 }
               );
-            },
-            function() {
-              app.dialog.close();
-              var toastCenter = app.toast.create({
-                text: "Cannot connect boomgate!",
-                position: "center",
-                closeTimeout: 2000
-              });
+          } else {
+            var dialog1 = app.dialog.create({
+                title: 'Open Boom Gate Failed',
+                text: 'Currently is using Mobile Data Plan. Please use manual button to open the boomgate ',
+                buttons: [
+                  {
+                    text: 'Close',
+                    onClick: function () {
+                      app.dialog.close();
+                    }
+                  }
+                ]
+              })
+      
+              dialog1.open()
+            
+            console.log(false)
+          }
+        }
 
-              toastCenter.open();
-            }
-          );
         }
       },
       function(xhr, status) {

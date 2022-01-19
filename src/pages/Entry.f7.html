@@ -43,6 +43,22 @@
                 </div>     
                     
             </div>
+
+            <!-- <div class="row" >
+
+              <div class="col-100" style='text-align: center;'> 
+                      
+                      <div class="custom-button-large impromtu_btn2" >
+                          <i class="material-icons custom-icon-large"> local_shipping</i>
+                          <div class="custom-label">
+                              <h2>IMPROMPTU</h2>
+                          </div>
+                      </div>
+                     
+                  
+              </div>     
+                  
+          </div> -->
            
         </div>
 
@@ -146,26 +162,26 @@ $$('.gps_btn').on('click', function () {
  // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
  var sck = socket.connect(CONFIG.SOCKET);
+ sck.disconnect();
+ sck = socket.connect(CONFIG.SOCKET);
 //*walkin function////////////////////////////////////////////////////////////////////////////////////////////////
 $$('.walkin_btn').on('click', function () {
     console.log("walkin");
     console.log(CONFIG.SOCKET);
     // router.navigate({name:"walkin"});
-
-    console.log(auth.user.area.id);
-    sck.emit('user',{role:"ivms",id:1,area:auth.user.area.id});
   
-      
-sck.on('impromptu_arrive', function (data) {
+    console.log(auth.user.area.id);
+    sck.emit("security_user", {
+      id: auth.user.id,
+      area: auth.user.area.id,
+      role: "security",
+      welcome:true
+    });
 
-         
-                console.log(data);
-console.log('abc')
-
-});
- 
-
-
+    sck.on('impromptu_arrive',function(data){
+      console.log(data)
+    });
+     router.navigate({name:"walkin"});
 });
 
  // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +193,28 @@ console.log('abc')
 //*walkin function////////////////////////////////////////////////////////////////////////////////////////////////
 $$('.impromtu_btn').on('click', function () {
     console.log("impromtu");
+
+    sck.emit("security_user", {
+      id: auth.user.id,
+      area: auth.user.area.id,
+      role: "security",
+      welcome:true
+    });
   router.navigate({name:"impromtu"});
+
+
+});
+
+$$('.impromtu_btn2').on('click', function () {
+    console.log("impromtu");
+
+    sck.emit("security_user", {
+      id: auth.user.id,
+      area: auth.user.area.id,
+      role: "security",
+      welcome:true
+    });
+  router.navigate({name:"impromtu-delivery"});
 
 
 });

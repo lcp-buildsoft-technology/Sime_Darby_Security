@@ -134,7 +134,7 @@
          var type='';
          var security_id = auth.user.id
         console.log(security_id)
-        
+        console.log(entry_data);
          
          switch (entry_data.entry_type){
            case "E": type="Single Entry";
@@ -213,7 +213,31 @@
                 onClick: function(dialog, index) {
                   if (index === 0) {
                     //Button 1 clicked
-                    ivms_capture(x, frontcam, facecam, iccam);
+                    if (app.device.desktop) {
+                        ivms_capture(x, frontcam, facecam, iccam);
+                      }else{
+                        if (navigator.connection.type === "wifi" ) {
+                          ivms_capture(x, frontcam, facecam, iccam);
+                        console.log(true)
+                      } else {
+                        var dialog1 = app.dialog.create({
+                            title: 'Open Boom Gate Failed',
+                            text: 'Currently is using Mobile Data Plan. Please use phone camera to capture image',
+                            buttons: [
+                              {
+                                text: 'Close',
+                                onClick: function () {
+                                  app.dialog.close();
+                                }
+                              }
+                            ]
+                          })
+
+                          dialog1.open()
+
+                        console.log(false)
+                      }
+                    }
                   } else if (index === 1) {
                     //Button 2 clicked
                     // cameara pugin deprecated!
@@ -397,7 +421,12 @@ $$('.submit_btn').on('click',function(){
 
 
   var Fdata = new FormData();
-    Fdata.append('status', 'PEN');
+    if(auth.user.area.walkin_approval == false) {
+            Fdata.append("status", "AIR");
+         
+    }else{
+       Fdata.append('status', 'PEN');
+    }
     Fdata.append('visitor_name', entry_data.visitor_name);
     Fdata.append('visitor_car_plate', entry_data.visitor_car_plate);
     Fdata.append('visitor_phone_number', entry_data.visitor_phone_number);

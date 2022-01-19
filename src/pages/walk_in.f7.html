@@ -5,7 +5,7 @@
       <div class="navbar">
         <div class="navbar-inner">
           <div class="left">
-            <a class="link back">
+            <a class="link_back link back">
               <i class="material-icons"> arrow_back</i>
               <span class="if-not-md">Back</span>
             </a>
@@ -85,6 +85,7 @@
                         readonly="readonly"
                         id="demo-picker-dependent"
                       />
+                      
                       <span class="input-clear-button"></span>
                     </div>
                   </div>
@@ -104,10 +105,17 @@
                       <input
                         type="text"
                         class="walkin_check"
-                        placeholder="Select Resident"
-                        readonly="readonly"
+                        placeholder="Enter your Resident"
                         name="address_resident"
                         id="demo-picker-device1"
+                        style="color:black;"
+                      />
+                      <input
+                        type="text"
+                        class="walkin_check_without_resident"
+                        placeholder="Enter your Resident"
+                        name="address_resident"
+                        id="resident_without_name"
                         style="color:black;"
                       />
                       <span class="input-clear-button"></span>
@@ -115,7 +123,15 @@
                   </div>
                 </div>
               </li>
-
+              <li>
+                <div style="color:#FB6C5E;width:90%;margin-left:5%">
+                  <b>With Resident Name</b>
+                  <label class="toggle resident_toggle" style="float:right;">
+                    <input type="checkbox" checked />
+                    <span class="toggle-icon"></span>
+                  </label>
+                </div>
+              </li>
               <li>
                 <div style="color:#FB6C5E;width:90%;margin-left:5%">
                   <b>With Vehicle</b>
@@ -125,6 +141,7 @@
                   </label>
                 </div>
               </li>
+              
             </ul>
 
             <input type="hidden" name="resident" />
@@ -158,7 +175,7 @@
           </div>
 
           <div class=" row ">
-            <div class="col button button-outline button-round"> <a class="button back" style="border-color:darkgrey;color:darkgrey" href="#"><b>Cancel</b></a> </div>
+            <div class="col button button-outline button-round"> <a class="button back link_back" style="border-color:darkgrey;color:darkgrey" href="#"><b>Cancel</b></a> </div>
             <div class="col button button-outline button-round"> <a class="button submit_btn" style="border-color:#00BE47;color:#00BE47;" href="#"><b>Register</b></a ></div>
           </div>
 
@@ -170,9 +187,16 @@
     </div>
   </div>
 </template>
+<style>
+  .picker{
+    height:300px !important;
+  }
 
+</style>
 <script>
   import request from "../js/request.js";
+  import socket from 'socket.io-client/dist/socket.io.js';
+  import CONFIG from "../js/config.js";
   export default {
     data: function() {
       var app = this.$app;
@@ -190,7 +214,10 @@
         var auth = app.form.getFormData("auth");
         var entry_data = app.form.getFormData("register_data");
         var security_id = auth.user.id
+        var resident_list_with_name;
         console.log(security_id)
+
+        $$('#resident_without_name').hide();
         if (entry_data === undefined) {
           console.log("no re-register data");
         } else {
@@ -205,10 +232,71 @@
             entry_data.lot.street.name + "," + entry_data.lot.name
           );
           $$("input[name='address_resident']").val(entry_data.resident_name);
+          $$("input[name='address_without_resident']").val(entry_data.resident_name);
+          
         }
+        var sck = socket.connect(CONFIG.SOCKET);
+        $$('.link_back').on('click', function () {
+          sck.emit("security_user", {
+            id: auth.user.id,
+            area: auth.user.area.id,
+            role: "security",
+            welcome:false
+          });
+          
+        });
+        var pickerDevice1;
+        var toggle_list = app.toggle.create({
+          el: ".resident_toggle",
+          on: {
+            change: function() {
+              if (toggle_list.checked) {
+                $$('#resident_without_name').hide();
+                $$('#demo-picker-device1').show();
+                console.log("Resident checked");
+
+                if(resident_list_with_name.length > 0){
+                  var resident_list1 = [];
+                        var resident_Value = [];
+                for (var z = 0; z < resident_list_with_name.length; z++) {
+                          resident_list1.push(
+                            resident_list_with_name[z].user.first_name +
+                              " " +
+                              resident_list_with_name[z].user.last_name
+                          );
+                          resident_Value.push(resident_list_with_name[z].id);
+                        }
+                        pickerDevice1 = app.picker.create({
+                          inputEl: "#demo-picker-device1",
+                          formatValue: function(values, displayValues) {
+                            return displayValues;
+                          },
+                          cols: [
+                            {
+                              textAlign: "center",
+                              displayValues: resident_list1,
+                              values: resident_Value,
+                              onChange: function(picker, val) {
+                                $$('input[name="resident"]').val(val);
+                              }
+                            }
+                          ]
+                        });
+                      }
+              } else {
+                console.log("not checked");
+                $$('#resident_without_name').show();
+                $$('#demo-picker-device1').hide();
+                $$('#demo-picker-device1').val('');
+                // $$("#vehicle_field").css("visibility", "hidden");
+                // $$("#vehicle_field").css("height", 0);
+              }
+            }
+          }
+        });
 
         var toggle = app.toggle.create({
-          el: ".toggle",
+          el: ".vehicle_toggle",
           on: {
             change: function() {
               if (toggle.checked) {
@@ -297,7 +385,7 @@
                 var temp = [];
                 var temp2 = [];
                 for (var y = 0; y < address[z].lot_set.length; y++) {
-                  if (address[z].lot_set[y].has_resident == true) {
+                  if (address[z].lot_set[y].has_resident == true || address[z].lot_set[y].has_resident == false) {
                     temp.push(address[z].lot_set[y].name);
                     temp2.push(address[z].lot_set[y].id);
                   }
@@ -373,36 +461,41 @@
                     formdata,
                     function(data) {
                       app.dialog.close();
-
+       
                       var resident_list = data.results;
+                      resident_list_with_name  = data.results; 
+                      // var resident_list = 0;
                       console.log(resident_list);
-
-                      var resident_list1 = [];
-                      var resident_Value = [];
-                      for (var z = 0; z < resident_list.length; z++) {
-                        resident_list1.push(
-                          resident_list[z].user.first_name +
-                            " " +
-                            resident_list[z].user.last_name
-                        );
-                        resident_Value.push(resident_list[z].id);
-                      }
-                      pickerDevice1 = app.picker.create({
-                        inputEl: "#demo-picker-device1",
-                        formatValue: function(values, displayValues) {
-                          return displayValues;
-                        },
-                        cols: [
-                          {
-                            textAlign: "center",
-                            displayValues: resident_list1,
-                            values: resident_Value,
-                            onChange: function(picker, val) {
-                              $$('input[name="resident"]').val(val);
+                      if(resident_list.length >0){
+                        var resident_list1 = [];
+                        var resident_Value = [];
+                        for (var z = 0; z < resident_list.length; z++) {
+                          resident_list1.push(
+                            resident_list[z].user.first_name +
+                              " " +
+                              resident_list[z].user.last_name
+                          );
+                          resident_Value.push(resident_list[z].id);
+                        }
+                        pickerDevice1 = app.picker.create({
+                          inputEl: "#demo-picker-device1",
+                          formatValue: function(values, displayValues) {
+                            return displayValues;
+                          },
+                          cols: [
+                            {
+                              textAlign: "center",
+                              displayValues: resident_list1,
+                              values: resident_Value,
+                              onChange: function(picker, val) {
+                                $$('input[name="resident"]').val(val);
+                              }
                             }
-                          }
-                        ]
-                      });
+                          ]
+                        });
+                      }else{
+
+                      }
                     },
                     function(error) {
                       app.dialog.close();
@@ -412,7 +505,32 @@
                 }
               }
             });
-          }
+          },function(error) {
+                console.log(error);
+                app.dialog.close();
+                var dialog1 = app.dialog.create({
+                    title: 'Sorry to have you waiting.',
+                    text: 'We currently facing high traffic on billing-related action.<br><br>Please try again<br>Thank you for your patience :)',
+                    buttons: [
+                    // {
+                    //     text: 'RETRY NOW',
+                    //     onClick: function () {
+                    //         clearInterval(myTimer);
+                    //         router.refreshPage('/');
+                            
+                    //     }
+                    // },
+                    {
+                        text: 'Close',
+                        onClick: function () {
+                          router.back("/main/", { force: true });
+                            app.dialog.close()
+                        }
+                    }
+                    ]
+                })
+                
+              }
         );
 
         var imgs = [];
@@ -530,7 +648,6 @@
                 var url = window.URL || window.webkitURL;
                 im.className = "custom-img";
                 im.src = url.createObjectURL(data);
-
                 if (data.size <= 100) {
                   app.dialog.close();
                   app.dialog.alert("Unable to connect to Camera!", "");
@@ -547,6 +664,66 @@
                 app.dialog.alert("Unable to connect to Camera!", "");
               }
             );
+
+            request.getimg(
+              facecam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+
+                console.log(data);
+                if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $$("#FC").html("");
+                  $$("#FC").append(im);
+                  imgs['FC'] = data;
+                  app.dialog.close();
+                }
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+
+            request.getimg(
+              iccam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+
+                if (data.size == 26) {
+                  app.dialog.close();
+                  app.dialog.alert("Please insert IC.", "");
+                  console.log(data.size)
+                } else if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $$('#IC').html("");
+                  $$('#IC').append(im);
+                  imgs['IC'] = data;
+                  app.dialog.close();
+                }
+
+                console.log(data);
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+
           } else if (x == "FC") {
             console.log("Face:" + facecam);
             var $this = $$("#" + x);
@@ -559,6 +736,7 @@
                 im.className = "custom-img";
                 im.src = url.createObjectURL(data);
 
+                console.log(data);
                 if (data.size <= 100) {
                   app.dialog.close();
                   app.dialog.alert("Unable to connect to Camera!", "");
@@ -575,6 +753,65 @@
                 app.dialog.alert("Unable to connect to Camera!", "");
               }
             );
+
+            request.getimg(
+              frontcam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+                if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $$('#EF').html("");
+                  $$('#EF').append(im);
+                  imgs['EF'] = data;
+                  app.dialog.close();
+                  console.log('EFSA')
+                }
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+
+            request.getimg(
+              iccam,
+              null,
+              function(data) {
+                var im = new Image();
+                var url = window.URL || window.webkitURL;
+                im.className = "custom-img";
+                im.src = url.createObjectURL(data);
+
+                if (data.size == 26) {
+                  app.dialog.close();
+                  app.dialog.alert("Please insert IC.", "");
+                  console.log(data.size)
+                } else if (data.size <= 100) {
+                  app.dialog.close();
+                  app.dialog.alert("Unable to connect to Camera!", "");
+                } else {
+                  $$('#IC').html("");
+                  $$('#IC').append(im);
+                  imgs['IC'] = data;
+                  app.dialog.close();
+                }
+
+                console.log(data);
+              },
+              function(error) {
+                console.log(error);
+                app.dialog.close();
+                app.dialog.alert("Unable to connect to Camera!", "");
+              }
+            );
+
           } else if (x == "IC") {
             console.log("IC:" + iccam);
             var $this = $$("#" + x);
@@ -583,14 +820,14 @@
               null,
               function(data) {
                 var im = new Image();
-
                 var url = window.URL || window.webkitURL;
                 im.className = "custom-img";
                 im.src = url.createObjectURL(data);
 
-                if (data.size <= 26) {
+                if (data.size == 26) {
                   app.dialog.close();
                   app.dialog.alert("Please insert IC.", "");
+                  console.log(data.size)
                 } else if (data.size <= 100) {
                   app.dialog.close();
                   app.dialog.alert("Unable to connect to Camera!", "");
@@ -611,7 +848,6 @@
             );
           }
         }
-
         $$(".submit_btn").on("click", function() {
           var isValid = true;
 
@@ -641,22 +877,39 @@
             }
           }
           Fdata.append("security", security_id);
-          $$(".walkin_check").each(function() {
-            console.log($$(this).attr("id"));
-            if ($$(this).val() == "") {
-              isValid = false;
-            }
-          });
+          // $$(".walkin_check").each(function() {
+          //   console.log($$(this).attr("id"));
+          //   if ($$(this).val() == "") {
+          //     isValid = false;
+          //   }
+          // });
+          if(auth.user.area.walkin_approval == false) {
+            Fdata.append("status", "AIR");
+            var resident_name = $$('#demo-picker-device1').val()
 
+            if(resident_name == ''){
+              resident_name =  $$('#resident_without_name').val()
+            }
+
+          // Fdata.append("resident", '');
+          Fdata.append("resident_name", resident_name);
+          }
+          
+          
           if (isValid) {
             if (imgs.EF != null && imgs.FC != null && imgs.IC != null) {
-             
-              app.dialog.confirm("<b style='color:black'>Name:</b><br> "+   $$('#demo-picker-device1').val()+"<br><br><b style='color:black'>Address:</b><br> "+$$('#demo-picker-dependent').val(),"<center><b style='color:#FB6C5E'>Resident Confirmation</b></center>", function(){
+              var resident_name = $$('#demo-picker-device1').val()
+
+            if(resident_name == ''){
+              resident_name =  $$('#resident_without_name').val()
+            }
+              app.dialog.confirm("<b style='color:black'>Name:</b><br> "+  resident_name+"<br><br><b style='color:black'>Address:</b><br> "+$$('#demo-picker-dependent').val(),"<center><b style='color:#FB6C5E'>Resident Confirmation</b></center>", function(){
 
                 app.dialog.preloader();
                 request.postFormData(
                   "visitor_entry",
                   { Authorization: "JWT " + auth.token },
+                  
                   Fdata,
                   function(data) {
                     app.dialog.close();
@@ -693,13 +946,14 @@
                       }
 
                       app.dialog.alert("Walk In Entry Created!", "");
-                      router.back("/main/", { force: true });
+                      router.back("/visitor/", { force: true });
                     }
                   },
                   function(xhr, status) {
                     //error
-                    alert("error");
                     app.dialog.close();
+                    app.dialog.alert("Please try again.", "Register Walkin Failed");
+                   
                   }
                 );
 
@@ -707,9 +961,11 @@
 
             
             } else {
+              app.dialog.close();
               app.dialog.alert("Please capture all image!", "");
             }
           } else {
+            app.dialog.close();
             app.dialog.alert("All field must be insert!", "");
           }
         });

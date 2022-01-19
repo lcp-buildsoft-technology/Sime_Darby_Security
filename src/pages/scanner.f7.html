@@ -115,7 +115,7 @@
                             request.post("visitors/check_qr",{"Authorization":"JWT "+auth.token},{ qr_uuid:text, area_id:auth.user.area.id},function (data){
                              
                               app.form.storeFormData("scan_entry_data", data);
-                         
+                              console.log(data);
                         
                               QRScanner.destroy(function(status) {
                                 console.log(status);

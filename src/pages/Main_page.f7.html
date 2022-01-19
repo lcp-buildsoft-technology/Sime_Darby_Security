@@ -1,11 +1,19 @@
 <template>
     
     <!-- Main Screen -->
-   
+          
           <div class="page login" id="login" data-name="login">
-            <div class="page-content login-screen-content login_bg"  >
+            <div class="page-content login-screen-content login_bg">
+              <a href="#" class="logout_btn" style="float: right">  <div class="row">
+                <div class="col-100" style='padding:10px;max-height: 6vh; text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;'>
+                            <b>LOGOUT</b>
+                    </div>
+    
+                </div>
+              </a>
+              <br><br><br>
               <div class="login-screen-title"> <img src="./static/logo.png" class="img_css"></div>
-            
+              
               <div style="margin-top: -3%">
               <div class="row">
                     <div class="col-100" style='text-align: center;'>
@@ -125,14 +133,7 @@
                 
                 
                 </center>
-                <a href="#" class="logout_btn">  <div class="row">
-                  <div class="col-100" style='padding:10px;max-height: 6vh; text-align: center;background-color:rgba(255, 255, 255, 0.75);border-radius: 150px;color: #FB6C5E;'>
-                              <b>LOGOUT</b>
-                      </div>
-      
-              </div>
-             </a>
-
+                
              </div>
             
             </div>
@@ -185,16 +186,54 @@ pageInit:function(){
 $$('.logout_btn').on('click', function () {
 console.log("logout");
 
-app.dialog.confirm('Are you want to Logout?', function () {
+// app.dialog.confirm('Are you want to Logout?', function () {
 
-  app.panel.close();
-  app.views.main.router.clearPreviousHistory();
-  router.navigate({name:"login"});
-  router.clearPreviousHistory();
-  app.form.removeFormData('auth');
-      });
+//   app.panel.close();
+//   app.views.main.router.clearPreviousHistory();
+//   router.navigate({name:"login"});
+//   router.clearPreviousHistory();
+//   app.form.removeFormData('auth');
+//   });
+
+var dialog1 = app.dialog.create({
+                    title: 'Are you want to logout ?',
+                    text: '<div id="logout_func"></div>',
+                    buttons: [
+                    // {
+                    //     text: 'RETRY NOW',
+                    //     onClick: function () {
+                    //         clearInterval(myTimer);
+                    //         router.refreshPage('/');
+                            
+                    //     }
+                    // },
+                    {
+                        text: 'OK',
+                        onClick: function () {
+                            if($$('#password_logout').val() != 'LOGOUT'){
+                              app.dialog.alert("Please try again.", "Password Wrong");
+                            }else{
+                              app.dialog.close();
+                              app.views.main.router.clearPreviousHistory();
+                              router.navigate({name:"login"});
+                              router.clearPreviousHistory();
+                              app.form.removeFormData('auth');
+                            }
+                            
+                        }
+                    }
+                    ]
+                });
+
+                dialog1.open();
+  $$('#logout_func').html('<p><b>Confirmation to delete :</b><p>'+
+  '<p style="font-size:11px">Type <b>"LOGOUT"</b> to logout the system<p>'+
+  '<div style="border:#FB6C5E solid 1px;padding:5px">'+
+  '<input type="password" name="password" placeholder="Enter your password" id="password_logout" style="color:black;"/>'+
+  '</div>');
 
 });
+
 
  // end ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var sck = socket.connect(CONFIG.SOCKET);
@@ -252,9 +291,20 @@ console.log("visitor");
 //*entry function////////////////////////////////////////////////////////////////////////////////////////////////
 $$('.entry_btn').on('click', function () {
 console.log("entry");
+if(auth.user.area.walk_in == false){
+  sck.emit("security_user", {
+      id: auth.user.id,
+      area: auth.user.area.id,
+      role: "security",
+      welcome:true
+    });
+  router.navigate({name:"impromtu-delivery"});
 
+}else{
   router.navigate({name:"entry"});
 
+}
+  
       });
 
 $$('.history_btn').on('click', function () {
